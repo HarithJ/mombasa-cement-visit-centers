@@ -144,6 +144,39 @@ const queuePhotoWarmup = load => {
     else setTimeout(resolve, 100);
   })).then(load).catch(() => {});
 };
+const galleries = [];
+const photoCycleDelay = 5000;
+const reducedPhotoMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let photoCycleTimer = null, photosChanging = false;
+const canCyclePhotos = () => !document.hidden && !dialog.open && !reducedPhotoMotion.matches;
+const stopPhotoCycle = () => {
+  clearTimeout(photoCycleTimer);
+  photoCycleTimer = null;
+  galleries.forEach(gallery => gallery.stopRing());
+};
+const startPhotoCycle = () => {
+  stopPhotoCycle();
+  if (!canCyclePhotos() || photosChanging) return;
+  photoCycleTimer = setTimeout(() => advancePhotos(galleries, true), photoCycleDelay);
+  galleries.forEach(gallery => gallery.fillRing());
+};
+const advancePhotos = async (selection, automatic = false) => {
+  if (photosChanging) return;
+  photosChanging = true;
+  stopPhotoCycle();
+  try {
+    // Decode every incoming layer before committing any of the crossfades.
+    const prepared = await Promise.allSettled(selection.map(gallery => gallery.prepareNext()));
+    if (prepared.some(result => result.status === 'rejected')) return;
+    const commits = prepared.map(result => result.value);
+    if (!automatic || canCyclePhotos()) commits.forEach(commit => commit());
+  } catch {
+    // Keep all current photographs visible if any incoming download fails.
+  } finally {
+    photosChanging = false;
+    startPhotoCycle();
+  }
+};
 document.querySelectorAll('.destination-photo').forEach(photo => {
   const images = JSON.parse(photo.dataset.images);
   const variants = JSON.parse(photo.dataset.variants || '[]');
@@ -151,8 +184,7 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
   const layers = [photo.querySelector('.photo-primary'), photo.querySelector('.photo-secondary')];
   const button = photo.querySelector('.photo-toggle');
   const name = destinations[photo.closest('[data-destination]').dataset.destination].name;
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  let index = 0, layer = 0, timer = null, hovered = false, changing = false;
+  let index = 0, layer = 0;
   photo.dataset.activeLayer = '0';
   const applySource = (image, position) => {
     const sources = variants[position] || {};
@@ -179,20 +211,15 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
   let progressAnimation = null;
   const fillRing = () => {
     progressAnimation?.cancel();
-    if (progress && timer) progressAnimation = progress.animate([{ strokeDashoffset: '100' }, { strokeDashoffset: '0' }], { duration: 2500, easing: 'linear', fill: 'forwards' });
+    if (progress) progressAnimation = progress.animate([{ strokeDashoffset: '100' }, { strokeDashoffset: '0' }], { duration: photoCycleDelay, easing: 'linear', fill: 'forwards' });
   };
-  const stop = () => { clearInterval(timer); timer = null; progressAnimation?.cancel(); };
-  const next = async (automatic = false) => {
-    if (changing) return;
-    changing = true;
+  const prepareNext = async () => {
     const position = (index + 1) % images.length;
     const nextLayer = 1 - layer;
-    try {
-      await loadPhoto(position);
-      if (automatic && (!hovered || document.hidden || dialog.open || reducedMotion.matches)) return;
-      applySource(layers[nextLayer], position);
-      await layers[nextLayer].decode();
-      if (automatic && (!hovered || document.hidden || dialog.open || reducedMotion.matches)) return;
+    await loadPhoto(position);
+    applySource(layers[nextLayer], position);
+    await layers[nextLayer].decode();
+    return () => {
       index = position;
       layer = nextLayer;
       layers[layer].alt = alts[index] || (photo.classList.contains('placeholder') ? 'Illustrated placeholder, not a destination photograph' : `${name} visit photograph ${index + 1}`);
@@ -201,32 +228,16 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
       button.setAttribute('aria-label', `Next photo of ${name} (${index + 1} of ${images.length})`);
       button.setAttribute('aria-pressed', String(index !== 0));
       preloadNext();
-      fillRing();
-    } catch {
-      // Keep the current photograph visible if the next download fails.
-    } finally {
-      changing = false;
-      if (hovered) start();
-    }
+    };
   };
-  const start = () => {
-    stop();
-    if (!reducedMotion.matches && !document.hidden && !dialog.open && images.length > 2) timer = setInterval(() => next(true), 2500);
-    fillRing();
-  };
+  const gallery = { prepareNext, fillRing, stopRing: () => progressAnimation?.cancel() };
+  galleries.push(gallery);
   button.setAttribute('aria-label', `Next photo of ${name} (1 of ${images.length})`);
-  button.addEventListener('click', () => { next(); if (hovered) start(); });
-  photo.addEventListener('pointerenter', event => {
-    if (event.pointerType !== 'mouse') return;
-    hovered = true;
-    if (!reducedMotion.matches) { next(true); start(); }
-  });
-  photo.addEventListener('pointerleave', () => { hovered = false; stop(); });
-  photo.addEventListener('focus', () => { if (!hovered && !reducedMotion.matches) next(); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (hovered) start(); });
-  reducedMotion.addEventListener('change', () => { stop(); if (hovered) start(); });
-  const observer = new MutationObserver(() => { if (dialog.open) stop(); else if (hovered) start(); });
-  observer.observe(dialog, { attributes: true, attributeFilter: ['open'] });
+  button.addEventListener('click', () => advancePhotos([gallery]));
   preloadNext();
 });
+document.addEventListener('visibilitychange', startPhotoCycle);
+reducedPhotoMotion.addEventListener('change', startPhotoCycle);
+new MutationObserver(startPhotoCycle).observe(dialog, { attributes: true, attributeFilter: ['open'] });
+visiblePhotosReady.then(startPhotoCycle);
 if ('IntersectionObserver' in window) { document.body.classList.add('js-ready'); const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }), { threshold: .08 }); document.querySelectorAll('.reveal').forEach(section => observer.observe(section)); }
