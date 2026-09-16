@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1200" role="img" aria-label="Illustrated landscape placeholder, not a photograph of Galana">
+<rect width="1000" height="1200" fill="#e7e4d9"/>
+<circle cx="700" cy="350" r="94" fill="#d8d0b9"/>
+<path d="M0 790 Q260 610 560 730T1000 640V1200H0Z" fill="#c3c7b4"/>
+<path d="M0 930 Q260 700 570 900T1000 780V1200H0Z" fill="#929f89"/>
+<path d="M0 1070 Q240 920 480 1000T1000 940V1200H0Z" fill="#627d68"/>
+<g fill="none" stroke="#f4f3eb" stroke-width="2" opacity=".4"><path d="M0 970 Q220 800 520 970T1000 900"/><path d="M0 990 Q220 820 520 990T1000 920"/><path d="M0 1010 Q220 840 520 1010T1000 940"/></g>
+</svg>
