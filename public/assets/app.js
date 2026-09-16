@@ -144,21 +144,81 @@ const queuePhotoWarmup = load => {
     else setTimeout(resolve, 100);
   })).then(load).catch(() => {});
 };
+const photoLightbox = document.querySelector('#photo-lightbox');
+const galleryImage = document.querySelector('#gallery-image');
+const galleryThumbnails = document.querySelector('#gallery-thumbnails');
+let openedGallery = null, openedPhoto = 0, galleryRequest = 0;
+const showGalleryPhoto = async position => {
+  openedPhoto = (position + openedGallery.images.length) % openedGallery.images.length;
+  const request = ++galleryRequest;
+  const selected = openedPhoto;
+  const collection = openedGallery;
+  galleryImage.setAttribute('aria-busy', 'true');
+  [...galleryThumbnails.children].forEach((thumbnail, index) => thumbnail.setAttribute('aria-pressed', String(index === openedPhoto)));
+  galleryThumbnails.children[selected]?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+  try {
+    const incoming = new Image();
+    incoming.src = collection.images[selected];
+    await incoming.decode();
+    if (request !== galleryRequest) return;
+    galleryImage.src = incoming.src;
+    galleryImage.alt = collection.alts[selected] || `${collection.name} photograph ${selected + 1}`;
+    document.querySelector('#gallery-count').textContent = `Photograph ${String(selected + 1).padStart(2, '0')} / ${String(collection.images.length).padStart(2, '0')}`;
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) galleryImage.animate([{opacity: .4}, {opacity: 1}], {duration: 350, easing: 'ease-out'});
+  } catch {
+    if (request === galleryRequest) document.querySelector('#gallery-count').textContent = 'This photograph could not load. Please choose another.';
+  } finally {
+    if (request === galleryRequest) galleryImage.setAttribute('aria-busy', 'false');
+  }
+};
+const openPhotoGallery = (photo, images, variants, alts, name) => {
+  openedGallery = { images, alts, name };
+  galleryImage.removeAttribute('src');
+  galleryImage.alt = '';
+  document.querySelector('#gallery-count').textContent = 'Loading photograph…';
+  document.querySelector('#gallery-title').textContent = name;
+  galleryThumbnails.replaceChildren();
+  images.forEach((source, index) => {
+    const thumbnail = document.createElement('button');
+    thumbnail.type = 'button';
+    thumbnail.setAttribute('aria-label', `View photograph ${index + 1}`);
+    const image = document.createElement('img');
+    image.src = variants[index]?.[360] || source;
+    image.alt = '';
+    image.loading = 'lazy';
+    thumbnail.append(image);
+    thumbnail.addEventListener('click', () => showGalleryPhoto(index));
+    galleryThumbnails.append(thumbnail);
+  });
+  showGalleryPhoto(Number(photo.dataset.photoIndex || 0));
+  photoLightbox.showModal();
+  stopPhotoCycle();
+};
+document.querySelector('#gallery-close').addEventListener('click', () => photoLightbox.close());
+document.querySelector('#gallery-previous').addEventListener('click', () => showGalleryPhoto(openedPhoto - 1));
+document.querySelector('#gallery-next').addEventListener('click', () => showGalleryPhoto(openedPhoto + 1));
+photoLightbox.addEventListener('keydown', event => {
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+    event.preventDefault();
+    showGalleryPhoto(openedPhoto + (event.key === 'ArrowRight' ? 1 : -1));
+  }
+});
+photoLightbox.addEventListener('close', () => startPhotoCycle());
 const galleries = [];
 const photoCycleDelay = 5000;
 const reducedPhotoMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let photoCycleTimer = null, photosChanging = false;
-const canCyclePhotos = () => !document.hidden && !dialog.open && !reducedPhotoMotion.matches;
+const canCyclePhotos = () => !document.hidden && !dialog.open && !photoLightbox.open && !reducedPhotoMotion.matches;
 const stopPhotoCycle = () => {
   clearTimeout(photoCycleTimer);
   photoCycleTimer = null;
-  galleries.forEach(gallery => gallery.stopRing());
+  galleries.forEach(gallery => { gallery.stopRing(); gallery.pauseZoom(); });
 };
 const startPhotoCycle = () => {
   stopPhotoCycle();
   if (!canCyclePhotos() || photosChanging) return;
   photoCycleTimer = setTimeout(() => advancePhotos(galleries, true), photoCycleDelay);
-  galleries.forEach(gallery => gallery.fillRing());
+  galleries.forEach(gallery => { gallery.fillRing(); gallery.startZoom(); });
 };
 const advancePhotos = async (selection, automatic = false) => {
   if (photosChanging) return;
@@ -185,6 +245,26 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
   const button = photo.querySelector('.photo-toggle');
   const name = destinations[photo.closest('[data-destination]').dataset.destination].name;
   let index = 0, layer = 0;
+  const zoomAnimations = [null, null];
+  const startZoom = () => {
+    if (reducedPhotoMotion.matches) return;
+    if (!zoomAnimations[layer]) {
+      zoomAnimations[layer] = layers[layer].animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(1.04)' }],
+        { duration: photoCycleDelay, easing: 'linear', fill: 'forwards' }
+      );
+    } else if (zoomAnimations[layer].playState === 'paused') {
+      zoomAnimations[layer].play();
+    }
+  };
+  const pauseZoom = () => {
+    zoomAnimations.forEach((animation, position) => {
+      if (reducedPhotoMotion.matches) {
+        animation?.cancel();
+        zoomAnimations[position] = null;
+      } else if (animation?.playState === 'running') animation.pause();
+    });
+  };
   photo.dataset.activeLayer = '0';
   const applySource = (image, position) => {
     const sources = variants[position] || {};
@@ -220,20 +300,34 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
     applySource(layers[nextLayer], position);
     await layers[nextLayer].decode();
     return () => {
+      // Reset only the incoming layer; preserve the outgoing zoom during its fade.
+      zoomAnimations[nextLayer]?.cancel();
+      zoomAnimations[nextLayer] = null;
       index = position;
       layer = nextLayer;
       layers[layer].alt = alts[index] || (photo.classList.contains('placeholder') ? 'Illustrated placeholder, not a destination photograph' : `${name} visit photograph ${index + 1}`);
       photo.dataset.activeLayer = String(layer);
       photo.dataset.photoIndex = String(index);
-      button.setAttribute('aria-label', `Next photo of ${name} (${index + 1} of ${images.length})`);
-      button.setAttribute('aria-pressed', String(index !== 0));
       preloadNext();
     };
   };
-  const gallery = { prepareNext, fillRing, stopRing: () => progressAnimation?.cancel() };
+  const gallery = { prepareNext, fillRing, startZoom, pauseZoom, stopRing: () => progressAnimation?.cancel() };
   galleries.push(gallery);
-  button.setAttribute('aria-label', `Next photo of ${name} (1 of ${images.length})`);
-  button.addEventListener('click', () => advancePhotos([gallery]));
+  button.setAttribute('aria-label', `Open ${name} photo gallery`);
+  button.setAttribute('aria-haspopup', 'dialog');
+  button.removeAttribute('aria-pressed');
+  button.addEventListener('click', () => openPhotoGallery(photo, images, variants, alts, name));
+  photo.setAttribute('aria-haspopup', 'dialog');
+  photo.setAttribute('aria-label', `${name} photographs. Click or press Enter to open the gallery.`);
+  photo.addEventListener('click', event => {
+    if (!event.target.closest('button')) openPhotoGallery(photo, images, variants, alts, name);
+  });
+  photo.addEventListener('keydown', event => {
+    if (event.target === photo && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      openPhotoGallery(photo, images, variants, alts, name);
+    }
+  });
   preloadNext();
 });
 document.addEventListener('visibilitychange', startPhotoCycle);

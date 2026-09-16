@@ -92,6 +92,7 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
         <div class="destinations wrap" id="destinations" aria-label="Choose a destination">
             <?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?>
             <article class="destination" data-destination="<?= e($id) ?>">
+                <div class="photo-stack">
                 <div class="destination-photo <?= $destination['placeholder'] ? 'placeholder' : '' ?>" data-images="<?= e(json_encode($destination['images'], JSON_THROW_ON_ERROR)) ?>" data-variants="<?= e(json_encode($destination['variants'], JSON_THROW_ON_ERROR)) ?>" data-alts="<?= e(json_encode($destination['imageAlts'] ?? [], JSON_THROW_ON_ERROR)) ?>" tabindex="0" aria-label="<?= e($destination['name']) ?> image gallery. Photos change automatically; use the photo button for the next view.">
                     <img class="photo-primary" src="<?= e($destination['variants'][0][720] ?? $destination['images'][0]) ?>" srcset="<?= e(photoSrcset($destination['variants'][0])) ?>" sizes="<?= e($photoSizes) ?>" decoding="async" alt="<?= $destination['placeholder'] ? 'Illustrated landscape placeholder; destination photography not yet supplied' : e($destination['imageAlts'][0] ?? $destination['name']) ?>" width="800" height="900" fetchpriority="<?= $number === 1 ? 'high' : 'auto' ?>">
                     <img class="photo-secondary" decoding="async" alt="<?= $destination['placeholder'] ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : e($destination['imageAlts'][1] ?? $destination['name']) ?>" width="800" height="900">
@@ -101,6 +102,7 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
                     <span class="photo-number">0<?= $number ?><?php if (!$destination['placeholder']): ?><svg class="photo-progress" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" pathLength="100" /></svg><?php endif; ?></span>
                     <?php if ($destination['placeholder']): ?><span class="placeholder-label">Illustration · Photo coming soon</span><?php endif; ?>
                     <div class="photo-bottom"><span><?= icon($destination['icon']) ?> <?= e($destination['tag']) ?></span><button class="photo-toggle" type="button" aria-label="Show alternate view of <?= e($destination['name']) ?>" aria-pressed="false"><?= icon('photo') ?></button></div>
+                </div>
                 </div>
                 <div class="destination-info">
                     <p class="eyebrow category"><?= e($destination['category']) ?></p>
@@ -158,6 +160,12 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
             <div id="confirmation-view" <?= $confirmation ? '' : 'hidden' ?>><div class="confirmation-icon"><?= icon('check') ?></div><p class="eyebrow">YOUR VISIT, AT A GLANCE</p><h2 id="confirmation-title" tabindex="-1">Visit registered.</h2><p class="confirmation-subtitle">Your visit has been recorded. Please keep your booking reference.</p><div class="confirmation-preview">Registration acknowledges your visit; it does not imply a capacity check.</div><div class="reference-label">BOOKING REFERENCE<strong><?= e($confirmation['reference'] ?? '') ?></strong></div><dl id="confirmation-details"><?php if ($confirmation): $rows = ['Name' => $confirmation['full_name'], 'Destination' => $schedule[$confirmation['destination']]['name'], 'Visit date' => $confirmation['visit_date'], 'Time' => $confirmation['booked_time'].' (Africa/Nairobi)', 'Attendees' => (string)$confirmation['attendees'], 'Phone' => '••• ••• '.substr($confirmation['phone'], -3)]; if ($confirmation['overnight']) { $rows['Overnight stay'] = $confirmation['arrival_date'].' – '.$confirmation['departure_date']; $rows['Staying guests'] = (string)$confirmation['overnight_guests']; } foreach ($rows as $label => $value): ?><div><dt><?= e($label) ?></dt><dd><?= e($value) ?></dd></div><?php endforeach; endif; ?></dl><button type="button" class="confirmation-close">Back to exploring</button></div>
         </div>
     </div>
+</dialog>
+<dialog class="photo-lightbox" id="photo-lightbox" aria-labelledby="gallery-title">
+    <div class="gallery-header"><div><p class="eyebrow">MOMENTS FROM NYUMBA</p><h2 id="gallery-title"></h2></div><button type="button" id="gallery-close" aria-label="Close photo gallery"><?= icon('close') ?></button></div>
+    <div class="gallery-stage"><button type="button" id="gallery-previous" aria-label="Previous photograph">‹</button><img id="gallery-image" alt=""><button type="button" id="gallery-next" aria-label="Next photograph">›</button></div>
+    <p id="gallery-count" aria-live="polite"></p>
+    <div id="gallery-thumbnails" class="gallery-thumbnails" aria-label="Choose a photograph"></div>
 </dialog>
 <noscript><div class="noscript-notice">Bookings work without JavaScript. For Galana Farm stays, enter an arrival date matching your visit date. Photo cycling requires JavaScript.</div></noscript>
 </body>
