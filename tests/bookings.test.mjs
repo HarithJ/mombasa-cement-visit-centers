@@ -27,9 +27,9 @@ try {
   await page.locator('#confirmation-view').waitFor({ state: 'visible' });
   assert.match(await page.locator('#confirmation-view').innerText(), /Visit registered/);
   assert.match(await page.locator('.reference-label strong').innerText(), /^NY-[A-F0-9]{24}$/);
-  assert.match(await page.locator('#confirmation-details').innerText(), /Feeding Centre/);
+  assert.match(await page.locator('#confirmation-details').innerText(), /Kibarani Feeding center/);
   assert.match(await page.locator('#confirmation-details').innerText(), /4/);
-  console.log('PASS Feeding Centre group day booking is saved and confirmed');
+  console.log('PASS Kibarani Feeding center group day booking is saved and confirmed');
   const reference = await page.locator('.reference-label strong').innerText();
   await page.reload();
   assert.equal(await page.locator('.reference-label strong').innerText(), reference);
@@ -92,7 +92,7 @@ try {
     assert.match(await page.locator('#confirmation-view').innerText(), /Visit registered/);
   }
   assert.equal(records().length, 4);
-  console.log('PASS school and Galana day visits are saved through their preselected forms');
+  console.log('PASS school and Galana Farm day visits are saved through their preselected forms');
   await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="feeding"]').click();
   const escapedName = '<img src=x onerror="window.injected=true">';
   await page.locator('#full-name').fill(escapedName); await page.locator('#phone').fill('0712 345 678');
@@ -132,7 +132,7 @@ try {
   assert.equal(records().length, 6);
   assert.ok(records().every(record => record.status === 'automatically_confirmed' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(record.created_at)));
   const config = join(storage, 'schedule.php');
-  await writeFile(config, "<?php return ['feeding'=>['name'=>'Feeding Centre','slots'=>['11:30']],'sahajanand'=>['name'=>'Sahajanand School','slots'=>['09:00']],'galana'=>['name'=>'Galana','slots'=>['14:00']]];");
+  await writeFile(config, "<?php return ['feeding'=>['name'=>'Kibarani Feeding center','slots'=>['11:30']],'sahajanand'=>['name'=>'Sahajanand Special School','slots'=>['09:00']],'galana'=>['name'=>'Galana Farm','slots'=>['14:00']]];");
   await stop(); server = launchServer(join(storage, 'bookings.sqlite'), config); await ready();
   await page.reload();
   assert.match(await page.locator('#confirmation-details').innerText(), /11:00/);

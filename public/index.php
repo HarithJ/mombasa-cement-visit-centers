@@ -2,6 +2,20 @@
 declare(strict_types=1);
 require __DIR__.'/../src/web.php';
 function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
+function photoVariants(string $path): array {
+    $variants = [];
+    foreach ([360, 720, 1024] as $width) {
+        $variant = dirname($path).'/responsive/'.pathinfo($path, PATHINFO_FILENAME).'-'.$width.'.webp';
+        if (is_file(__DIR__.'/'.$variant)) $variants[$width] = $variant;
+    }
+    return $variants;
+}
+function photoSrcset(array $variants): string {
+    $sources = [];
+    foreach ($variants as $width => $path) $sources[] = $path.' '.$width.'w';
+    return implode(', ', $sources);
+}
+$photoSizes = '(max-width: 600px) calc(100vw - 40px), (max-width: 1100px) 32vw, 408px';
 function icon(string $name, string $class = ''): string {
     $paths = [
         'arrow' => '<path d="M4 12h15M13 5l7 7-7 7"/>',
@@ -18,9 +32,9 @@ function icon(string $name, string $class = ''): string {
     return '<svg class="icon '.e($class).'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$paths[$name].'</svg>';
 }
 $destinations = [
-    'sahajanand' => ['name' => 'Sahajanand School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Make time for connection. Discover the school and the community at its heart.', 'icon' => 'people', 'tag' => 'A place to connect'],
-    'galana' => ['name' => 'Galana', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Take a different pace. Plan a day at Galana, or make room for an overnight stay.', 'icon' => 'leaf', 'tag' => 'Stay a little longer'],
-    'feeding' => ['name' => 'Feeding Centre', 'category' => 'CARE & COMMUNITY', 'description' => 'Come closer to the work of care. Arrange a visit to the Feeding Centre.', 'icon' => 'sun', 'tag' => 'Visit at 11:00 am'],
+    'sahajanand' => ['name' => 'Sahajanand Special School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Make time for connection. Meet our special stars and discover the school community at its heart.', 'icon' => 'people', 'tag' => 'Discover how learning happens at this special school'],
+    'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Take a different pace. Plan a day at Galana Farm, or make room for an overnight stay.', 'icon' => 'leaf', 'tag' => 'Experience modern agriculture and farm tourism'],
+    'feeding' => ['name' => 'Kibarani Feeding center', 'category' => 'CARE & COMMUNITY', 'description' => 'Come closer to the work of care. Arrange a visit to the Kibarani Feeding center.', 'icon' => 'sun', 'tag' => 'See large-scale daily feeding for the community'],
 ];
 foreach ($destinations as $id => &$destination) {
     $files = glob(__DIR__.'/assets/photos/'.$id.'/*.{webp,jpg,jpeg,png}', GLOB_BRACE) ?: [];
@@ -29,23 +43,25 @@ foreach ($destinations as $id => &$destination) {
     $destination['placeholder'] = !$files;
     if (!$files) $destination['images'] = ['assets/galana-placeholder.svg', 'assets/galana-placeholder.svg'];
     if (count($destination['images']) === 1) $destination['images'][] = $destination['images'][0];
+    $destination['variants'] = array_map('photoVariants', $destination['images']);
 }
 unset($destination);
-$destinations['sahajanand']['imageAlts'] = ['Aerial view of the entrance and green-roofed buildings at Sahajanand School', 'Visitors and pupils gathered in the school courtyard'];
-$destinations['feeding']['imageAlts'] = ['Prepared meals laid out on a long table at the Feeding Centre', 'A volunteer handing out meals beneath the Feeding Centre canopy'];
-$destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fields at Galana', 'Irrigation equipment over Galana fields at sunset', 'Excavators lined up at Galana', 'Green cultivated fields at Galana', 'Aerial view of a circular irrigated field at Galana', 'Cultivated fields beneath a cloudy sky at Galana', 'Close view of green crop rows at Galana', 'Irrigation machinery at Galana', 'A tractor with farm equipment at Galana', 'Cattle resting at Galana', 'A red tractor at Galana', 'A green tractor sheltered in a farm building at Galana', 'Irrigated fields at sunset at Galana', 'Close-up of an onion flower'];
+$destinations['sahajanand']['imageAlts'] = ['Aerial view of the entrance and green-roofed buildings at Sahajanand Special School', 'Visitors and pupils gathered in the school courtyard'];
+$destinations['feeding']['imageAlts'] = ['Prepared meals laid out on a long table at the Kibarani Feeding center', 'A volunteer handing out meals beneath the Kibarani Feeding center canopy'];
+$destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fields at Galana Farm', 'Irrigation equipment over Galana Farm fields at sunset', 'Excavators lined up at Galana Farm', 'Green cultivated fields at Galana Farm', 'Aerial view of a circular irrigated field at Galana Farm', 'Cultivated fields beneath a cloudy sky at Galana Farm', 'Close view of green crop rows at Galana Farm', 'Irrigation machinery at Galana Farm', 'A tractor with farm equipment at Galana Farm', 'Cattle resting at Galana Farm', 'A red tractor at Galana Farm', 'A green tractor sheltered in a farm building at Galana Farm', 'Irrigated fields at sunset at Galana Farm', 'Close-up of an onion flower'];
 ?>
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Explore Sahajanand School, Galana, and the Feeding Centre. Register your Nyumba day visit.">
+    <meta name="description" content="Explore Sahajanand Special School, Galana Farm, and the Kibarani Feeding center. Register your Nyumba day visit.">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#f7f8f3">
     <title>Visit Nyumba — A visit that means more</title>
     <link rel="icon" href="assets/nyumba-group.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
+    <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
     <script src="assets/app.js" defer></script>
@@ -76,9 +92,12 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
         <div class="destinations wrap" id="destinations" aria-label="Choose a destination">
             <?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?>
             <article class="destination" data-destination="<?= e($id) ?>">
-                <div class="destination-photo <?= $destination['placeholder'] ? 'placeholder' : '' ?>" data-images="<?= e(json_encode($destination['images'], JSON_THROW_ON_ERROR)) ?>" data-alts="<?= e(json_encode($destination['imageAlts'] ?? [], JSON_THROW_ON_ERROR)) ?>" tabindex="0" aria-label="<?= e($destination['name']) ?> image gallery. Hover to cycle photos; use the photo button for the next view.">
-                    <img class="photo-primary" src="<?= e($destination['images'][0]) ?>" alt="<?= $destination['placeholder'] ? 'Illustrated landscape placeholder; destination photography not yet supplied' : e($destination['imageAlts'][0] ?? $destination['name']) ?>" width="800" height="900" fetchpriority="<?= $number === 1 ? 'high' : 'auto' ?>">
-                    <img class="photo-secondary" src="<?= e($destination['images'][1]) ?>" alt="<?= $destination['placeholder'] ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : e($destination['imageAlts'][1] ?? $destination['name']) ?>" width="800" height="900">
+                <div class="destination-photo <?= $destination['placeholder'] ? 'placeholder' : '' ?>" data-images="<?= e(json_encode($destination['images'], JSON_THROW_ON_ERROR)) ?>" data-variants="<?= e(json_encode($destination['variants'], JSON_THROW_ON_ERROR)) ?>" data-alts="<?= e(json_encode($destination['imageAlts'] ?? [], JSON_THROW_ON_ERROR)) ?>" tabindex="0" aria-label="<?= e($destination['name']) ?> image gallery. Hover to cycle photos; use the photo button for the next view.">
+                    <img class="photo-primary" src="<?= e($destination['variants'][0][720] ?? $destination['images'][0]) ?>" srcset="<?= e(photoSrcset($destination['variants'][0])) ?>" sizes="<?= e($photoSizes) ?>" decoding="async" alt="<?= $destination['placeholder'] ? 'Illustrated landscape placeholder; destination photography not yet supplied' : e($destination['imageAlts'][0] ?? $destination['name']) ?>" width="800" height="900" fetchpriority="<?= $number === 1 ? 'high' : 'auto' ?>">
+                    <img class="photo-secondary" decoding="async" alt="<?= $destination['placeholder'] ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : e($destination['imageAlts'][1] ?? $destination['name']) ?>" width="800" height="900">
+                    <noscript>
+                        <img class="photo-secondary" src="<?= e($destination['variants'][1][720] ?? $destination['images'][1]) ?>" srcset="<?= e(photoSrcset($destination['variants'][1])) ?>" sizes="<?= e($photoSizes) ?>" alt="<?= $destination['placeholder'] ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : e($destination['imageAlts'][1] ?? $destination['name']) ?>" width="800" height="900">
+                    </noscript>
                     <span class="photo-number">0<?= $number ?><?php if (!$destination['placeholder']): ?><svg class="photo-progress" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" pathLength="100" /></svg><?php endif; ?></span>
                     <?php if ($destination['placeholder']): ?><span class="placeholder-label">Illustration · Photo coming soon</span><?php endif; ?>
                     <div class="photo-bottom"><span><?= icon($destination['icon']) ?> <?= e($destination['tag']) ?></span><button class="photo-toggle" type="button" aria-label="Show alternate view of <?= e($destination['name']) ?>" aria-pressed="false"><?= icon('photo') ?></button></div>
@@ -111,7 +130,7 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
 <dialog id="booking-dialog" aria-labelledby="<?= $confirmation ? 'confirmation-title' : 'booking-title' ?>" <?= $openForm || $confirmation ? 'open' : '' ?>>
     <div class="dialog-toolbar"><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
     <div class="dialog-shell">
-        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">YOUR NEXT VISIT</p><h2 id="aside-destination">Sahajanand School</h2><p>A little time.<br>A different perspective.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
+        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">YOUR NEXT VISIT</p><h2 id="aside-destination">Sahajanand Special School</h2><p>A little time.<br>A different perspective.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
         <div class="booking-main">
             <div id="form-view" <?= $confirmation ? 'hidden' : '' ?>>
                 <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">You’re invited.</h2><p class="dialog-subtitle">Tell us a little about your visit.</p>
@@ -128,7 +147,7 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
                         <p class="schedule-note full" id="schedule-note"><?= icon('clock') ?> Africa/Nairobi · Provisional schedule; times are subject to review.</p>
                         <div class="field full attendee-field"><div><label for="attendees">Number of attendees <span aria-hidden="true">*</span></label><p class="field-hint" id="attendee-hint">Include yourself in the total.</p></div><div><input id="attendees" name="attendees" type="number" min="1" step="1" value="<?= e($input['attendees'] ?? '1') ?>" required aria-describedby="attendee-hint attendees-error"><span class="field-error" id="attendees-error"><?= e($errors['attendees'] ?? '') ?></span></div></div>
                     </div>
-                    <div id="overnight-option" <?= ($input['location'] ?? '') === 'galana' ? '' : 'hidden' ?>><label class="checkbox-label"><input id="overnight" aria-describedby="overnight-error" name="overnight" type="checkbox" <?= ($input['overnight'] ?? '') === 'on' ? 'checked' : '' ?>><span class="checkbox-copy"><strong><?= icon('moon') ?> Stay overnight at Galana</strong><span>Add your preferred dates and number of staying guests.</span></span></label></div>
+                    <div id="overnight-option" <?= ($input['location'] ?? '') === 'galana' ? '' : 'hidden' ?>><label class="checkbox-label"><input id="overnight" aria-describedby="overnight-error" name="overnight" type="checkbox" <?= ($input['overnight'] ?? '') === 'on' ? 'checked' : '' ?>><span class="checkbox-copy"><strong><?= icon('moon') ?> Stay overnight at Galana Farm</strong><span>Add your preferred dates and number of staying guests.</span></span></label></div>
                     <span class="field-error" id="overnight-error"><?= e($errors['overnight'] ?? '') ?></span><div id="overnight-fields" class="overnight-fields" <?= ($input['location'] ?? '') === 'galana' ? '' : 'hidden' ?>><div class="form-grid"><div class="field"><label for="arrival-date">Arrival date <span aria-hidden="true">*</span></label><input id="arrival-date" name="arrivalDate" type="date" value="<?= e($input['arrivalDate'] ?? '') ?>" aria-describedby="arrival-date-error arrival-note"><span class="field-error" id="arrival-date-error"><?= e($errors['arrivalDate'] ?? '') ?></span></div><div class="field"><label for="departure-date">Departure date <span aria-hidden="true">*</span></label><input id="departure-date" name="departureDate" type="date" value="<?= e($input['departureDate'] ?? '') ?>" aria-describedby="departure-date-error"><span class="field-error" id="departure-date-error"><?= e($errors['departureDate'] ?? '') ?></span></div><p class="field-hint full" id="arrival-note">Arrival matches your visit date. Accommodation is a request, not a room allocation.</p><div class="field full"><label for="overnight-guests">Overnight guests <span aria-hidden="true">*</span></label><input id="overnight-guests" name="overnightGuests" type="number" min="1" step="1" value="<?= e($input['overnightGuests'] ?? '1') ?>" aria-describedby="overnight-guests-error"><span class="field-error" id="overnight-guests-error"><?= e($errors['overnightGuests'] ?? '') ?></span></div></div></div>
                     <p class="privacy-note">Your name, phone number and visit details are stored to record your visit. No email or message is sent.</p>
                     <button class="button submit-button" type="submit"><span id="submit-label">Book my visit</span><span class="spinner" hidden></span><?= icon('arrow', 'submit-arrow') ?></button>
@@ -136,10 +155,10 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
 
                 </form>
             </div>
-            <div id="confirmation-view" <?= $confirmation ? '' : 'hidden' ?>><div class="confirmation-icon"><?= icon('check') ?></div><p class="eyebrow">YOUR VISIT, AT A GLANCE</p><h2 id="confirmation-title" tabindex="-1">Visit registered.</h2><p class="confirmation-subtitle">Your visit has been recorded. Please keep your booking reference.</p><div class="confirmation-preview">Registration acknowledges your visit; it does not imply a capacity check.</div><div class="reference-label">BOOKING REFERENCE<strong><?= e($confirmation['reference'] ?? '') ?></strong></div><dl id="confirmation-details"><?php if ($confirmation): $rows = ['Name' => $confirmation['full_name'], 'Destination' => $schedule[$confirmation['destination']]['name'], 'Visit date' => $confirmation['visit_date'], 'Time' => $confirmation['booked_time'].' (Africa/Nairobi)', 'Attendees' => (string)$confirmation['attendees'], 'Phone' => '••• ••• '.substr($confirmation['phone'], -3)]; if ($confirmation['overnight']) { $rows['Overnight stay'] = $confirmation['arrival_date'].' – '.$confirmation['departure_date']; $rows['Staying guests'] = (string)$confirmation['overnight_guests']; } foreach ($rows as $label => $value): ?><div><dt><?= e($label) ?></dt><dd><?= e($value) ?></dd></div><?php endforeach; endif; ?></dl><p class="confirmation-note">Your visit is saved. Overnight stays are requests, not room allocations. No outbound confirmation message has been sent.</p><a href="/" class="button" id="edit-preview">Book another visit <?= icon('arrow') ?></a><button type="button" class="confirmation-close">Back to exploring</button></div>
+            <div id="confirmation-view" <?= $confirmation ? '' : 'hidden' ?>><div class="confirmation-icon"><?= icon('check') ?></div><p class="eyebrow">YOUR VISIT, AT A GLANCE</p><h2 id="confirmation-title" tabindex="-1">Visit registered.</h2><p class="confirmation-subtitle">Your visit has been recorded. Please keep your booking reference.</p><div class="confirmation-preview">Registration acknowledges your visit; it does not imply a capacity check.</div><div class="reference-label">BOOKING REFERENCE<strong><?= e($confirmation['reference'] ?? '') ?></strong></div><dl id="confirmation-details"><?php if ($confirmation): $rows = ['Name' => $confirmation['full_name'], 'Destination' => $schedule[$confirmation['destination']]['name'], 'Visit date' => $confirmation['visit_date'], 'Time' => $confirmation['booked_time'].' (Africa/Nairobi)', 'Attendees' => (string)$confirmation['attendees'], 'Phone' => '••• ••• '.substr($confirmation['phone'], -3)]; if ($confirmation['overnight']) { $rows['Overnight stay'] = $confirmation['arrival_date'].' – '.$confirmation['departure_date']; $rows['Staying guests'] = (string)$confirmation['overnight_guests']; } foreach ($rows as $label => $value): ?><div><dt><?= e($label) ?></dt><dd><?= e($value) ?></dd></div><?php endforeach; endif; ?></dl><button type="button" class="confirmation-close">Back to exploring</button></div>
         </div>
     </div>
 </dialog>
-<noscript><div class="noscript-notice">Bookings work without JavaScript. For Galana stays, enter an arrival date matching your visit date. Photo cycling requires JavaScript.</div></noscript>
+<noscript><div class="noscript-notice">Bookings work without JavaScript. For Galana Farm stays, enter an arrival date matching your visit date. Photo cycling requires JavaScript.</div></noscript>
 </body>
 </html>

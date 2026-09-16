@@ -114,7 +114,6 @@ form.addEventListener('submit', event => {
   busy = true; submit.disabled = true;
   document.querySelector('#submit-label').textContent = 'Saving your visit…';
 });
-document.querySelector('#edit-preview').addEventListener('click', () => { window.location.href = '/'; });
 if (serverState.openForm || serverState.confirmation) {
   dialog.removeAttribute('open');
   locationField.value = serverState.input.location || serverState.confirmation?.destination || 'sahajanand';
@@ -137,17 +136,45 @@ if (serverState.openForm || serverState.confirmation) {
     summary.focus();
   }
 }
+const visiblePhotosReady = Promise.all([...document.querySelectorAll('.photo-primary')].map(image => image.decode().catch(() => {})));
+let photoWarmup = visiblePhotosReady;
+const queuePhotoWarmup = load => {
+  photoWarmup = photoWarmup.then(() => new Promise(resolve => {
+    if ('requestIdleCallback' in window) requestIdleCallback(resolve, { timeout: 1500 });
+    else setTimeout(resolve, 100);
+  })).then(load).catch(() => {});
+};
 document.querySelectorAll('.destination-photo').forEach(photo => {
   const images = JSON.parse(photo.dataset.images);
+  const variants = JSON.parse(photo.dataset.variants || '[]');
   const alts = JSON.parse(photo.dataset.alts);
   const layers = [photo.querySelector('.photo-primary'), photo.querySelector('.photo-secondary')];
   const button = photo.querySelector('.photo-toggle');
   const name = destinations[photo.closest('[data-destination]').dataset.destination].name;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  let index = 0, layer = 0, timer = null, hovered = false;
+  let index = 0, layer = 0, timer = null, hovered = false, changing = false;
   photo.dataset.activeLayer = '0';
-  // Warm the next image without downloading every photograph on initial page load.
-  const preloadNext = () => { const image = new Image(); image.src = images[(index + 1) % images.length]; };
+  const applySource = (image, position) => {
+    const sources = variants[position] || {};
+    image.sizes = layers[0].sizes;
+    image.srcset = Object.entries(sources).map(([width, path]) => `${path} ${width}w`).join(', ');
+    image.src = sources[720] || images[position];
+  };
+  const ready = new Map();
+  const loadPhoto = position => {
+    if (!ready.has(position)) {
+      const image = new Image();
+      image.decoding = 'async';
+      applySource(image, position);
+      ready.set(position, image.decode().catch(error => { ready.delete(position); throw error; }));
+    }
+    return ready.get(position);
+  };
+  // Warm only one photo ahead, after the visible photos have finished loading.
+  const preloadNext = () => {
+    const position = (index + 1) % images.length;
+    queuePhotoWarmup(() => loadPhoto(position));
+  };
   const progress = photo.querySelector('.photo-progress circle');
   let progressAnimation = null;
   const fillRing = () => {
@@ -155,21 +182,36 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
     if (progress && timer) progressAnimation = progress.animate([{ strokeDashoffset: '100' }, { strokeDashoffset: '0' }], { duration: 2500, easing: 'linear', fill: 'forwards' });
   };
   const stop = () => { clearInterval(timer); timer = null; progressAnimation?.cancel(); };
-  const next = () => {
-    index = (index + 1) % images.length;
-    layer = 1 - layer;
-    layers[layer].src = images[index];
-    layers[layer].alt = alts[index] || (photo.classList.contains('placeholder') ? 'Illustrated placeholder, not a destination photograph' : `${name} visit photograph ${index + 1}`);
-    photo.dataset.activeLayer = String(layer);
-    photo.dataset.photoIndex = String(index);
-    button.setAttribute('aria-label', `Next photo of ${name} (${index + 1} of ${images.length})`);
-    button.setAttribute('aria-pressed', String(index !== 0));
-    preloadNext();
-    fillRing();
+  const next = async (automatic = false) => {
+    if (changing) return;
+    changing = true;
+    const position = (index + 1) % images.length;
+    const nextLayer = 1 - layer;
+    try {
+      await loadPhoto(position);
+      if (automatic && (!hovered || document.hidden || dialog.open || reducedMotion.matches)) return;
+      applySource(layers[nextLayer], position);
+      await layers[nextLayer].decode();
+      if (automatic && (!hovered || document.hidden || dialog.open || reducedMotion.matches)) return;
+      index = position;
+      layer = nextLayer;
+      layers[layer].alt = alts[index] || (photo.classList.contains('placeholder') ? 'Illustrated placeholder, not a destination photograph' : `${name} visit photograph ${index + 1}`);
+      photo.dataset.activeLayer = String(layer);
+      photo.dataset.photoIndex = String(index);
+      button.setAttribute('aria-label', `Next photo of ${name} (${index + 1} of ${images.length})`);
+      button.setAttribute('aria-pressed', String(index !== 0));
+      preloadNext();
+      fillRing();
+    } catch {
+      // Keep the current photograph visible if the next download fails.
+    } finally {
+      changing = false;
+      if (hovered) start();
+    }
   };
   const start = () => {
     stop();
-    if (!reducedMotion.matches && !document.hidden && !dialog.open && images.length > 2) timer = setInterval(next, 2500);
+    if (!reducedMotion.matches && !document.hidden && !dialog.open && images.length > 2) timer = setInterval(() => next(true), 2500);
     fillRing();
   };
   button.setAttribute('aria-label', `Next photo of ${name} (1 of ${images.length})`);
@@ -177,7 +219,7 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
   photo.addEventListener('pointerenter', event => {
     if (event.pointerType !== 'mouse') return;
     hovered = true;
-    if (!reducedMotion.matches) { next(); start(); }
+    if (!reducedMotion.matches) { next(true); start(); }
   });
   photo.addEventListener('pointerleave', () => { hovered = false; stop(); });
   photo.addEventListener('focus', () => { if (!hovered && !reducedMotion.matches) next(); });
