@@ -192,6 +192,7 @@ const openPhotoGallery = (photo, images, variants, alts, name) => {
   });
   showGalleryPhoto(Number(photo.dataset.photoIndex || 0));
   photoLightbox.showModal();
+  document.body.style.overflow = 'hidden';
   stopPhotoCycle();
 };
 document.querySelector('#gallery-close').addEventListener('click', () => photoLightbox.close());
@@ -203,12 +204,13 @@ photoLightbox.addEventListener('keydown', event => {
     showGalleryPhoto(openedPhoto + (event.key === 'ArrowRight' ? 1 : -1));
   }
 });
-photoLightbox.addEventListener('close', () => startPhotoCycle());
+photoLightbox.addEventListener('close', () => { document.body.style.overflow = ''; startPhotoCycle(); });
 const galleries = [];
 const photoCycleDelay = 5000;
 const reducedPhotoMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let photoCycleTimer = null, photosChanging = false;
-const canCyclePhotos = () => !document.hidden && !dialog.open && !photoLightbox.open && !reducedPhotoMotion.matches;
+let photosPaused = false;
+const canCyclePhotos = () => !photosPaused && !document.hidden && !dialog.open && !photoLightbox.open && !reducedPhotoMotion.matches;
 const stopPhotoCycle = () => {
   clearTimeout(photoCycleTimer);
   photoCycleTimer = null;
@@ -335,3 +337,14 @@ reducedPhotoMotion.addEventListener('change', startPhotoCycle);
 new MutationObserver(startPhotoCycle).observe(dialog, { attributes: true, attributeFilter: ['open'] });
 visiblePhotosReady.then(startPhotoCycle);
 if ('IntersectionObserver' in window) { document.body.classList.add('js-ready'); const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }), { threshold: .08 }); document.querySelectorAll('.reveal').forEach(section => observer.observe(section)); }
+
+const motionToggle = document.querySelector('#motion-toggle');
+motionToggle.addEventListener('click', () => {
+  photosPaused = !photosPaused;
+  motionToggle.setAttribute('aria-pressed', String(photosPaused));
+  motionToggle.textContent = photosPaused ? 'Resume photo motion' : 'Pause photo motion';
+  startPhotoCycle();
+});
+const syncMotionToggle = () => { motionToggle.hidden = reducedPhotoMotion.matches; };
+reducedPhotoMotion.addEventListener('change', syncMotionToggle);
+syncMotionToggle();

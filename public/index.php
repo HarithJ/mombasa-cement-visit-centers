@@ -57,10 +57,11 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Explore Sahajanand Special School, Galana Farm, and the Kibarani Feeding center. Register your Nyumba day visit.">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#f7f8f3">
+    <meta name="theme-color" content="#f6f3ea">
     <title>Visit Nyumba — A visit that means more</title>
     <link rel="icon" href="assets/nyumba-group.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/travel.css">
     <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
@@ -79,16 +80,19 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
 </header>
 <main>
     <section class="visit-hero" aria-labelledby="hero-title">
-        <div class="hero-intro wrap">
-            <div class="hero-title-block">
-                <p class="eyebrow"><span class="eyebrow-line"></span> VISIT NYUMBA</p>
-                <h1 id="hero-title">A visit that<br>means <span>more.</span></h1>
+        <div class="travel-hero">
+            <img class="hero-landscape" src="assets/photos/galana/02-farm.webp" alt="Sunset over the green fields and irrigation system at Galana Farm" width="1600" height="1065" fetchpriority="high">
+            <div class="hero-shade"></div>
+            <div class="hero-content wrap">
+                <p class="eyebrow">PLACES. PEOPLE. A LITTLE PERSPECTIVE.</p>
+                <h1 id="hero-title">Visit Nyumba<span>Go somewhere<br><em>meaningful.</em></span></h1>
+                <p class="hero-description">Wide-open fields. Warm welcomes. Stories to take home.<br>Discover a different side of Nyumba.</p>
+                <a class="travel-button" href="#destinations">Find your next adventure <?= icon('arrow') ?></a>
             </div>
-            <div class="hero-support">
-                <p>See the places. Meet the purpose.<br>Discover a different side of Nyumba.</p>
-                <a class="text-link" href="#destinations">Find your next visit <?= icon('arrow') ?></a>
-            </div>
+            <div class="hero-caption wrap"><span><?= icon('sun') ?> A moment at Galana Farm</span><a href="#destinations">LET CURIOSITY LEAD <span>↓</span></a></div>
+            <div class="travel-stamp" aria-hidden="true"><span>TAKE THE</span><?= icon('sun') ?><strong>scenic route</strong><span>VISIT NYUMBA</span></div>
         </div>
+        <div class="discovery-heading wrap" id="discover"><div><p class="eyebrow">YOUR NEXT CHAPTER STARTS HERE</p><h2>Three places.<br><em>So much to discover.</em></h2></div><p>Follow your curiosity. Find your place.<br>Make a day of something different.</p></div>
         <div class="destinations wrap" id="destinations" aria-label="Choose a destination">
             <?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?>
             <article class="destination" data-destination="<?= e($id) ?>">
@@ -105,37 +109,37 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
                 </div>
                 </div>
                 <div class="destination-info">
-                    <p class="eyebrow category"><?= e($destination['category']) ?></p>
+                    <p class="eyebrow category"><span>0<?= $number ?> /</span> <?= e($destination['category']) ?></p>
                     <h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
-                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Book a visit <?= icon('diagonal') ?></a>
+                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Plan this visit <?= icon('arrow') ?></a>
                 </div>
             </article>
             <?php endforeach; ?>
         </div>
-        <div class="hero-footnote wrap"><span><?= icon('clock') ?> Your visit, thoughtfully planned.</span><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
+        <div class="hero-footnote wrap"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
     </section>
     <section class="planning wrap reveal" id="planning" aria-labelledby="planning-title">
-        <div class="planning-heading"><p class="eyebrow">A LITTLE PLANNING. A MEANINGFUL VISIT.</p><h2 id="planning-title">Come curious.<br>We’ll keep it simple.</h2><p>From choosing a place to planning your day,<br>your next visit starts here.</p></div>
+        <div class="planning-heading"><p class="eyebrow">THE MAKING OF A GOOD DAY</p><h2 id="planning-title">A good day out.<br><em>A simple way in.</em></h2><p>From choosing a place to planning your day,<br>your next visit starts here.</p></div>
         <ol class="steps">
             <li><span class="step-number">01</span><div><h3>Find your place</h3><p>Choose the destination you’d like to explore.</p></div></li>
             <li><span class="step-number">02</span><div><h3>Make a plan</h3><p>Pick a date and time, and let us know how many are coming.</p></div></li>
             <li><span class="step-number">03</span><div><h3>You’re ready to visit</h3><p>See your visit details together in one clear confirmation.</p></div></li>
         </ol>
     </section>
-    <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">THERE’S MORE TO DISCOVER</p><h2 id="cta-title">Make time for a visit.</h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
+    <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">THERE’S MORE TO DISCOVER</p><h2 id="cta-title">Your next story<br><em>starts with a visit.</em></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
 </main>
 <footer class="footer wrap">
     <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="44" height="55"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Places to visit</a><a href="#planning">Plan your visit</a><a href="https://www.nyumba.com/nyumba-foundation/" target="_blank" rel="noopener noreferrer">Nyumba Foundation <?= icon('diagonal') ?></a></div></div>
     <div class="footer-bottom"><span>© <?= date('Y') ?> Nyumba Group</span><span>Visit Nyumba · Day bookings</span><a href="https://www.nyumba.com/" target="_blank" rel="noopener noreferrer">Visit nyumba.com <?= icon('diagonal') ?></a></div>
 </footer>
 <dialog id="booking-dialog" aria-labelledby="<?= $confirmation ? 'confirmation-title' : 'booking-title' ?>" <?= $openForm || $confirmation ? 'open' : '' ?>>
-    <div class="dialog-toolbar"><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
+    <div class="dialog-toolbar"><span class="itinerary-label">VISIT NYUMBA <span>/ YOUR VISIT PLAN</span></span><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
     <div class="dialog-shell">
         <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">YOUR NEXT VISIT</p><h2 id="aside-destination">Sahajanand Special School</h2><p>A little time.<br>A different perspective.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
         <div class="booking-main">
             <div id="form-view" <?= $confirmation ? 'hidden' : '' ?>>
-                <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">You’re invited.</h2><p class="dialog-subtitle">Tell us a little about your visit.</p>
+                <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">Let’s make a day of it.</h2><p class="dialog-subtitle">Tell us a little about your visit.</p>
                 <div class="prototype-notice"><span class="status-dot"></span><span><strong>Visit bookings</strong> · Your visit is registered after submission.</span></div>
                 <form id="booking-form" method="post" action="/" novalidate>
                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>"><input type="hidden" name="submissionToken" value="<?= e($token) ?>">
