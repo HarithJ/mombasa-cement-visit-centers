@@ -1,4 +1,8 @@
-# Visit Nyumba
+# Visit Nyumba — Design preview branch
+
+This branch exports all three designs as a static GitHub Pages site. Run `npm run build:preview` and serve `_site/`. Forms only preview sample details; no bookings are saved. See [static preview setup](docs/design-preview.md) for deployment and testing.
+
+The sections below describe the retained PHP application source.
 
 PHP-rendered visitor booking website for Sahajanand School, Galana and the Feeding Centre. All three UI versions are available together on `main`; day bookings use real SQLite persistence. Galana overnight requests include saved arrival/departure dates and staying guest counts. Hosting is not selected.
 

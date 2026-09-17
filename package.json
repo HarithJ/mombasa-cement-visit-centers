@@ -6,7 +6,9 @@
     "test:ui": "node tests/ui.test.mjs",
     "test:bookings": "node tests/bookings.test.mjs",
     "test:overnight": "node tests/overnight.test.mjs",
-    "test:versions": "node tests/versions.test.mjs"
+    "test:versions": "node tests/versions.test.mjs",
+    "build:preview": "node bin/build-preview.mjs",
+    "test:preview": "node tests/preview.test.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

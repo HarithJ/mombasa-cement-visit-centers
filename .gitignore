@@ -2,3 +2,5 @@ node_modules/
 test-results/
 .DS_Store
 var/
+
+_site/
