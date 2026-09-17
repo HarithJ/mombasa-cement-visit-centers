@@ -71,10 +71,10 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
 <a class="skip-link" href="#destinations">Skip to destinations</a>
 <header class="header">
     <div class="header-inner">
-        <div class="brand-lockup" aria-label="Nyumba Group, Nyumba Foundation and Nyumba Agri">
-            <img class="group-logo" src="assets/nyumba-group.svg" alt="Nyumba Group" width="48" height="60">
-            <img class="foundation-logo" src="assets/nyumba-foundation.svg" alt="Nyumba Foundation" width="146" height="58">
-            <img class="agri-logo" src="assets/nyumba-agri.svg" alt="Nyumba Agri" width="99" height="58">
+        <div class="brand-lockup" aria-label="Nyumba Group">
+            <img class="group-logo" src="assets/nyumba-group.svg" alt="Nyumba Group" width="56" height="76">
+
+
         </div>
         <nav class="explorer-nav" aria-label="Main navigation"><a href="#destinations">The destinations</a><a href="#planning">How it works</a><a href="#destinations" class="nav-plan">Let’s go <?= icon('diagonal') ?></a></nav>
     </div>
