@@ -48,3 +48,12 @@ body:not(.js-ready) #overnight-option:has(input:not(:checked))~#overnight-fields
 
 /* Slideshow progress belongs to the gallery control, not a destination number. */
 .photo-toggle{position:relative;overflow:visible}.photo-toggle .photo-progress{inset:-5px;width:calc(100% + 10px);height:calc(100% + 10px)}
+
+/* Lightweight directions: no third-party map is loaded with the form. */
+.destination-location{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--soft)}
+.location-caption{display:block;font-size:8px;letter-spacing:1.4px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.destination-location a{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:44px;color:var(--green-dark)}
+.destination-location strong{display:block;font-size:12px;font-weight:700;line-height:1.5}
+.map-action{display:block;font-size:11px;line-height:1.6;margin-top:3px;text-decoration:underline;text-underline-offset:3px}
+.destination-location a:hover .map-action{text-decoration-thickness:2px}
+.destination-location .icon{width:20px;height:20px}
