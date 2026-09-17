@@ -350,3 +350,29 @@ motionToggle.addEventListener('click', () => {
 const syncMotionToggle = () => { motionToggle.hidden = reducedPhotoMotion.matches; };
 reducedPhotoMotion.addEventListener('change', syncMotionToggle);
 syncMotionToggle();
+
+// Do not contact Google until the visitor explicitly expands the map.
+const inlineMap = document.querySelector('#inline-map');
+const inlineMapFrame = document.querySelector('#inline-map-frame');
+function syncInlineMap() {
+  if (!inlineMap.open) { inlineMapFrame.replaceChildren(); return; }
+  const selected = locationField.selectedOptions[0];
+  const source = selected?.dataset.mapEmbed;
+  if (!source) { inlineMapFrame.replaceChildren(); return; }
+  let frame = inlineMapFrame.querySelector('iframe');
+  if (!frame) {
+    frame = document.createElement('iframe');
+    frame.referrerPolicy = 'no-referrer';
+    frame.allowFullscreen = true;
+    inlineMapFrame.append(frame);
+  }
+  frame.title = `Map showing ${selected.textContent}`;
+  if (frame.getAttribute('src') !== source) frame.src = source;
+}
+inlineMap.hidden = false;
+inlineMap.addEventListener('toggle', syncInlineMap);
+locationField.addEventListener('change', syncInlineMap);
+dialog.addEventListener('close', () => {
+  inlineMap.open = false;
+  inlineMapFrame.replaceChildren();
+});
