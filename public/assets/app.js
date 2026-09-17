@@ -48,6 +48,8 @@ function syncOvernight() {
 function syncDestination() {
   const destination = destinations[locationField.value];
   if (!destination) return;
+  document.querySelector('#destination-map').href = locationField.selectedOptions[0].dataset.mapUrl;
+  document.querySelector('#map-destination-name').textContent = locationField.selectedOptions[0].textContent;
   const slot = form.elements.timeSlot;
   slot.replaceChildren(new Option('Select a time', ''));
   destination.slots.forEach(time => slot.add(new Option(timeLabel(time), time)));
