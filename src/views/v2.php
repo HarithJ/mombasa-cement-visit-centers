@@ -74,7 +74,7 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
         <div class="brand-lockup" aria-label="Nyumba Group, Nyumba Foundation and Nyumba Agri">
             <img class="group-logo" src="/assets/nyumba-group.svg" alt="Nyumba Group" width="48" height="60">
             <img class="foundation-logo" src="/assets/nyumba-foundation.svg" alt="Nyumba Foundation" width="146" height="58">
-            <img class="agri-logo" src="/assets/nyumba-agri.svg" alt="Nyumba Agri" width="99" height="58">
+            <img class="agri-logo" src="/assets/versions/v2/nyumba-agri.svg" alt="Nyumba Agri" width="99" height="58">
         </div>
     </div>
 </header>
