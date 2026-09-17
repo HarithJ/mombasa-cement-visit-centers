@@ -1,8 +1,5 @@
 <?php
 declare(strict_types=1);
-if (!in_array(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), ['/', '/index.php'], true)) {
-    http_response_code(404); header('Content-Type: text/plain; charset=utf-8'); echo 'Page not found.'; exit;
-}
 require_once __DIR__.'/BookingStore.php';
 require_once __DIR__.'/DayBooking.php';
 require_once __DIR__.'/Schedule.php';
@@ -31,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $store = new BookingStore($dbPath);
             $saved = $store->create($input, hash('sha256', $token));
             $_SESSION['confirmationToken'] = hash('sha256', $token);
-            header('Location: /?confirmation=1', true, 303); exit;
+            header('Location: '.$bookingPath.'?confirmation=1', true, 303); exit;
         } catch (Throwable $error) {
             error_log('Nyumba booking storage failure: '.get_class($error));
             http_response_code(503); $errors['_form'] = 'We could not save your visit. Your details are still here; please try again. No confirmation has been issued.';

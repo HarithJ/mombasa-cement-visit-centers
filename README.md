@@ -1,6 +1,6 @@
 # Visit Nyumba
 
-PHP-rendered visitor booking website for Sahajanand School, Galana and the Feeding Centre. The owner-approved UI is preserved; day bookings now use real SQLite persistence. Galana overnight requests include saved arrival/departure dates and staying guest counts. Hosting is not selected.
+PHP-rendered visitor booking website for Sahajanand School, Galana and the Feeding Centre. All three UI versions are available together on `main`; day bookings use real SQLite persistence. Galana overnight requests include saved arrival/departure dates and staying guest counts. Hosting is not selected.
 
 ## Run locally
 
@@ -12,6 +12,21 @@ php -S 127.0.0.1:8080 -t public
 ```
 
 Open http://127.0.0.1:8080. Serve only `public/`, never the repository root. Migrations are repeatable and preserve existing records; they also run on first storage access.
+
+## UI versions
+
+- `/v1` — original design, imported from branch `v1` (`9021b48`).
+- `/v2` — travel-journal design, imported from branch `v2` (`67f45d7`).
+- `/v3` — outdoor-explorer design, imported from branch `v3` (`a8d4f81`).
+- `/` and `/index.php` retain the original v1 design.
+
+Each version also accepts a trailing slash or `/index.php`. Booking links, form actions, confirmation redirects and close links stay in the selected version. All versions share the existing booking database, schedules, session and photograph library; they do not create separate booking systems.
+
+`public/index.php` explicitly selects templates in `src/views/`. Version-specific JavaScript and styles are in `public/assets/versions/`; unchanged base CSS, fonts, logos and photos remain shared. The original branches are unchanged.
+
+The PHP development server supports these routes with the command above. When configuring production hosting, route non-file requests to `public/index.php` and keep `public/` as the document root; the application returns 404 for unknown routes. For example, use `try_files $uri $uri/ /index.php?$query_string;` with an appropriately configured Nginx PHP handler. Hosting is not configured by this change.
+
+Run `npm run test:versions` for the version-routing regression suite. It uses isolated temporary SQLite/session storage and checks all routes, assets, galleries, responsive layouts, same-version confirmations, refresh, no-JavaScript submissions, shared persistence and unknown/private paths.
 
 ## Private configuration and storage
 
