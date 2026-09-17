@@ -99,9 +99,9 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
                     <noscript>
                         <img class="photo-secondary" src="<?= e($destination['variants'][1][720] ?? $destination['images'][1]) ?>" srcset="<?= e(photoSrcset($destination['variants'][1])) ?>" sizes="<?= e($photoSizes) ?>" alt="<?= $destination['placeholder'] ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : e($destination['imageAlts'][1] ?? $destination['name']) ?>" width="800" height="900">
                     </noscript>
-                    <span class="photo-number">0<?= $number ?><?php if (!$destination['placeholder']): ?><svg class="photo-progress" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" pathLength="100" /></svg><?php endif; ?></span>
+
                     <?php if ($destination['placeholder']): ?><span class="placeholder-label">Illustration · Photo coming soon</span><?php endif; ?>
-                    <div class="photo-bottom"><span><?= icon($destination['icon']) ?> <?= e($destination['tag']) ?></span><button class="photo-toggle" type="button" aria-label="Show alternate view of <?= e($destination['name']) ?>" aria-pressed="false"><?= icon('photo') ?></button></div>
+                    <div class="photo-bottom"><span><?= icon($destination['icon']) ?> <?= e($destination['tag']) ?></span><button class="photo-toggle" type="button" aria-label="Show alternate view of <?= e($destination['name']) ?>" aria-pressed="false"><?= icon('photo') ?><?php if (!$destination['placeholder']): ?><svg class="photo-progress" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" pathLength="100" /></svg><?php endif; ?></button></div>
                 </div>
                 </div>
                 <div class="destination-info">

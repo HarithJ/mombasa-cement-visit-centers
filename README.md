@@ -29,7 +29,7 @@ Phone policy: 7–15 digits, optional leading +, spaces, parentheses and hyphens
 
 ## Content and interaction
 
-Three official Nyumba logos are distributed across the header without navigation links. Supplied photos are optimized copies, with unchanged originals: seven school, fourteen Feeding Centre and fourteen Galana images. Galleries cycle every 2.5 seconds while hovered and stop on leave. A progress ring surrounds the destination number; touch/keyboard users have a next-photo control. Reduced motion disables automatic cycling. Manrope uses the bundled SIL Open Font License. Final contact details and operational copy remain owner handoff items; official Nyumba links are used rather than invented contact details.
+Three official Nyumba logos are distributed across the header without navigation links. Supplied photos are optimized copies, with unchanged originals: seven school, fourteen Feeding Centre and fourteen Galana images. Galleries cycle every 2.5 seconds while hovered and stop on leave. A progress ring surrounds the gallery button; destination photographs have no numbered badges; touch/keyboard users have a next-photo control. Reduced motion disables automatic cycling. Manrope uses the bundled SIL Open Font License. Final contact details and operational copy remain owner handoff items; official Nyumba links are used rather than invented contact details.
 
 ## Development-only browser tests
 
