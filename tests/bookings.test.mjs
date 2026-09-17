@@ -145,7 +145,8 @@ try {
   const runtimeErrors = []; page.on('pageerror', error => runtimeErrors.push(error.message));
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 }); await page.goto('http://127.0.0.1:8091/');
-    assert.equal(await page.locator('header a, header nav').count(), 0);
+    assert.equal(await page.locator('header nav[aria-label="Main navigation"]').count(), 1);
+    assert.equal(await page.locator('header .nav-plan').getAttribute('href'), '#destinations');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: `test-results/day-${width}-home.png`, animations: 'disabled' });
     await page.locator('[data-book="galana"]').click();

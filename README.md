@@ -1,6 +1,6 @@
 # Visit Nyumba
 
-PHP-rendered visitor booking website for Sahajanand School, Galana and the Feeding Centre. The UI uses a travel-journal design with a full-width photographic hero, destination postcards and itinerary-style booking forms. Day bookings use real SQLite persistence. Galana overnight requests include saved arrival/departure dates and staying guest counts. Hosting is not selected.
+PHP-rendered visitor booking website for Sahajanand School, Galana and the Feeding Centre. The UI uses a bold outdoor-explorer identity: panoramic photography, oversized typography, deep green and tangerine, destination navigation, alternating destination stories and trip-planning forms. Day bookings use real SQLite persistence. Galana overnight requests include saved arrival/departure dates and staying guest counts. Hosting is not selected.
 
 ## Run locally
 
@@ -29,7 +29,7 @@ Phone policy: 7–15 digits, optional leading +, spaces, parentheses and hyphens
 
 ## Content and interaction
 
-Three official Nyumba logos are distributed across the header without navigation links. Supplied photos are optimized copies, with unchanged originals: seven school, fourteen Feeding Centre and fourteen Galana images. Destination photographs cycle every five seconds, with a pause/resume control and progress rings. Opening a photo launches a gallery with thumbnails, previous/next buttons and arrow-key navigation. Reduced motion disables automatic cycling. Manrope uses the bundled SIL Open Font License; editorial headings pair it with the system Georgia serif. Final contact details and operational copy remain owner handoff items; official Nyumba links are used rather than invented contact details.
+Three official Nyumba logos sit alongside responsive destination and planning navigation. Supplied photos are optimized copies, with unchanged originals: seven school, fourteen Feeding Centre and fourteen Galana images. Destination photographs cycle every five seconds, with a pause/resume control and progress rings. Opening a photo launches a gallery with thumbnails, previous/next buttons and arrow-key navigation. Reduced motion disables automatic cycling. Manrope uses the bundled SIL Open Font License across headings and interface text. Final contact details and operational copy remain owner handoff items; official Nyumba links are used rather than invented contact details.
 
 ## Development-only browser tests
 

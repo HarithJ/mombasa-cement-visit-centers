@@ -15,7 +15,7 @@ function photoSrcset(array $variants): string {
     foreach ($variants as $width => $path) $sources[] = $path.' '.$width.'w';
     return implode(', ', $sources);
 }
-$photoSizes = '(max-width: 600px) calc(100vw - 40px), (max-width: 1100px) 32vw, 408px';
+$photoSizes = '(max-width: 700px) calc(100vw - 40px), 60vw';
 function icon(string $name, string $class = ''): string {
     $paths = [
         'arrow' => '<path d="M4 12h15M13 5l7 7-7 7"/>',
@@ -32,9 +32,9 @@ function icon(string $name, string $class = ''): string {
     return '<svg class="icon '.e($class).'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$paths[$name].'</svg>';
 }
 $destinations = [
-    'sahajanand' => ['name' => 'Sahajanand Special School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Make time for connection. Meet our special stars and discover the school community at its heart.', 'icon' => 'people', 'tag' => 'Discover how learning happens at this special school'],
-    'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Take a different pace. Plan a day at Galana Farm, or make room for an overnight stay.', 'icon' => 'leaf', 'tag' => 'Experience modern agriculture and farm tourism'],
-    'feeding' => ['name' => 'Kibarani Feeding center', 'category' => 'CARE & COMMUNITY', 'description' => 'Come closer to the work of care. Arrange a visit to the Kibarani Feeding center.', 'icon' => 'sun', 'tag' => 'See large-scale daily feeding for the community'],
+    'sahajanand' => ['name' => 'Sahajanand Special School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Meet the people behind a school built around care, connection and different ways of learning.', 'icon' => 'people', 'tag' => 'Discover how learning happens at this special school'],
+    'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.', 'icon' => 'leaf', 'tag' => 'Experience modern agriculture and farm tourism'],
+    'feeding' => ['name' => 'Kibarani Feeding center', 'category' => 'CARE & COMMUNITY', 'description' => 'Discover the people and daily work behind community feeding at Kibarani. A visit with care at its heart.', 'icon' => 'sun', 'tag' => 'See large-scale daily feeding for the community'],
 ];
 foreach ($destinations as $id => &$destination) {
     $files = glob(__DIR__.'/assets/photos/'.$id.'/*.{webp,jpg,jpeg,png}', GLOB_BRACE) ?: [];
@@ -57,7 +57,7 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Explore Sahajanand Special School, Galana Farm, and the Kibarani Feeding center. Register your Nyumba day visit.">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#f6f3ea">
+    <meta name="theme-color" content="#173f35">
     <title>Visit Nyumba — A visit that means more</title>
     <link rel="icon" href="assets/nyumba-group.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
@@ -76,26 +76,23 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
             <img class="foundation-logo" src="assets/nyumba-foundation.svg" alt="Nyumba Foundation" width="146" height="58">
             <img class="agri-logo" src="assets/nyumba-agri.svg" alt="Nyumba Agri" width="99" height="58">
         </div>
+        <nav class="explorer-nav" aria-label="Main navigation"><a href="#destinations">The destinations</a><a href="#planning">How it works</a><a href="#destinations" class="nav-plan">Let’s go <?= icon('diagonal') ?></a></nav>
     </div>
 </header>
 <main>
     <section class="visit-hero" aria-labelledby="hero-title">
-        <div class="travel-hero">
-            <img class="hero-landscape" src="assets/photos/galana/02-farm.webp" alt="Sunset over the green fields and irrigation system at Galana Farm" width="1600" height="1065" fetchpriority="high">
-            <div class="hero-shade"></div>
-            <div class="hero-content wrap">
-                <p class="eyebrow">PLACES. PEOPLE. A LITTLE PERSPECTIVE.</p>
-                <h1 id="hero-title">Visit Nyumba<span>Go somewhere<br><em>meaningful.</em></span></h1>
-                <p class="hero-description">Wide-open fields. Warm welcomes. Stories to take home.<br>Discover a different side of Nyumba.</p>
-                <a class="travel-button" href="#destinations">Find your next adventure <?= icon('arrow') ?></a>
-            </div>
-            <div class="hero-caption wrap"><span><?= icon('sun') ?> A moment at Galana Farm</span><a href="#destinations">LET CURIOSITY LEAD <span>↓</span></a></div>
-            <div class="travel-stamp" aria-hidden="true"><span>TAKE THE</span><?= icon('sun') ?><strong>scenic route</strong><span>VISIT NYUMBA</span></div>
+        <div class="explorer-hero">
+            <img class="explorer-landscape" src="assets/photos/galana/01-farm.webp" alt="Long rows of green crops stretching to the horizon at Galana Farm" width="1600" height="1065" fetchpriority="high">
+            <div class="explorer-shade"></div>
+            <div class="hero-topline wrap"><span>GO OUT. GET CURIOUS.</span><span>PLACES / PEOPLE / PURPOSE</span></div>
+            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Nyumba<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><p>A little adventure.<br>A whole new perspective.</p><a class="explorer-button" href="#destinations">Explore the places <?= icon('diagonal') ?></a></div></div>
+            <div class="hero-bottomline wrap"><span><?= icon('leaf') ?> Out in the fields · Galana Farm</span><span>SCROLL TO FIND YOUR KIND OF DAY ↓</span></div>
         </div>
-        <div class="discovery-heading wrap" id="discover"><div><p class="eyebrow">YOUR NEXT CHAPTER STARTS HERE</p><h2>Three places.<br><em>So much to discover.</em></h2></div><p>Follow your curiosity. Find your place.<br>Make a day of something different.</p></div>
+        <div class="destination-jumps"><div class="wrap"><span>WHERE TO?</span><a href="#place-sahajanand">01 <strong>The school</strong><?= icon('diagonal') ?></a><a href="#place-galana">02 <strong>The farm</strong><?= icon('diagonal') ?></a><a href="#place-feeding">03 <strong>The feeding centre</strong><?= icon('diagonal') ?></a></div></div>
+        <div class="discovery-heading wrap"><p class="eyebrow">PICK YOUR NEXT EXPERIENCE</p><h2>Good days start<br>with <span>curiosity.</span></h2><p>Three ways to get closer to the places,<br>people and purpose of Nyumba.</p></div>
         <div class="destinations wrap" id="destinations" aria-label="Choose a destination">
             <?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?>
-            <article class="destination" data-destination="<?= e($id) ?>">
+            <article class="destination" id="place-<?= e($id) ?>" data-destination="<?= e($id) ?>">
                 <div class="photo-stack">
                 <div class="destination-photo <?= $destination['placeholder'] ? 'placeholder' : '' ?>" data-images="<?= e(json_encode($destination['images'], JSON_THROW_ON_ERROR)) ?>" data-variants="<?= e(json_encode($destination['variants'], JSON_THROW_ON_ERROR)) ?>" data-alts="<?= e(json_encode($destination['imageAlts'] ?? [], JSON_THROW_ON_ERROR)) ?>" tabindex="0" aria-label="<?= e($destination['name']) ?> image gallery. Photos change automatically; use the photo button for the next view.">
                     <img class="photo-primary" src="<?= e($destination['variants'][0][720] ?? $destination['images'][0]) ?>" srcset="<?= e(photoSrcset($destination['variants'][0])) ?>" sizes="<?= e($photoSizes) ?>" decoding="async" alt="<?= $destination['placeholder'] ? 'Illustrated landscape placeholder; destination photography not yet supplied' : e($destination['imageAlts'][0] ?? $destination['name']) ?>" width="800" height="900" fetchpriority="<?= $number === 1 ? 'high' : 'auto' ?>">
@@ -110,9 +107,9 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
                 </div>
                 <div class="destination-info">
                     <p class="eyebrow category"><span>0<?= $number ?> /</span> <?= e($destination['category']) ?></p>
-                    <h2><?= e($destination['name']) ?></h2>
+                    <p class="place-kicker"><?= ['sahajanand' => 'A place to connect.', 'galana' => 'Room to roam.', 'feeding' => 'Care, in action.'][$id] ?></p><h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
-                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Plan this visit <?= icon('arrow') ?></a>
+                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>
                 </div>
             </article>
             <?php endforeach; ?>
@@ -120,33 +117,33 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
         <div class="hero-footnote wrap"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
     </section>
     <section class="planning wrap reveal" id="planning" aria-labelledby="planning-title">
-        <div class="planning-heading"><p class="eyebrow">THE MAKING OF A GOOD DAY</p><h2 id="planning-title">A good day out.<br><em>A simple way in.</em></h2><p>From choosing a place to planning your day,<br>your next visit starts here.</p></div>
+        <div class="planning-heading"><p class="eyebrow">LESS PLANNING. MORE EXPLORING.</p><h2 id="planning-title">Your day out,<br>in three steps.</h2><p>From choosing a place to planning your day,<br>your next visit starts here.</p></div>
         <ol class="steps">
             <li><span class="step-number">01</span><div><h3>Find your place</h3><p>Choose the destination you’d like to explore.</p></div></li>
             <li><span class="step-number">02</span><div><h3>Make a plan</h3><p>Pick a date and time, and let us know how many are coming.</p></div></li>
             <li><span class="step-number">03</span><div><h3>You’re ready to visit</h3><p>See your visit details together in one clear confirmation.</p></div></li>
         </ol>
     </section>
-    <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">THERE’S MORE TO DISCOVER</p><h2 id="cta-title">Your next story<br><em>starts with a visit.</em></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
+    <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
 </main>
 <footer class="footer wrap">
     <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="44" height="55"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Places to visit</a><a href="#planning">Plan your visit</a><a href="https://www.nyumba.com/nyumba-foundation/" target="_blank" rel="noopener noreferrer">Nyumba Foundation <?= icon('diagonal') ?></a></div></div>
     <div class="footer-bottom"><span>© <?= date('Y') ?> Nyumba Group</span><span>Visit Nyumba · Day bookings</span><a href="https://www.nyumba.com/" target="_blank" rel="noopener noreferrer">Visit nyumba.com <?= icon('diagonal') ?></a></div>
 </footer>
 <dialog id="booking-dialog" aria-labelledby="<?= $confirmation ? 'confirmation-title' : 'booking-title' ?>" <?= $openForm || $confirmation ? 'open' : '' ?>>
-    <div class="dialog-toolbar"><span class="itinerary-label">VISIT NYUMBA <span>/ YOUR VISIT PLAN</span></span><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
+    <div class="dialog-toolbar"><span class="itinerary-label">YOUR NEXT ADVENTURE <span>/ VISIT NYUMBA</span></span><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
     <div class="dialog-shell">
-        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">YOUR NEXT VISIT</p><h2 id="aside-destination">Sahajanand Special School</h2><p>A little time.<br>A different perspective.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
+        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">THE DESTINATION</p><h2 id="aside-destination">Sahajanand Special School</h2><p>Something different<br>to look forward to.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
         <div class="booking-main">
             <div id="form-view" <?= $confirmation ? 'hidden' : '' ?>>
-                <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">Let’s make a day of it.</h2><p class="dialog-subtitle">Tell us a little about your visit.</p>
+                <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">Make it a date.</h2><p class="dialog-subtitle">Your people. Your place. Your next day out.</p>
                 <div class="prototype-notice"><span class="status-dot"></span><span><strong>Visit bookings</strong> · Your visit is registered after submission.</span></div>
                 <form id="booking-form" method="post" action="/" novalidate>
                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>"><input type="hidden" name="submissionToken" value="<?= e($token) ?>">
                     <div id="error-summary" class="error-summary" role="alert" tabindex="-1" <?= $errors ? '' : 'hidden' ?>><?= e(implode(' ', $errors)) ?></div>
                     <div class="form-grid">
-                        <div class="field"><label for="full-name">Full name <span aria-hidden="true">*</span></label><input id="full-name" name="fullName" value="<?= e($input['fullName'] ?? '') ?>" type="text" maxlength="120" required placeholder="e.g. Alex Mwangi" aria-describedby="full-name-error"><span class="field-error" id="full-name-error"><?= e($errors['fullName'] ?? '') ?></span></div>
-                        <div class="field"><label for="phone">Phone number <span aria-hidden="true">*</span></label><input id="phone" name="phone" value="<?= e($input['phone'] ?? '') ?>" type="tel" maxlength="24" required placeholder="e.g. +254 712 345 678" aria-describedby="phone-error"><span class="field-error" id="phone-error"><?= e($errors['phone'] ?? '') ?></span></div>
+                        <div class="field"><label for="full-name">Full name <span aria-hidden="true">*</span></label><input id="full-name" name="fullName" value="<?= e($input['fullName'] ?? '') ?>" type="text" autocomplete="name" maxlength="120" required placeholder="e.g. Alex Mwangi" aria-describedby="full-name-error"><span class="field-error" id="full-name-error"><?= e($errors['fullName'] ?? '') ?></span></div>
+                        <div class="field"><label for="phone">Phone number <span aria-hidden="true">*</span></label><input id="phone" name="phone" value="<?= e($input['phone'] ?? '') ?>" type="tel" autocomplete="tel" maxlength="24" required placeholder="e.g. +254 712 345 678" aria-describedby="phone-error"><span class="field-error" id="phone-error"><?= e($errors['phone'] ?? '') ?></span></div>
                         <div class="field full"><label for="location">Where would you like to visit? <span aria-hidden="true">*</span></label><select id="location" name="location" required aria-describedby="location-error"><?php foreach ($destinations as $id => $destination): ?><option value="<?= e($id) ?>" <?= ($input['location'] ?? 'sahajanand') === $id ? 'selected' : '' ?>><?= e($destination['name']) ?></option><?php endforeach; ?></select><span class="field-error" id="location-error"><?= e($errors['location'] ?? '') ?></span></div>
                         <div class="field"><label for="visit-date">Visit date <span aria-hidden="true">*</span></label><input id="visit-date" name="visitDate" value="<?= e($input['visitDate'] ?? '') ?>" type="date" required aria-describedby="visit-date-error"><span class="field-error" id="visit-date-error"><?= e($errors['visitDate'] ?? '') ?></span></div>
                         <div class="field"><label for="time-slot">Time slot <span aria-hidden="true">*</span></label><select id="time-slot" name="timeSlot" required aria-describedby="time-slot-error schedule-note"><option value="">Select a time</option><?php foreach ($schedule[$input['location'] ?? 'sahajanand']['slots'] ?? [] as $time): ?><option value="<?= e($time) ?>" <?= ($input['timeSlot'] ?? '') === $time ? 'selected' : '' ?>><?= e($time) ?> (Africa/Nairobi)</option><?php endforeach; ?></select><span class="field-error" id="time-slot-error"><?= e($errors['timeSlot'] ?? '') ?></span></div>
