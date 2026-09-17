@@ -57,3 +57,12 @@ body:not(.js-ready) #overnight-option:has(input:not(:checked))~#overnight-fields
 .map-action{display:block;font-size:11px;line-height:1.6;margin-top:3px;text-decoration:underline;text-underline-offset:3px}
 .destination-location a:hover .map-action{text-decoration-thickness:2px}
 .destination-location .icon{width:20px;height:20px}
+
+.destination-location{margin-top:18px}
+#inline-map summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;cursor:pointer;list-style:none;font-size:12px;font-weight:700;color:var(--green-dark)}
+#inline-map summary::-webkit-details-marker{display:none}
+#inline-map summary>span{font-size:22px;font-weight:400;transition:transform .2s}
+#inline-map[open] summary>span{transform:rotate(45deg)}
+.inline-map-frame:has(iframe){height:230px;margin:8px 0 14px;background:var(--paper);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.inline-map-frame iframe{display:block;width:100%;height:100%;border:0}
+@media(max-width:600px){.inline-map-frame:has(iframe){height:210px}}

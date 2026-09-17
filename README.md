@@ -42,3 +42,7 @@ npm run test:bookings
 `npm run test:overnight` runs the Galana suite; `npm run test:ui` runs both day and overnight suites. Tests start an isolated PHP server with temporary SQLite/session storage and remove their own generated data afterward. Database inspection is used only for the agreed persistence assertions, not through a public retrieval endpoint. Screenshots are written to ignored `test-results/`. `UI_BROWSER_PATH` can select an existing Chromium executable. `PLAYWRIGHT_MODULE_PATH` can select an installed Playwright module.
 
 Tickets 02 and 03 are complete; ten day and seven overnight browser groups pass. Requirement evidence is in `docs/day-booking-review.md` and `docs/overnight-booking-review.md`. This is not production deployment approval; broader release hardening remains ticket 04.
+
+## Booking location maps
+
+An expandable Google Map sits directly above Book my visit. No map iframe is created until it is expanded; changing the destination updates the pin and closing the popup resets the map. Directions links remain available without JavaScript. `config/locations.php` stores the owner-supplied share links, and `config/map-embeds.php` stores exact coordinates resolved from them. The supplied Feeding Center link points to Kibarani Recreation Park.
