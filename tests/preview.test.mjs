@@ -55,7 +55,7 @@ try{
    assert.match(await page.locator('#inline-map iframe').getAttribute('src'),/-4.0330122/);
    await page.locator('#location').selectOption('galana');
    await page.locator('#full-name').fill('Sample Visitor');
-   await page.locator('#phone').fill('0712345678');
+   await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
    await page.locator('#visit-date').fill('2099-05-01');
    await page.locator('#time-slot').selectOption('09:00');
    await page.locator('#attendees').fill('3');

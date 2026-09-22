@@ -19,7 +19,7 @@ for(const version of ['v1','v2','v3']){
   html=html.replace('method="post" action="./"','method="dialog"');
   html=html.replace('class="button submit-button" type="submit"','class="button submit-button" type="submit" disabled');
   html=html.replaceAll('Book my visit','Preview my visit');
-  html=html.replace('Your name, phone number and visit details are stored to record your visit and may be emailed to the destination team to coordinate your visit.','Design preview only. Use sample details. Nothing entered here is submitted or saved.');
+  html=html.replace('Your name, email address, phone number and visit details are stored to record your visit. Booking emails may be sent to you and the destination team to coordinate your visit.','Design preview only. Use sample details. Nothing entered here is submitted or saved.');
   html=html.replace('<strong>Visit bookings</strong> · Your visit is registered after submission.','<strong>Design preview</strong> · This form does not make a booking.');
   html=html.replace('Visit registered.</h2>','Your visit preview.</h2>');
   html=html.replace('Your visit has been recorded. Please keep your booking reference.','Sample summary only. No booking has been made.');
