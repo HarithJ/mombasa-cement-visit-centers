@@ -14,7 +14,7 @@ try {
   browser = await chromium.launch({ executablePath: process.env.UI_BROWSER_PATH });
   const page = await browser.newPage(); page.setDefaultTimeout(4000);
   await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
-  await page.locator('#full-name').fill('Overnight Visitor'); await page.locator('#phone').fill('0712345678');
+  await page.locator('#full-name').fill('Overnight Visitor'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#time-slot').selectOption('09:00');
   await page.locator('#attendees').fill('4'); await page.locator('#overnight').check();
   assert.equal(await page.locator('#arrival-date').inputValue(), '2099-05-01');
@@ -39,7 +39,7 @@ try {
     await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
     const response = page.waitForResponse(response => response.request().method() === 'POST');
     await page.locator('form').evaluate((form, changed) => {
-      const values = { fullName: 'Retained Overnight', phone: '0712345678', location: 'galana', visitDate: '2099-05-01', timeSlot: '09:00', attendees: '4', overnight: 'on', arrivalDate: '2099-05-01', departureDate: '2099-05-02', overnightGuests: '3', ...changed };
+      const values = { email: 'visitor@example.com', fullName: 'Retained Overnight', phone: '0712345678', location: 'galana', visitDate: '2099-05-01', timeSlot: '09:00', attendees: '4', overnight: 'on', arrivalDate: '2099-05-01', departureDate: '2099-05-02', overnightGuests: '3', ...changed };
       for (const [key, value] of Object.entries(values)) {
         let input = form.elements[key];
         if (key === 'overnight') { input = document.createElement('input'); input.name = key; input.type = 'hidden'; form.append(input); }
@@ -62,7 +62,7 @@ try {
   assert.equal(records().length, 2);
   console.log('PASS invalid overnight requests preserve entries without saving and a correction saves exactly once');
   await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
-  await page.locator('#full-name').fill('Multi Night'); await page.locator('#phone').fill('+44 20 7946 0958');
+  await page.locator('#full-name').fill('Multi Night'); await page.locator('#phone').fill('+44 20 7946 0958'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#time-slot').selectOption('11:00');
   await page.locator('#attendees').fill('4'); await page.locator('#overnight').check();
   await page.locator('#departure-date').fill('2099-06-15'); await page.locator('#overnight-guests').fill('2');
@@ -75,7 +75,7 @@ try {
   console.log('PASS multi-night stays have no invented maximum and replay/refresh preserve one request');
   for (const destination of ['galana', 'feeding', 'sahajanand']) {
     await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
-    await page.locator('#full-name').fill('Day Only'); await page.locator('#phone').fill('0712345678');
+    await page.locator('#full-name').fill('Day Only'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#overnight').check();
     await page.locator('#departure-date').fill('2099-05-03');
     if (destination === 'galana') await page.locator('#overnight').uncheck();
@@ -112,7 +112,7 @@ try {
   const native = await browser.newContext({ javaScriptEnabled: false });
   const nativePage = await native.newPage(); nativePage.setDefaultTimeout(4000);
   await nativePage.goto('http://127.0.0.1:8092/?book=galana');
-  await nativePage.locator('#full-name').fill('Native Overnight'); await nativePage.locator('#phone').fill('0712345678');
+  await nativePage.locator('#full-name').fill('Native Overnight'); await nativePage.locator('#phone').fill('0712345678'); await nativePage.locator('#email').fill('visitor@example.com');
   await nativePage.locator('#visit-date').fill('2099-06-01'); await nativePage.locator('#time-slot').selectOption('11:00');
   await nativePage.locator('#overnight').check(); await nativePage.locator('#arrival-date').fill('2099-06-01');
   await nativePage.locator('#departure-date').fill('2099-06-03');
@@ -126,7 +126,7 @@ try {
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 }); await page.goto('http://127.0.0.1:8092/');
     await page.locator('[data-book="galana"]').click();
-    await page.locator('#full-name').fill('Visual Overnight'); await page.locator('#phone').fill('0712345678');
+    await page.locator('#full-name').fill('Visual Overnight'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-07-01'); await page.locator('#time-slot').selectOption('14:00');
     await page.locator('#attendees').fill('4'); await page.locator('#overnight').check();
     await page.getByRole('button', { name: 'Book my visit', exact: true }).click();

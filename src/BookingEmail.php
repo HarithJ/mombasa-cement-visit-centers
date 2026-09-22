@@ -13,6 +13,7 @@ final class BookingEmail {
             'Destination: '.$team['name'],
             'Visitor: '.$booking['full_name'],
             'Phone: '.$booking['phone'],
+            'Email: '.$booking['email'],
             'Visit date: '.$booking['visit_date'],
             'Time: '.$booking['booked_time'].' (Africa/Nairobi)',
             'Attendees: '.$booking['attendees'],
@@ -30,5 +31,19 @@ final class BookingEmail {
             'text' => $text,
             'html' => '<h1>New visit booking</h1><p style="white-space:pre-line">'.htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</p>',
         ];
+    }
+    public static function visitorPayload(array $booking): array {
+        $payload = self::payload($booking);
+        $contacts = require __DIR__.'/../config/contacts.php';
+        $team = $contacts[$booking['destination']];
+        $payload['to'] = [$booking['email']];
+        $payload['subject'] = 'Your visit is registered — '.$booking['reference'];
+        $payload['text'] = str_replace('A visit has been registered.', 'Thank you for booking your visit with Nyumba Group.', $payload['text']);
+        $payload['text'] .= "\n\nQuestions about your visit? Contact ".$team['name'].":\n";
+        foreach ($team['people'] as $person) {
+            $payload['text'] .= ($person['name'] !== '' ? $person['name'].' — ' : '').$person['phone'].' · '.$person['email']."\n";
+        }
+        $payload['html'] = '<h1>Your visit is registered</h1><p style="white-space:pre-line">'.htmlspecialchars($payload['text'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</p>';
+        return $payload;
     }
 }

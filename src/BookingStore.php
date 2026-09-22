@@ -29,13 +29,14 @@ final class BookingStore {
     public function create(array $booking, string $token): array {
         $this->db->beginTransaction();
         try {
-            $query = $this->db->prepare('INSERT INTO bookings(reference, submission_token, full_name, phone, destination, visit_date, booked_time, attendees, status, created_at, overnight, arrival_date, departure_date, overnight_guests) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(submission_token) DO NOTHING');
-            $query->execute(['NY-'.strtoupper(bin2hex(random_bytes(12))), $token, $booking['fullName'], $booking['phone'], $booking['location'], $booking['visitDate'], $booking['timeSlot'], $booking['attendees'], 'automatically_confirmed', gmdate('Y-m-d\TH:i:s\Z'), $booking['overnight'] === 'on' ? 1 : 0, $booking['arrivalDate'], $booking['departureDate'], $booking['overnightGuests']]);
+            $query = $this->db->prepare('INSERT INTO bookings(reference, submission_token, full_name, phone, destination, visit_date, booked_time, attendees, status, created_at, overnight, arrival_date, departure_date, overnight_guests, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(submission_token) DO NOTHING');
+            $query->execute(['NY-'.strtoupper(bin2hex(random_bytes(12))), $token, $booking['fullName'], $booking['phone'], $booking['location'], $booking['visitDate'], $booking['timeSlot'], $booking['attendees'], 'automatically_confirmed', gmdate('Y-m-d\TH:i:s\Z'), $booking['overnight'] === 'on' ? 1 : 0, $booking['arrivalDate'], $booking['departureDate'], $booking['overnightGuests'], $booking['email']]);
             $created = $query->rowCount() === 1;
             $saved = $this->findByToken($token);
             if (!$saved) throw new RuntimeException('Booking not saved');
             if ($created && BookingEmail::configured()) {
                 $this->db->prepare('INSERT INTO booking_emails(booking_id, payload, idempotency_key) VALUES (?, ?, ?)')->execute([$saved['id'], json_encode(BookingEmail::payload($saved), JSON_THROW_ON_ERROR), 'booking/'.$saved['reference']]);
+                $this->db->prepare("INSERT INTO booking_emails(booking_id, kind, payload, idempotency_key) VALUES (?, 'visitor', ?, ?)")->execute([$saved['id'], json_encode(BookingEmail::visitorPayload($saved), JSON_THROW_ON_ERROR), 'visitor/'.$saved['reference']]);
             }
             $this->db->commit();
             return $saved;
