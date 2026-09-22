@@ -68,6 +68,8 @@ try{
    assert.match(await page.locator('#confirmation-view').innerText(),/No booking has been made/);
    assert.match(await page.locator('#confirmation-details').innerText(),/Overnight stay/);
    assert.equal(await page.locator('.reference-label').count(),0);
+   assert.equal(await page.locator('[data-contact-destination]:visible').getAttribute('data-contact-destination'),'galana');
+   assert.equal(await page.locator('[data-contact-destination=galana] a[href="mailto:jaco@nyumbagri.com"]').count(),1);
    assert.ok(requests.slice(before).every(r=>r.method==='GET'));
    assert.equal(page.url(),`${origin}${mount}/${version}/`);
    await page.reload();
