@@ -103,6 +103,7 @@ function validate() {
   return !errors.length;
 }
 function showConfirmation(data) {
+  document.querySelectorAll('[data-contact-destination]').forEach(team => { team.hidden = team.dataset.contactDestination !== data.location; });
   const rows = [ ['Name', data.fullName.trim()], ['Destination', destinations[data.location].name], ['Visit date', dateLabel(data.visitDate)], ['Time', timeLabel(data.timeSlot)], ['Attendees', data.attendees], ['Phone', `••• ••• ${data.phone.replace(/\D/g, '').slice(-3)}`] ];
   if (data.overnight === 'on' && data.location === 'galana') rows.push(['Overnight stay', `${dateLabel(data.arrivalDate)} – ${dateLabel(data.departureDate)}`], ['Staying guests', data.overnightGuests]);
   const list = document.querySelector('#confirmation-details'); list.replaceChildren();
