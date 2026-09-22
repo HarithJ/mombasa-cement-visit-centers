@@ -91,6 +91,21 @@ try{
    console.log(`PASS ${mount||'/'} ${version}: static assets, local-only form, maps, gallery and responsive layout`);
   }
  }
+ for(const mount of ['',prefix]) for(const version of ['v1','v2','v3']) for(const sample of ['','overnight.html']) {
+  await page.goto(`${origin}${mount}/${version}/feedback/${sample}`);
+  await page.getByLabel('I attended').check();
+  await page.getByRole('button',{name:'Preview feedback',exact:true}).click();
+  assert.match(await page.locator('#rating-error').innerText(),/rating/);
+  await page.getByLabel('5 stars',{exact:true}).check();
+  await page.getByLabel('I didn’t attend').check();
+  assert.ok(await page.locator('#rating-field').isHidden());
+  await page.getByLabel('Anything else to share?').fill('Sample feedback only');
+  await page.getByRole('button',{name:'Preview feedback',exact:true}).click();
+  assert.match(await page.locator('#feedback-preview-done').innerText(),/No feedback was sent or saved/);
+  await page.reload(); assert.equal(await page.locator('#comments').inputValue(),'');
+  for(const width of [320,768,1440]) {await page.setViewportSize({width,height:900});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
+  await page.screenshot({path:`test-results/feedback-${version}.png`,fullPage:true});
+ }
  assert.deepEqual(errors,[]);
  assert.ok(requests.every(r=>r.method==='GET'));
  assert.ok(requests.every(r=>!r.url.includes('Sample')&&!r.url.includes('0712345678')));
@@ -99,6 +114,8 @@ try{
  assert.ok(await p.locator('.submit-button').isDisabled());
  await p.locator('[data-book="galana"]').click();
  assert.ok(await p.locator('#preview-unavailable').isVisible());
+ await p.goto(`${origin}${prefix}/v2/feedback/`);
+ assert.ok(await p.locator('[type=submit]').isDisabled());
  await nojs.close();
  for(const path of ['/src/web.php','/var/bookings.sqlite','/config/locations.php','/public/index.php'])assert.equal((await fetch(origin+path)).status,404);
  console.log('PASS no submissions, no personal data in requests, no-JS notice and no backend files served');

@@ -8,7 +8,7 @@ const output=join(root,'_site');
 await rm(output,{recursive:true,force:true});
 await mkdir(output,{recursive:true});
 // An explicit asset allowlist excludes databases, sessions, PHP and repository files.
-for(const name of ['style.css','manrope.ttf','manrope-OFL.txt','nyumba-group.svg','nyumba-foundation.svg','nyumba-agri.svg','galana-placeholder.svg','photos','versions']){
+for(const name of ['style.css','feedback.css','feedback.js','manrope.ttf','manrope-OFL.txt','nyumba-group.svg','nyumba-foundation.svg','nyumba-agri.svg','galana-placeholder.svg','photos','versions']){
   await cp(join(root,'public/assets',name),join(output,'assets',name),{recursive:true});
 }
 for(const version of ['v1','v2','v3']){
@@ -28,7 +28,7 @@ for(const version of ['v1','v2','v3']){
   html=html.replace(/<noscript><div class="noscript-notice">[\s\S]*?<\/div><\/noscript>/,'<noscript><div id="preview-unavailable" class="noscript-notice">Design preview only. Enable JavaScript to try the form, galleries and inline maps. No bookings can be made on this site.</div></noscript>');
   html=html.replace(/href="\.\/\?book=[^"]+"/g,'href="#preview-unavailable"');
   const nav=['v1','v2','v3'].map(v=>`<a href="../${v}/"${v===version?' aria-current="page"':''}>${v.toUpperCase()}</a>`).join('');
-  html=html.replace('<body>',`<body><aside class="preview-bar" aria-label="Design preview"><a href="../">Design previews</a><span>No bookings are saved</span><nav aria-label="Preview versions">${nav}</nav></aside>`);
+  html=html.replace('<body>',`<body><aside class="preview-bar" aria-label="Design preview"><a href="../">Design previews</a><span>No bookings are saved</span><a href="feedback/">Try feedback</a><nav aria-label="Preview versions">${nav}</nav></aside>`);
   html=html.replace('</head>','<link rel="stylesheet" href="../assets/preview.css">\n</head>');
   let js=await readFile(join(root,`public/assets/versions/${version}/app.js`),'utf8');
   const old=`form.addEventListener('submit', event => {\n  if (busy || !validate()) { event.preventDefault(); return; }\n  busy = true; submit.disabled = true;\n  document.querySelector('#submit-label').textContent = 'Saving your visit…';\n});`;
@@ -38,6 +38,11 @@ for(const version of ['v1','v2','v3']){
   js+=`\n// Enabled only after the local-only preview handler is attached.\nsubmit.disabled = false;\n`;
   await mkdir(join(output,version),{recursive:true});
   await writeFile(join(output,version,'index.html'),html);
+  await mkdir(join(output,version,'feedback'),{recursive:true});
+  for(const sample of ['day','overnight']) {
+    const feedback=execFileSync('php',[join(root,'bin/render-feedback-preview.php'),version,sample],{encoding:'utf8'});
+    await writeFile(join(output,version,'feedback',sample==='day'?'index.html':'overnight.html'),feedback);
+  }
   await writeFile(join(output,`assets/versions/${version}/app.js`),js);
 }
 await writeFile(join(output,'assets/preview.css'),`

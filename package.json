@@ -8,7 +8,10 @@
     "test:overnight": "node tests/overnight.test.mjs",
     "test:versions": "node tests/versions.test.mjs",
     "build:preview": "node bin/build-preview.mjs",
-    "test:preview": "node tests/preview.test.mjs"
+    "test:preview": "node tests/preview.test.mjs",
+    "test:feedback": "node tests/feedback.test.mjs",
+    "test:feedback-worker": "php tests/feedback-worker.test.php",
+    "test:email": "php tests/email.test.php"
   },
   "devDependencies": {
     "playwright": "1.62.1"
