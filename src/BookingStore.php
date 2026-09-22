@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/BookingEmail.php';
+require_once __DIR__.'/Feedback.php';
 final class BookingStore {
     private PDO $db;
     public function __construct(string $path) {
@@ -26,7 +27,7 @@ final class BookingStore {
             } catch (Throwable $error) { $this->db->rollBack(); throw $error; }
         }
     }
-    public function create(array $booking, string $token): array {
+    public function create(array $booking, string $token, string $version = 'v1', string $basePath = '/v1'): array {
         $this->db->beginTransaction();
         try {
             $query = $this->db->prepare('INSERT INTO bookings(reference, submission_token, full_name, phone, destination, visit_date, booked_time, attendees, status, created_at, overnight, arrival_date, departure_date, overnight_guests, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(submission_token) DO NOTHING');
@@ -38,6 +39,7 @@ final class BookingStore {
                 $this->db->prepare('INSERT INTO booking_emails(booking_id, payload, idempotency_key) VALUES (?, ?, ?)')->execute([$saved['id'], json_encode(BookingEmail::payload($saved), JSON_THROW_ON_ERROR), 'booking/'.$saved['reference']]);
                 $this->db->prepare("INSERT INTO booking_emails(booking_id, kind, payload, idempotency_key) VALUES (?, 'visitor', ?, ?)")->execute([$saved['id'], json_encode(BookingEmail::visitorPayload($saved), JSON_THROW_ON_ERROR), 'visitor/'.$saved['reference']]);
             }
+            if ($created) Feedback::schedule($this->db, $saved, $version, $basePath);
             $this->db->commit();
             return $saved;
         } catch (Throwable $error) { $this->db->rollBack(); throw $error; }

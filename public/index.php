@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+$uiVersion = 'v2';
+if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/feedback') { require __DIR__.'/../src/feedback-web.php'; exit; }
 require __DIR__.'/../src/web.php';
 function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function photoVariants(string $path): array {

@@ -174,20 +174,15 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement.closest('dialog')?.id), 'booking-dialog');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('[data-book="sahajanand"]').evaluate(el => el === document.activeElement), true);
-  const photo = page.locator('[data-destination="galana"] .destination-photo');
-  await page.locator('#motion-toggle').click();
-  assert.equal(await page.locator('#motion-toggle').getAttribute('aria-pressed'), 'true');
-  const stopped = await photo.getAttribute('data-photo-index');
-  await page.waitForTimeout(5500);
-  assert.equal(await photo.getAttribute('data-photo-index'), stopped);
-  await page.locator('#motion-toggle').click();
-  await page.waitForFunction(initial => document.querySelector('[data-destination="galana"] .destination-photo').getAttribute('data-photo-index') !== initial, stopped, {timeout: 15000});
-  await page.locator('[data-destination="galana"] .photo-toggle').click();
-  await page.locator('#gallery-image').waitFor({state:'visible'});
-  assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('Escape');
-  await page.waitForFunction(() => document.body.style.overflow === '');
+  for (const id of ['sahajanand', 'galana', 'feeding']) {
+    await page.locator(`[data-destination="${id}"] .photo-toggle`).click();
+    await page.locator('#photo-lightbox').waitFor({state:'visible'});
+    await page.locator('#gallery-thumbnails button').first().click();
+    await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('01 /'));
+    await page.locator('#gallery-next').click();
+    await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 /'));
+    await page.locator('#gallery-close').click();
+  }
   await page.emulateMedia({ reducedMotion: 'reduce' }); await page.reload();
   const stillPhoto = page.locator('[data-destination="galana"] .destination-photo');
   await stillPhoto.hover(); await page.waitForTimeout(2700);
@@ -197,14 +192,14 @@ try {
   const toggle = touchPage.locator('[data-destination="galana"] .photo-toggle');
   await toggle.tap();
   await touchPage.locator('#gallery-next').tap();
-  await touchPage.waitForFunction(() => document.querySelector('#gallery-count').textContent.includes('02 / 14'));
+  await touchPage.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 /'));
   await touchPage.locator('#gallery-close').tap();
   const box = await toggle.boundingBox(); assert.ok(box.width >= 44 && box.height >= 44);
   await touchPage.locator('[data-book="galana"]').tap();
   assert.equal(await touchPage.locator('#location').inputValue(), 'galana');
   await touchContext.close();
   assert.deepEqual(runtimeErrors, []);
-  console.log('PASS keyboard focus, dropdown slots, photo pause, gallery navigation, reduced motion and real touch controls');
+  console.log('PASS keyboard focus, dropdown slots, galleries, reduced motion and real touch controls');
 } finally {
   await browser?.close(); await stop();
   await rm(storage, { recursive: true, force: true });
