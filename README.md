@@ -65,3 +65,7 @@ An expandable Google Map sits directly above Book my visit. No map iframe is cre
 ## Booking emails
 
 Resend destination notifications are available in the PHP backend. See [configuration, worker setup and delivery monitoring](docs/resend.md). Sending is disabled by default and is not available in the GitHub Pages preview.
+
+## Post-visit feedback
+
+Optional next-morning feedback invitations and private forms are available for day and Galana overnight bookings, regardless of attendance. See [feedback configuration and operations](docs/feedback.md). Sending is disabled by default.

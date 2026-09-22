@@ -6,7 +6,11 @@
     "test:ui": "node tests/ui.test.mjs",
     "test:bookings": "node tests/bookings.test.mjs",
     "test:overnight": "node tests/overnight.test.mjs",
-    "test:versions": "node tests/versions.test.mjs"
+    "test:versions": "node tests/versions.test.mjs",
+    "test:feedback": "node tests/feedback.test.mjs",
+    "test:feedback-worker": "php tests/feedback-worker.test.php",
+    "test:email": "php tests/email.test.php",
+    "test": "node tests/all.test.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

@@ -9,6 +9,11 @@ foreach (['v1', 'v2', 'v3'] as $version) {
     $routes['/'.$version.'/'] = $version;
     $routes['/'.$version.'/index.php'] = $version;
 }
+if (is_string($path) && preg_match('#^/(v[123]/)?feedback$#D', $path, $match)) {
+    $uiVersion = isset($match[1]) ? rtrim($match[1], '/') : 'v1';
+    require __DIR__.'/../src/feedback-web.php';
+    exit;
+}
 if (!is_string($path) || !isset($routes[$path])) {
     http_response_code(404);
     header('Content-Type: text/plain; charset=utf-8');
