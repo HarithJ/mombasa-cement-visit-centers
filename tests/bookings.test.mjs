@@ -18,7 +18,7 @@ try {
   await page.goto('http://127.0.0.1:8091');
   await page.locator('[data-book="feeding"]').click();
   await page.locator('#full-name').fill('Alex Mwangi');
-  await page.locator('#phone').fill('0712 345 678');
+  await page.locator('#phone').fill('0712 345 678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-01-15');
   await page.locator('#time-slot').selectOption('11:00');
   await page.locator('#attendees').fill('4');
@@ -48,7 +48,7 @@ try {
   await nativePage.goto('http://127.0.0.1:8091/');
   await nativePage.locator('[data-book="feeding"]').click();
   await nativePage.locator('#full-name').fill('Sam Test', { timeout: 3000 });
-  await nativePage.locator('#phone').fill('+44 20 7946 0958');
+  await nativePage.locator('#phone').fill('+44 20 7946 0958'); await nativePage.locator('#email').fill('visitor@example.com');
   await nativePage.locator('#visit-date').fill('2099-01-20');
   await nativePage.locator('#time-slot').selectOption('11:00');
   await nativePage.getByRole('button', { name: 'Book my visit', exact: true }).click();
@@ -66,7 +66,7 @@ try {
     await page.locator('[data-book="feeding"]').click();
     const responsePromise = page.waitForResponse(response => response.request().method() === 'POST');
     await page.locator('form').evaluate((form, change) => {
-      const values = { fullName: 'Retained Test', phone: '+44 20 7946 0958', location: 'feeding', visitDate: '2099-02-15', timeSlot: '11:00', attendees: '3', ...change };
+      const values = { email: 'visitor@example.com', fullName: 'Retained Test', phone: '+44 20 7946 0958', location: 'feeding', visitDate: '2099-02-15', timeSlot: '11:00', attendees: '3', ...change };
       for (const [key, value] of Object.entries(values)) {
         let input = form.elements[key];
         if (input?.tagName === 'SELECT') input.add(new Option(value, value));
@@ -85,7 +85,7 @@ try {
   for (const destination of ['sahajanand', 'galana']) {
     await page.goto('http://127.0.0.1:8091/'); await page.locator(`[data-book="${destination}"]`).click();
     assert.equal(await page.locator('#location').inputValue(), destination);
-    await page.locator('#full-name').fill('Day Visitor'); await page.locator('#phone').fill('+1 (202) 555-0123');
+    await page.locator('#full-name').fill('Day Visitor'); await page.locator('#phone').fill('+1 (202) 555-0123'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-02-15'); await page.locator('#time-slot').selectOption('14:00');
     await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
     await page.locator('#confirmation-view').waitFor({ state: 'visible' });
@@ -95,7 +95,7 @@ try {
   console.log('PASS school and Galana Farm day visits are saved through their preselected forms');
   await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="feeding"]').click();
   const escapedName = '<img src=x onerror="window.injected=true">';
-  await page.locator('#full-name').fill(escapedName); await page.locator('#phone').fill('0712 345 678');
+  await page.locator('#full-name').fill(escapedName); await page.locator('#phone').fill('0712 345 678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-02-20'); await page.locator('#time-slot').selectOption('11:00');
   let rejection = page.waitForResponse(response => response.request().method() === 'POST');
   await page.locator('form').evaluate(form => { form.elements.csrf.value = 'forged'; form.submit(); });
@@ -113,7 +113,7 @@ try {
   console.log('PASS CSRF rejection retains correctable input, submitted text is escaped, and private files are not served');
   await stop(); server = launchServer(storage); await ready();
   await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="feeding"]').click();
-  await page.locator('#full-name').fill('Retry Visitor'); await page.locator('#phone').fill('+254712345678');
+  await page.locator('#full-name').fill('Retry Visitor'); await page.locator('#phone').fill('+254712345678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-03-01'); await page.locator('#time-slot').selectOption('11:00');
   rejection = page.waitForResponse(response => response.request().method() === 'POST');
   await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
@@ -154,7 +154,7 @@ try {
     await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
     assert.equal(await page.locator('#error-summary').isVisible(), true);
     await page.screenshot({ path: `test-results/day-${width}-validation.png`, animations: 'disabled' });
-    await page.locator('#full-name').fill('Responsive Visitor'); await page.locator('#phone').fill('0712345678');
+    await page.locator('#full-name').fill('Responsive Visitor'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-04-01'); await page.locator('#time-slot').selectOption('09:00');
     const count = records().length;
     await page.locator('[type="submit"]').evaluate(button => { button.click(); button.click(); });

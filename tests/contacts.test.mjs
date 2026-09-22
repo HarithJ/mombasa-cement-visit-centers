@@ -19,12 +19,13 @@ try {
  for(const [destination,emails] of Object.entries(expected)) {
   await page.goto(`${origin}${route}?book=${destination}`);
   await page.locator('#full-name').fill('Contact Test');
-  await page.locator('#phone').fill('0712345678');
+  await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-05-01');
   await page.locator('#time-slot').selectOption('11:00');
   await page.locator('#attendees').fill('1');
   await page.locator('[type=submit]').click();
   await page.waitForURL(/confirmation=1/);
+  assert.match(await page.locator('#confirmation-details').innerText(), /visitor@example.com/);
   const team=page.locator('[data-contact-destination]:visible');
   assert.equal(await team.count(),1);
   assert.equal(await team.getAttribute('data-contact-destination'),destination);
