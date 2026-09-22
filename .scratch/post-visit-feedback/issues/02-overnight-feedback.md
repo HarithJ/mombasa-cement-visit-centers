@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Day-visit feedback from email to saved response
 
-**Status:** claimed
+**Status:** resolved
 
 **Type:** feature
 
@@ -15,3 +15,7 @@
 - [ ] Integration tests follow a Galana booking through the worker, invitation link and saved response. Cover exact due-time boundaries, calendar/month/year transitions, single-night and multi-night departures, and no send before the due instant.
 - [ ] Use temporary storage, a controlled clock and mocked Resend; no live email or elapsed-time sleeps are needed.
 - [ ] Commit updates to main, the actual v1/v2/v3 branches, and retained design-preview source, with relevant regression checks. Do not activate production delivery.
+
+## Answer
+
+Implemented departure-based scheduling and stay-date context for Galana overnight bookings. Integration checks cover a multi-night stay across a year boundary, exact due time and non-attendance without JavaScript. All version branches are synchronized.

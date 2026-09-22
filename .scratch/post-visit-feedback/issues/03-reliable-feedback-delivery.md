@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Day-visit feedback from email to saved response
 
-**Status:** claimed
+**Status:** resolved
 
 **Type:** feature
 
@@ -18,3 +18,7 @@
 - [ ] Integration tests exercise due invitations through mock timeout/failure, backoff, retry and acceptance; cover simultaneous claims, catch-up, the disabled switch, completed-response suppression, and retry-window expiry with a controlled clock.
 - [ ] Preserve existing booking emails, historical queue states and the new-booking-only rollout; do not bulk-mail old records. This ticket operates on generic due invitations and does not depend on overnight date calculation from ticket 02.
 - [ ] Commit updates to main, each actual version branch and the retained design-preview source. Keep static export local-only. Do not run real email sends or activate a production scheduler.
+
+## Answer
+
+Implemented independent switches, catch-up, due-time separation, lease claiming/fencing, immutable retries, suppression before first send and review before duplicate protection expires. Controlled-clock worker tests cover overlapping claims, expired-lease takeover and stale-result counters. Populated migration tests preserve pending, accepted and review jobs without backfill.

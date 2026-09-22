@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Day-visit feedback from email to saved response; 02 — Feedback after Galana overnight stays
 
-**Status:** claimed
+**Status:** resolved
 
 **Type:** feature
 
@@ -17,3 +17,7 @@
 - [ ] Browser tests exercise sample attended and non-attended flows and confirm no data-bearing network requests or backend files are exported.
 - [ ] Commit the preview work on design-preview. Any shared production UI changes must also be committed on main and the affected actual version branches. No hosting change, push or production deployment is required.
 - [ ] This ticket depends on the day and overnight user journeys, but not on ticket 03’s operational delivery work; the preview never calls the worker.
+
+## Answer
+
+Exported day and overnight sample feedback pages for all three designs, linked from the preview toolbar. Browser checks pass at root and repository subpaths, across responsive widths, with no submission or data persistence and honest no-JavaScript behaviour.

@@ -4,7 +4,7 @@
 
 **Blocked by:** None — can start immediately
 
-**Status:** claimed
+**Status:** resolved
 
 **Type:** feature
 
@@ -23,3 +23,7 @@
 - [ ] An integration test creates a booking through HTTP, advances the clock, captures the invitation through mocked delivery, opens its link and saves feedback. Cover both attendance choices, validation, token isolation, CSRF, replay and migration preservation without sending real email.
 - [ ] Commit corresponding changes on main and the actual v1, v2 and v3 branches; update the retained backend source on design-preview. Keep its current static export functional and free of backend data. Sample feedback export is ticket 04.
 - [ ] Document the required PHP host, canonical site URL and scheduled worker. No production activation, push or real email send is required by this ticket.
+
+## Answer
+
+Implemented next-morning invitations, private token links, accessible forms, attended/non-attended responses, validation, CSRF protection and immutable one-response-per-booking storage. Application-to-worker integration and all-design no-JavaScript checks pass. Branches: main, v1, v2, v3 and design-preview.
