@@ -1,6 +1,6 @@
 # Resend booking notifications
 
-The PHP application queues one notification per new booking for the booked destination's contacts in `config/contacts.php`. Visitors are not emailed: the form does not collect their email address. Day and Galana overnight details are included, with the booking reference and visitor phone number. The queue and booking are saved in the same SQLite transaction. Existing bookings are not retroactively emailed.
+The PHP application queues two separate messages per new booking: a visitor confirmation to the required form email address, and a notification to the booked destination's contacts in `config/contacts.php`. Visitor confirmations include the destination team's contact details. Day and Galana overnight details are included, with the booking reference and visitor phone number. The queue and booking are saved in the same SQLite transaction. Existing bookings are not retroactively emailed. The migration preserves old bookings with a null email and retains existing queued messages, IDs, payloads and delivery states.
 
 ## Server setup
 
