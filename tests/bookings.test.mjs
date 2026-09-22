@@ -175,12 +175,13 @@ try {
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('[data-book="sahajanand"]').evaluate(el => el === document.activeElement), true);
   for (const id of ['sahajanand', 'galana', 'feeding']) {
-    const photo = page.locator(`[data-destination="${id}"] .destination-photo`);
-    await photo.hover(); const initial = await photo.getAttribute('data-photo-index');
-    await page.waitForTimeout(2700);
-    assert.notEqual(await photo.getAttribute('data-photo-index'), initial);
-    await page.mouse.move(0, 0); const stopped = await photo.getAttribute('data-photo-index');
-    await page.waitForTimeout(2700); assert.equal(await photo.getAttribute('data-photo-index'), stopped);
+    await page.locator(`[data-destination="${id}"] .photo-toggle`).click();
+    await page.locator('#photo-lightbox').waitFor({state:'visible'});
+    await page.locator('#gallery-thumbnails button').first().click();
+    await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('01 /'));
+    await page.locator('#gallery-next').click();
+    await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 /'));
+    await page.locator('#gallery-close').click();
   }
   await page.emulateMedia({ reducedMotion: 'reduce' }); await page.reload();
   const stillPhoto = page.locator('[data-destination="galana"] .destination-photo');
@@ -189,14 +190,16 @@ try {
   const touchContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
   const touchPage = await touchContext.newPage(); await touchPage.goto('http://127.0.0.1:8091/');
   const toggle = touchPage.locator('[data-destination="galana"] .photo-toggle');
-  await toggle.tap(); await toggle.tap();
-  assert.equal(await touchPage.locator('[data-destination="galana"] .destination-photo').getAttribute('data-photo-index'), '2');
+  await toggle.tap();
+  await touchPage.locator('#gallery-next').tap();
+  await touchPage.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 /'));
+  await touchPage.locator('#gallery-close').tap();
   const box = await toggle.boundingBox(); assert.ok(box.width >= 44 && box.height >= 44);
   await touchPage.locator('[data-book="galana"]').tap();
   assert.equal(await touchPage.locator('#location').inputValue(), 'galana');
   await touchContext.close();
   assert.deepEqual(runtimeErrors, []);
-  console.log('PASS keyboard focus, dropdown slots, hover pause, reduced motion and real touch controls');
+  console.log('PASS keyboard focus, dropdown slots, galleries, reduced motion and real touch controls');
 } finally {
   await browser?.close(); await stop();
   await rm(storage, { recursive: true, force: true });

@@ -40,5 +40,22 @@ try {
     $store->create($booking, 'disabled');
     putenv('FEEDBACK_EMAIL_ENABLED=1'); putenv('BOOKING_EMAIL_ENABLED=0');
     verify($worker->run(fn()=>throw new RuntimeException('Historical invitation'), 'test@example.com')['retry']===0, 'Do not backfill bookings made while disabled');
+    // Response integrity at the existing private-storage boundary.
+    $stored=$db->query('SELECT * FROM feedback_responses WHERE booking_id = '.(int)$saved['id'])->fetch(PDO::FETCH_ASSOC);
+    verify($stored['rating']===null, 'Non-attendance discards tampered rating');
+    $feedback->submit($match[1], ['attendance'=>'attended','rating'=>'1','comments'=>'Overwrite']);
+    verify($db->query('SELECT * FROM feedback_responses WHERE booking_id = '.(int)$saved['id'])->fetch(PDO::FETCH_ASSOC)===$stored, 'Duplicate submission cannot change answers');
+    $new=$store->create($booking,'isolated');
+    $payload=json_decode($db->query('SELECT payload FROM booking_emails WHERE booking_id = '.(int)$new['id'])->fetchColumn(),true);
+    preg_match('/token=([a-f0-9]{64})/', $payload['text'], $second);
+    verify($feedback->find($second[1])['submitted_at']===null, 'Another invitation cannot retrieve the first response');
+    $feedback->submit($second[1], ['attendance'=>'attended','rating'=>'4','booking_id'=>(string)$saved['id']]);
+    verify($db->query('SELECT * FROM feedback_responses WHERE booking_id = '.(int)$saved['id'])->fetch(PDO::FETCH_ASSOC)===$stored, 'Posted booking ID cannot redirect a response');
+    // Simulate lease takeover while an old delivery callback is still returning.
+    $store->create($booking,'takeover');
+    $takeover=new EmailWorker(new PDO('sqlite:'.$path,null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]),fn()=>$now+61);
+    $taken=null;
+    $late=$worker->run(function()use($takeover,&$taken){$taken=$takeover->run(fn()=>'new-owner','test@example.com');throw new RuntimeException('Late old failure');},'test@example.com');
+    verify($taken['accepted']===1 && $late['retry']===0, 'Outdated worker cannot report a rejected transition');
     echo "PASS leases, response suppression, independent switches, replay and rollout\n";
 } finally {unset($store,$db,$worker,$other,$feedback);foreach(glob($directory.'/*') as $file)unlink($file);@rmdir($directory);}

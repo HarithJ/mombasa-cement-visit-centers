@@ -11,7 +11,8 @@
     "test:preview": "node tests/preview.test.mjs",
     "test:feedback": "node tests/feedback.test.mjs",
     "test:feedback-worker": "php tests/feedback-worker.test.php",
-    "test:email": "php tests/email.test.php"
+    "test:email": "php tests/email.test.php",
+    "test": "node tests/all.test.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

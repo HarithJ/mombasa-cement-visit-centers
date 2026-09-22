@@ -43,12 +43,14 @@ final class EmailWorker {
                 // A lease prevents another worker from picking this job during send.
                 try {
                     $id = $send($payload, $job['idempotency_key']);
-                    $this->db->prepare("UPDATE booking_emails SET status = 'accepted', provider_id = ?, attempts = attempts + 1, last_error = NULL WHERE id = ? AND lease_token = ? AND status = 'pending'")->execute([$id, $job['id'], $lease]);
-                    $counts['accepted']++;
+                    $updated = $this->db->prepare("UPDATE booking_emails SET status = 'accepted', provider_id = ?, attempts = attempts + 1, last_error = NULL WHERE id = ? AND lease_token = ? AND status = 'pending'");
+                    $updated->execute([$id, $job['id'], $lease]);
+                    $counts['accepted'] += $updated->rowCount();
                 } catch (Throwable $error) {
                     // Store a category only: no provider response, secrets or personal data.
-                    $this->db->prepare('UPDATE booking_emails SET attempts = attempts + 1, next_attempt_at = ?, last_error = ? WHERE id = ? AND lease_token = ? AND status = \'pending\'')->execute([$now + min(3600, 60 * (2 ** min((int)$job['attempts'], 6))), 'Email API request failed', $job['id'], $lease]);
-                    $counts['retry']++;
+                    $updated = $this->db->prepare('UPDATE booking_emails SET attempts = attempts + 1, next_attempt_at = ?, last_error = ? WHERE id = ? AND lease_token = ? AND status = \'pending\'');
+                    $updated->execute([$now + min(3600, 60 * (2 ** min((int)$job['attempts'], 6))), 'Email API request failed', $job['id'], $lease]);
+                    $counts['retry'] += $updated->rowCount();
                 }
             } catch (Throwable $error) {
                 try { $this->db->exec('ROLLBACK'); } catch (Throwable $ignored) {}

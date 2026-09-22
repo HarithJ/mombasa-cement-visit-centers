@@ -75,10 +75,10 @@ try {
  await native.close();
  console.log('PASS overnight year boundary and non-attendance without JavaScript');
  // Recovery path: pause, timeout, retry with the same payload, then stop at expiry.
- async function bookDay(email) {
-  await page.goto(origin+(combined?'/v3':'/')+'?book=sahajanand');
+ async function bookDay(email, route = combined?'/v3':'/', date = '2100-05-01') {
+  await page.goto(origin+route+'?book=sahajanand');
   await page.locator('#full-name').fill('Retry Feedback'); await page.locator('#email').fill(email);
-  await page.locator('#phone').fill('0712345678'); await page.locator('#visit-date').fill('2100-05-01');
+  await page.locator('#phone').fill('0712345678'); await page.locator('#visit-date').fill(date);
   await page.locator('#time-slot').selectOption('11:00'); await page.locator('#attendees').fill('1');
   await page.locator('[type=submit]').click(); await page.waitForURL(/confirmation=1/);
  }
@@ -106,5 +106,18 @@ try {
  const expired=worker('2100-05-03T07:00:00Z');
  assert.equal(expired.result.review,1); assert.equal(expired.messages.length,0);
  console.log('PASS feedback pause, catch-up, retries, expiry, validation and scanner-safe links');
+ for(const route of combined?['/v1','/v2','/v3']:['/']) {
+  await bookDay('native@example.com',route,'2101-01-01');
+  const message=worker('2101-01-02T06:00:00Z').messages[0];
+  const href=message.payload.text.match(/https:\/\/visits\.example\.com\/\S+/)[0].replace('https://visits.example.com',origin);
+  const context=await browser.newContext({javaScriptEnabled:false,viewport:{width:320,height:844}});
+  const p=await context.newPage(); await p.goto(href);
+  await p.getByLabel('I attended').check(); await p.getByLabel('4 stars',{exact:true}).check();
+  await p.getByRole('button',{name:'Send feedback',exact:true}).click();
+  await p.getByRole('heading',{name:'Thank you for your feedback.'}).waitFor();
+  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await context.close();
+ }
+ console.log('PASS no-JavaScript feedback across every available design');
  console.log('PASS day booking → due email → private form → saved response, without duplicate sends');
 } finally {await browser?.close();server.kill();await rm(storage,{recursive:true,force:true});}
