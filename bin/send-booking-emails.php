@@ -4,7 +4,7 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__.'/../src/ResendClient.php';
 require __DIR__.'/../src/EmailWorker.php';
 try {
-    if (!BookingEmail::configured()) throw new RuntimeException('BOOKING_EMAIL_ENABLED must be 1');
+    if (!BookingEmail::configured() && !Feedback::enabled()) throw new RuntimeException('Enable booking or feedback email delivery');
     $key = getenv('RESEND_API_KEY') ?: '';
     if ($key === '') throw new RuntimeException('RESEND_API_KEY is required');
     if (!extension_loaded('curl')) throw new RuntimeException('PHP cURL is required');

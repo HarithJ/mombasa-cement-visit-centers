@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$errors) {
         try {
             $store = new BookingStore($dbPath);
-            $saved = $store->create($input, hash('sha256', $token));
+            $saved = $store->create($input, hash('sha256', $token), $uiVersion ?? 'v1', '/');
             $_SESSION['confirmationToken'] = hash('sha256', $token);
             header('Location: /?confirmation=1', true, 303); exit;
         } catch (Throwable $error) {
