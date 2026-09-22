@@ -42,7 +42,7 @@ Run `npm run test:versions` for the version-routing regression suite. It uses is
 
 ## Booking behavior
 
-Visits collect name, phone, destination, date/time and positive integer attendee count including the contact. Galana can include an overnight request: arrival matches the visit date, departure is later, and staying guests must be whole-number 1–attendees. Unchecked/non-Galana requests discard all overnight fields. No ID, email, accounts, approval workflow, admin screens or outbound messages are introduced. Successful transactional writes are followed by an on-screen registered-visit summary, hard-to-guess reference and masked phone. Registration does not imply a capacity check or accommodation allocation. CSRF/session submission tokens and redirect-after-success prevent accidental replay duplicates. Errors preserve correctable input; failed writes do not display confirmation. Day and overnight booking/confirmation work without JavaScript. Overnight requests do not allocate rooms or guarantee accommodation.
+Visits collect name, phone, destination, date/time and positive integer attendee count including the contact. Galana can include an overnight request: arrival matches the visit date, departure is later, and staying guests must be whole-number 1–attendees. Unchecked/non-Galana requests discard all overnight fields. No visitor email address is collected. Optional Resend notifications send booking details to destination contacts; see [Resend setup](docs/resend.md). No ID, accounts, approval workflow or admin screens are introduced. Successful transactional writes are followed by an on-screen registered-visit summary, hard-to-guess reference and masked phone. Registration does not imply a capacity check or accommodation allocation. CSRF/session submission tokens and redirect-after-success prevent accidental replay duplicates. Errors preserve correctable input; failed writes do not display confirmation. Day and overnight booking/confirmation work without JavaScript. Overnight requests do not allocate rooms or guarantee accommodation.
 
 Phone policy: 7–15 digits, optional leading +, spaces, parentheses and hyphens. Ten-digit Kenyan 01/07 numbers normalize to +254; twelve-digit 254 numbers receive +. Other numbers retain supplied +, or digits only without guessing their country.
 
@@ -65,3 +65,7 @@ Tickets 02 and 03 are complete; ten day and seven overnight browser groups pass.
 ## Booking location maps
 
 An expandable Google Map sits directly above Book my visit. No map iframe is created until it is expanded; changing the destination updates the pin and closing the popup resets the map. Directions links remain available without JavaScript. `config/locations.php` stores the owner-supplied share links, and `config/map-embeds.php` stores exact coordinates resolved from them. The supplied Feeding Center link points to Kibarani Recreation Park.
+
+## Booking emails
+
+Resend destination notifications are available in the PHP backend. See [configuration, worker setup and delivery monitoring](docs/resend.md). Sending is disabled by default and is not available in the GitHub Pages preview.

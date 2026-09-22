@@ -4,3 +4,6 @@ test-results/
 var/
 
 _site/
+
+.env
+.env.*
