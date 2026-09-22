@@ -40,7 +40,7 @@ try {
     await page.keyboard.press('Escape');
     await page.locator('[data-book="galana"]').click();
     await page.locator('#full-name').fill(`Visitor ${version}`);
-    await page.locator('#phone').fill('0712345678');
+    await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-05-01');
     await page.locator('#time-slot').selectOption('09:00');
     await page.locator('#attendees').fill('3');
@@ -69,7 +69,7 @@ try {
     await p.goto(`${origin}/${version}/`);
     await p.locator('[data-book="feeding"]').click();
     await p.locator('#full-name').fill(`No JS ${version}`);
-    await p.locator('#phone').fill('0712345678');
+    await p.locator('#phone').fill('0712345678'); await p.locator('#email').fill('visitor@example.com');
     await p.locator('#visit-date').fill('2099-05-03');
     await p.locator('#time-slot').selectOption('11:00');
     await p.locator('[type="submit"]').click();
