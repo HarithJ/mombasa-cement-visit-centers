@@ -18,6 +18,12 @@ try {
  const page=await context.newPage();
  for(const [destination,emails] of Object.entries(expected)) {
   await page.goto(`${origin}${route}?book=${destination}`);
+  await page.locator('#inline-map summary').click();
+  assert.equal(await page.locator('#inline-map iframe').count(),0);
+  assert.match(await page.locator('#route-image').getAttribute('src'),new RegExp(`/routes/${destination}\\.png$`));
+  await page.locator('#route-image').evaluate(image=>image.decode());
+  assert.equal(await page.locator('#route-image-link').getAttribute('href'),await page.locator('#route-image').getAttribute('src'));
+  assert.match(await page.locator('#route-image').getAttribute('alt'),/Not to scale/);
   const destinationName = {sahajanand:'Sahajanand Special School',galana:'Galana Farm',feeding:'Kibarani Feeding center'}[destination];
   assert.equal(await page.locator('#aside-destination').textContent(),destinationName);
   await page.locator('#full-name').fill('Contact Test');

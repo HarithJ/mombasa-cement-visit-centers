@@ -60,7 +60,7 @@ Tickets 02 and 03 are complete; ten day and seven overnight browser groups pass.
 
 ## Booking location maps
 
-An expandable Google Map sits directly above Book my visit. No map iframe is created until it is expanded; changing the destination updates the pin and closing the popup resets the map. Directions links remain available without JavaScript. `config/locations.php` stores the owner-supplied share links, and `config/map-embeds.php` stores exact coordinates resolved from them. The supplied Feeding Center link points to Kibarani Recreation Park.
+An expandable illustrated route sits directly above Book my visit. Each destination uses its owner-approved static artwork, with descriptive alternative text and a link to open the full image. The schematic illustrations are not to scale. Google Maps directions remain available through the existing external link; no map iframe or third-party map request is loaded. The illustrations also work without JavaScript. `config/route-illustrations.php` maps destinations to local assets, and `config/locations.php` retains the owner-supplied directions links.
 
 ## Booking emails
 
