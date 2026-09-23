@@ -13,7 +13,7 @@ let busy = false;
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Nairobi', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const validDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 const dateLabel = value => new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value));
-const timeLabel = value => { const [hours, minutes] = value.split(':'); const hour = Number(hours); return `${hour % 12 || 12}:${minutes} ${hour < 12 ? 'am' : 'pm'} (Africa/Nairobi)`; };
+const timeLabel = value => { const [hours, minutes] = value.split(':'); const hour = Number(hours); return `${hour % 12 || 12}:${minutes} ${hour < 12 ? 'am' : 'pm'}`; };
 function clearErrors() {
   form.querySelectorAll('[aria-invalid]').forEach(input => input.removeAttribute('aria-invalid'));
   form.querySelectorAll('.field-error').forEach(error => { error.textContent = ''; });
