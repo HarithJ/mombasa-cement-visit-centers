@@ -37,6 +37,7 @@ body:not(.js-ready) dialog[open]{position:fixed;inset:24px 0 auto;margin-inline:
 body:not(.js-ready) #overnight-option:has(input:not(:checked))~#overnight-fields{display:none}
 .dialog-toolbar{position:relative;inset:auto;width:100%;height:56px;align-items:center;background:#fff;border-bottom:1px solid var(--line)}.dialog-toolbar .close-button{margin:0 12px 0 0}.dialog-shell{max-height:calc(100dvh - 104px)}
 @media(max-width:600px){.dialog-shell{max-height:calc(100dvh - 80px)}.dialog-toolbar .close-button{margin:0 12px 0 0}}
+@media(min-width:601px){.dialog-shell{align-items:start}.booking-aside{position:sticky;top:0;align-self:start;height:calc(100dvh - 104px);min-height:0}}
 @media(max-width:600px){.header .agri-logo{width:104px;height:58px}}
 @media(max-width:360px){.header .agri-logo{width:90px;height:53px}}
 @media(max-width:1100px) and (min-width:601px){.destination-description{font-size:12px;min-height:85px}.hero-support p{font-size:14px}}
