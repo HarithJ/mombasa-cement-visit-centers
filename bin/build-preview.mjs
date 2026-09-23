@@ -8,7 +8,7 @@ const output=join(root,'_site');
 await rm(output,{recursive:true,force:true});
 await mkdir(output,{recursive:true});
 // An explicit asset allowlist excludes databases, sessions, PHP and repository files.
-for(const name of ['style.css','feedback.css','feedback.js','manrope.ttf','manrope-OFL.txt','nyumba-group.svg','nyumba-foundation.svg','nyumba-agri.svg','galana-placeholder.svg','photos','versions']){
+for(const name of ['style.css','feedback.css','feedback.js','manrope.ttf','manrope-OFL.txt','nyumba-group.svg','nyumba-foundation.svg','nyumba-agri.svg','galana-placeholder.svg','photos','routes','versions']){
   await cp(join(root,'public/assets',name),join(output,'assets',name),{recursive:true});
 }
 for(const version of ['v1','v2','v3']){
