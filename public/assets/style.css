@@ -64,9 +64,7 @@ body:not(.js-ready) #overnight-option:has(input:not(:checked))~#overnight-fields
 #inline-map summary::-webkit-details-marker{display:none}
 #inline-map summary>span{font-size:22px;font-weight:400;transition:transform .2s}
 #inline-map[open] summary>span{transform:rotate(45deg)}
-.inline-map-frame:has(iframe){height:230px;margin:8px 0 14px;background:var(--paper);border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.inline-map-frame iframe{display:block;width:100%;height:100%;border:0}
-@media(max-width:600px){.inline-map-frame:has(iframe){height:210px}}
+.inline-map-frame{margin:8px 0 14px}.inline-map-frame img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:6px}.inline-map-frame>a{display:block}.inline-map-frame>a:focus-visible{outline:3px solid var(--green);outline-offset:3px}.route-image-hint{display:block;margin-top:8px;font-size:11px;line-height:1.5;color:var(--muted)}
 
 /* Destination contacts on the booking confirmation. */
 .visit-contacts { margin: 24px 0; padding-top: 22px; border-top: 1px solid #d8ddd3; text-align: left; }

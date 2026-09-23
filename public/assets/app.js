@@ -51,6 +51,9 @@ function syncDestination() {
   const locationMeta = document.querySelector(`[data-location-meta="${locationField.value}"]`);
   document.querySelector('#destination-map').href = locationMeta.dataset.mapUrl;
   document.querySelector('#map-destination-name').textContent = locationMeta.dataset.name;
+  document.querySelector('#route-image').src = locationMeta.dataset.routeImage;
+  document.querySelector('#route-image').alt = locationMeta.dataset.routeAlt;
+  document.querySelector('#route-image-link').href = locationMeta.dataset.routeImage;
   const slot = form.elements.timeSlot;
   slot.replaceChildren(new Option('Select a time', ''));
   destination.slots.forEach(time => slot.add(new Option(timeLabel(time), time)));
@@ -355,28 +358,6 @@ const syncMotionToggle = () => { motionToggle.hidden = reducedPhotoMotion.matche
 reducedPhotoMotion.addEventListener('change', syncMotionToggle);
 syncMotionToggle();
 
-// Do not contact Google until the visitor explicitly expands the map.
+// Route illustrations are local assets; Google opens only through the directions link.
 const inlineMap = document.querySelector('#inline-map');
-const inlineMapFrame = document.querySelector('#inline-map-frame');
-function syncInlineMap() {
-  if (!inlineMap.open) { inlineMapFrame.replaceChildren(); return; }
-  const selected = document.querySelector(`[data-location-meta="${locationField.value}"]`);
-  const source = selected?.dataset.mapEmbed;
-  if (!source) { inlineMapFrame.replaceChildren(); return; }
-  let frame = inlineMapFrame.querySelector('iframe');
-  if (!frame) {
-    frame = document.createElement('iframe');
-    frame.referrerPolicy = 'no-referrer';
-    frame.allowFullscreen = true;
-    inlineMapFrame.append(frame);
-  }
-  frame.title = `Map showing ${selected.dataset.name}`;
-  if (frame.getAttribute('src') !== source) frame.src = source;
-}
-inlineMap.hidden = false;
-inlineMap.addEventListener('toggle', syncInlineMap);
-locationField.addEventListener('change', syncInlineMap);
-dialog.addEventListener('close', () => {
-  inlineMap.open = false;
-  inlineMapFrame.replaceChildren();
-});
+dialog.addEventListener('close', () => { inlineMap.open = false; });
