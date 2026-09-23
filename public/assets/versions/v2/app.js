@@ -13,7 +13,7 @@ let busy = false;
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Nairobi', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const validDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 const dateLabel = value => new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value));
-const timeLabel = value => { const [hours, minutes] = value.split(':'); const hour = Number(hours); return `${hour % 12 || 12}:${minutes} ${hour < 12 ? 'am' : 'pm'} (Africa/Nairobi)`; };
+const timeLabel = value => { const [hours, minutes] = value.split(':'); const hour = Number(hours); return `${hour % 12 || 12}:${minutes} ${hour < 12 ? 'am' : 'pm'}`; };
 function clearErrors() {
   form.querySelectorAll('[aria-invalid]').forEach(input => input.removeAttribute('aria-invalid'));
   form.querySelectorAll('.field-error').forEach(error => { error.textContent = ''; });
@@ -48,8 +48,9 @@ function syncOvernight() {
 function syncDestination() {
   const destination = destinations[locationField.value];
   if (!destination) return;
-  document.querySelector('#destination-map').href = locationField.selectedOptions[0].dataset.mapUrl;
-  document.querySelector('#map-destination-name').textContent = locationField.selectedOptions[0].textContent;
+  const locationMeta = document.querySelector(`[data-location-meta="${locationField.value}"]`);
+  document.querySelector('#destination-map').href = locationMeta.dataset.mapUrl;
+  document.querySelector('#map-destination-name').textContent = locationMeta.dataset.name;
   const slot = form.elements.timeSlot;
   slot.replaceChildren(new Option('Select a time', ''));
   destination.slots.forEach(time => slot.add(new Option(timeLabel(time), time)));
@@ -359,7 +360,7 @@ const inlineMap = document.querySelector('#inline-map');
 const inlineMapFrame = document.querySelector('#inline-map-frame');
 function syncInlineMap() {
   if (!inlineMap.open) { inlineMapFrame.replaceChildren(); return; }
-  const selected = locationField.selectedOptions[0];
+  const selected = document.querySelector(`[data-location-meta="${locationField.value}"]`);
   const source = selected?.dataset.mapEmbed;
   if (!source) { inlineMapFrame.replaceChildren(); return; }
   let frame = inlineMapFrame.querySelector('iframe');
@@ -369,7 +370,7 @@ function syncInlineMap() {
     frame.allowFullscreen = true;
     inlineMapFrame.append(frame);
   }
-  frame.title = `Map showing ${selected.textContent}`;
+  frame.title = `Map showing ${selected.dataset.name}`;
   if (frame.getAttribute('src') !== source) frame.src = source;
 }
 inlineMap.hidden = false;
