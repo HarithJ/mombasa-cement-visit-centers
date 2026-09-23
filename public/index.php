@@ -137,7 +137,7 @@ $destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fie
 <dialog id="booking-dialog" aria-labelledby="<?= $confirmation ? 'confirmation-title' : 'booking-title' ?>" <?= $openForm || $confirmation ? 'open' : '' ?>>
     <div class="dialog-toolbar"><span class="itinerary-label">YOUR NEXT ADVENTURE <span>/ VISIT NYUMBA</span></span><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
     <div class="dialog-shell">
-        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">THE DESTINATION</p><h2 id="aside-destination">Sahajanand Special School</h2><p>Something different<br>to look forward to.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
+        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">THE DESTINATION</p><h2 id="aside-destination"><?= e($destinations[$confirmation['destination'] ?? $input['location'] ?? 'sahajanand']['name'] ?? $destinations['sahajanand']['name']) ?></h2><p>Something different<br>to look forward to.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
         <div class="booking-main">
             <div id="form-view" <?= $confirmation ? 'hidden' : '' ?>>
                 <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">Make it a date.</h2><p class="dialog-subtitle">Your people. Your place. Your next day out.</p>
