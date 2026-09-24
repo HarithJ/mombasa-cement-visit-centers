@@ -58,7 +58,7 @@ final class BookingStore {
             $where[] = '(instr(lower(reference), lower(?)) > 0 OR instr(lower(full_name), lower(?)) > 0)';
             $params[] = $filters['q']; $params[] = $filters['q'];
         }
-        $query = $this->db->prepare('SELECT id, reference, full_name, destination, visit_date, booked_time, attendees, EXISTS(SELECT 1 FROM feedback_responses WHERE booking_id = bookings.id) AS has_feedback FROM bookings'.($where ? ' WHERE '.implode(' AND ', $where) : '').' ORDER BY visit_date DESC, id DESC LIMIT 26 OFFSET ?');
+        $query = $this->db->prepare('SELECT id, reference, full_name, destination, visit_date, booked_time, attendees, EXISTS(SELECT 1 FROM feedback_responses WHERE booking_id = bookings.id) AS has_feedback, (SELECT attendance FROM feedback_responses WHERE booking_id = bookings.id) AS feedback_attendance FROM bookings'.($where ? ' WHERE '.implode(' AND ', $where) : '').' ORDER BY visit_date DESC, id DESC LIMIT 26 OFFSET ?');
         foreach ($params as $index => $value) $query->bindValue($index + 1, $value);
         $query->bindValue(count($params) + 1, ($page - 1) * 25, PDO::PARAM_INT);
         $query->execute();
