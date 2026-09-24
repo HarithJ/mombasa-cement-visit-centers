@@ -167,13 +167,18 @@ try {
   await page.goto('http://127.0.0.1:8091/');
   await page.locator('[data-book="sahajanand"]').focus(); await page.keyboard.press('Enter');
   assert.equal(await page.locator('#full-name').evaluate(el => el === document.activeElement), true);
-  await page.locator('#location').selectOption('feeding');
+  assert.equal(await page.locator('#location').getAttribute('type'), 'hidden');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('[data-book="sahajanand"]').evaluate(el => el === document.activeElement), true);
+  await page.locator('#booking-dialog').waitFor({state:'hidden'});
+  await page.locator('[data-book="feeding"]').click();
+  assert.equal(await page.locator('#location').inputValue(), 'feeding');
   assert.match(await page.locator('#time-slot').innerText(), /11:00/);
   assert.doesNotMatch(await page.locator('#time-slot').innerText(), /9:00/);
   await page.locator('.close-button').focus(); await page.keyboard.press('Tab');
   assert.equal(await page.evaluate(() => document.activeElement.closest('dialog')?.id), 'booking-dialog');
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('[data-book="sahajanand"]').evaluate(el => el === document.activeElement), true);
+  assert.equal(await page.locator('[data-book="feeding"]').evaluate(el => el === document.activeElement), true);
   for (const id of ['sahajanand', 'galana', 'feeding']) {
     await page.locator(`[data-destination="${id}"] .photo-toggle`).click();
     await page.locator('#photo-lightbox').waitFor({state:'visible'});
@@ -199,7 +204,7 @@ try {
   assert.equal(await touchPage.locator('#location').inputValue(), 'galana');
   await touchContext.close();
   assert.deepEqual(runtimeErrors, []);
-  console.log('PASS keyboard focus, dropdown slots, galleries, reduced motion and real touch controls');
+  console.log('PASS keyboard focus, destination-specific slots, galleries, reduced motion and real touch controls');
 } finally {
   await browser?.close(); await stop();
   await rm(storage, { recursive: true, force: true });
