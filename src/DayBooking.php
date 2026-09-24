@@ -6,7 +6,7 @@ final class DayBooking {
         foreach (['fullName', 'email', 'phone', 'location', 'visitDate', 'timeSlot', 'attendees', 'overnight', 'arrivalDate', 'departureDate', 'overnightGuests'] as $key) $data[$key] = is_string($input[$key] ?? null) ? trim($input[$key]) : '';
         $errors = [];
         if ($data['fullName'] === '' || mb_strlen($data['fullName']) > 120 || preg_match('/[\x00-\x1F\x7F]/u', $data['fullName'])) $errors['fullName'] = 'Enter your full name (up to 120 characters).';
-        if (strlen($data['email']) > 254 || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Enter a valid email address (up to 254 characters).';
+        if ($data['email'] !== '' && (strlen($data['email']) > 254 || !filter_var($data['email'], FILTER_VALIDATE_EMAIL))) $errors['email'] = 'Enter a valid email address (up to 254 characters).';
         $phone = $data['phone'];
         $digits = preg_replace('/\D/', '', $phone);
         if (strlen($phone) > 40 || !preg_match('/^\+?[0-9][0-9 ()-]*$/D', $phone) || strlen($digits) < 7 || strlen($digits) > 15) $errors['phone'] = 'Enter a phone number with 7–15 digits, optionally using +, spaces, parentheses or hyphens.';
