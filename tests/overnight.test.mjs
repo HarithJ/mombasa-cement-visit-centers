@@ -79,7 +79,14 @@ try {
     await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#overnight').check();
     await page.locator('#departure-date').fill('2099-05-03');
     if (destination === 'galana') await page.locator('#overnight').uncheck();
-    else await page.locator('#location').selectOption(destination);
+    else {
+      await page.keyboard.press('Escape');
+      await page.locator(`[data-book="${destination}"]`).click();
+      await page.locator('#full-name').fill('Day Only'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
+      await page.locator('#visit-date').fill('2099-05-01');
+    }
+    assert.equal(await page.locator('#location').inputValue(), destination);
+    assert.equal(await page.locator('#location').getAttribute('type'), 'hidden');
     assert.equal(await page.locator('#overnight-fields').isVisible(), false);
     assert.equal(await page.locator('#arrival-date').inputValue(), '');
     assert.equal(await page.locator('#departure-date').inputValue(), '');
