@@ -24,13 +24,13 @@ try {
     $firstPayload = null; $firstKey = null;
     $failed = $worker->run(function ($payload, $key) use (&$firstPayload, &$firstKey) {
         $firstPayload = $payload; $firstKey = $key;
-        check($payload['to'] === ['jaco@nyumbagri.com', 'pravin@nyumbagri.com'], 'Destination recipients');
+        check($payload['to'] === ['jaco@nyumbagri.com', 'pravin@nyumbagri.com', 'harithjaved@gmail.com'], 'Destination recipients');
         check(str_contains($payload['html'], '&lt;Visitor &amp; Test&gt;'), 'HTML escaping');
         check(str_contains($payload['text'], 'Staying guests: 2'), 'Overnight details');
         throw new RuntimeException('Simulated timeout');
     }, 'bookings@example.com', 1);
     check($failed['retry'] === 1, 'Failed delivery must remain retryable');
-    check($firstPayload['to'] === ['jaco@nyumbagri.com', 'pravin@nyumbagri.com'], 'Recipient routing');
+    check($firstPayload['to'] === ['jaco@nyumbagri.com', 'pravin@nyumbagri.com', 'harithjaved@gmail.com'], 'Recipient routing');
     check(str_contains($firstPayload['html'], '&lt;Visitor &amp; Test&gt;'), 'Escaped visitor name');
     check(str_contains($firstPayload['text'], 'Staying guests: 2'), 'Overnight content');
     check($store->findByToken('test-token')['reference'] === $saved['reference'], 'Failure preserves booking');
@@ -49,7 +49,8 @@ try {
         $store->create($day, $destination);
         $job = $db->query("SELECT payload FROM booking_emails WHERE kind = 'destination' ORDER BY id DESC LIMIT 1")->fetchColumn();
         $payload = json_decode($job, true);
-        check(count($payload['to']) === $count, 'Correct contact count');
+        check(count($payload['to']) === $count + 1, 'Destination contacts plus additional notification recipient');
+        check(in_array('harithjaved@gmail.com', $payload['to'], true), 'Additional notification recipient included');
         check(!str_contains($payload['text'], 'Overnight stay'), 'Day visit content');
     }
     $db->exec('UPDATE booking_emails SET first_attempt_at = '.(time()-86400)." WHERE status = 'pending'");
