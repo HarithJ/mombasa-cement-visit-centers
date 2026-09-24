@@ -48,3 +48,6 @@ button{display:flex;align-items:center;justify-content:space-between;width:100%;
 }
 @media(max-width:400px){.scene{height:225px;min-height:225px}.scene-title h1{font-size:44px}.house-wrap{width:56%;right:3%;bottom:8px}}
 @media(max-width:850px){.login-layout{grid-template-rows:max-content 1fr}}
+/* Keep the full house inside the compact tablet banner. */
+@media(max-width:850px){.house-wrap{max-width:330px}}
+@media(max-width:400px){.scene-title h1{font-size:clamp(36px,10vw,44px)}}
