@@ -9,7 +9,7 @@ try {
     $store = new BookingStore($path);
     $booking = ['email' => 'visitor@example.com', 'fullName' => '<Visitor & Test>', 'phone' => '+254712345678', 'location' => 'galana', 'visitDate' => '2099-05-01', 'timeSlot' => '11:00', 'attendees' => '3', 'overnight' => 'on', 'arrivalDate' => '2099-05-01', 'departureDate' => '2099-05-02', 'overnightGuests' => '2'];
     $schedule = require __DIR__.'/../config/destinations.php';
-    foreach (['', 'invalid', 'a@b', "a@example.com\r\nBcc: b@example.com", str_repeat('a', 255).'@example.com'] as $invalid) {
+    foreach (['invalid', 'a@b', "a@example.com\r\nBcc: b@example.com", str_repeat('a', 255).'@example.com'] as $invalid) {
         [, $errors] = DayBooking::validate(array_merge($booking, ['email' => $invalid]), $schedule);
         check(isset($errors['email']), 'Invalid email rejected');
     }
@@ -64,6 +64,22 @@ try {
     try { $store->create($booking, 'rollback'); throw new RuntimeException('Expected queue storage failure'); }
     catch (PDOException $expected) {}
     check($store->findByToken('rollback') === null, 'Booking and notification must commit atomically');
+    $db->exec('DROP TRIGGER fail_queue');
+    putenv('FEEDBACK_EMAIL_ENABLED=1');
+    putenv('BOOKING_SITE_URL=https://example.com');
+    foreach (['', '   ', null] as $optional) {
+        $input = array_merge($booking, ['email' => $optional]);
+        if ($optional === null) unset($input['email']);
+        [$withoutEmail, $errors] = DayBooking::validate($input, $schedule);
+        check(!$errors, 'Blank, whitespace or omitted email is valid');
+        $record = $store->create($withoutEmail, 'optional-'.bin2hex(random_bytes(4)));
+        check($record['email'] === null, 'Missing email stored as null');
+        $query = $db->prepare('SELECT kind, payload FROM booking_emails WHERE booking_id = ?');
+        $query->execute([$record['id']]); $jobs = $query->fetchAll(PDO::FETCH_ASSOC);
+        check(count($jobs) === 1 && $jobs[0]['kind'] === 'destination', 'Only destination notification queued without email');
+        check(str_contains(json_decode($jobs[0]['payload'], true)['text'], 'Email: Not provided'), 'Destination message explains missing email');
+        check((int)$db->query('SELECT COUNT(*) FROM feedback_invitations WHERE booking_id = '.(int)$record['id'])->fetchColumn() === 0, 'No feedback invitation without email');
+    }
     echo "PASS email queue: routing, escaping, overnight, replay, failure isolation, retries, immutable payload, expiry and disabled mode\n";
 } finally {
     unset($db, $store, $worker);
