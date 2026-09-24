@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+if (preg_match('#^/admin(?:/|$)#', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '')) { require __DIR__.'/../src/admin-web.php'; exit; }
+
 // Keep routing explicit: request paths must never become filesystem paths.
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $routes = ['/' => 'v1', '/index.php' => 'v1'];
