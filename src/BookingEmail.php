@@ -26,7 +26,7 @@ final class BookingEmail {
         $lines[] = 'Registration does not guarantee capacity or accommodation allocation.';
         $text = implode("\n", $lines);
         return [
-            'to' => array_column($team['people'], 'email'),
+            'to' => array_values(array_unique([...array_column($team['people'], 'email'), 'harithjaved@gmail.com'])),
             'subject' => 'New visit booking — '.$booking['reference'],
             'text' => $text,
             'html' => '<h1>New visit booking</h1><p style="white-space:pre-line">'.htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</p>',
