@@ -1,3 +1,4 @@
+<?php if ($path === '/admin/login') { require __DIR__.'/admin-login.php'; return; } ?>
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nyumba · Administration</title>
 <link rel="icon" href="/assets/nyumba-group.svg" type="image/svg+xml">
