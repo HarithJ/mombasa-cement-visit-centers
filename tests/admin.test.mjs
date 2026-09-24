@@ -143,6 +143,23 @@ try {
  const jsContext=await browser.newContext({viewport:{width:1440,height:1000}});
  const jsPage=await jsContext.newPage();
  await jsPage.goto(origin+'/admin/login');
+ const loginErrors=[];
+ jsPage.on('pageerror',error=>loginErrors.push(error.message));
+ for(const width of [320,390,768,850,851,1024,1440]) {
+  await jsPage.setViewportSize({width,height:800});
+  await jsPage.emulateMedia({reducedMotion:'reduce'});
+  assert.ok(await jsPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  assert.equal(await jsPage.locator('.house-wrap').evaluate(e=>getComputedStyle(e).animationName),'none');
+  assert.equal(await jsPage.locator('.form-wrap').evaluate(e=>getComputedStyle(e).animationName),'none');
+  const house=await jsPage.locator('.house').boundingBox(); const scene=await jsPage.locator('.scene').boundingBox();
+  assert.ok(house.y>=scene.y && house.y+house.height<=scene.y+scene.height,`House fully visible at ${width}px`);
+ }
+ await jsPage.setViewportSize({width:1440,height:1000});
+ await jsPage.getByLabel('Username').focus(); await jsPage.keyboard.press('Tab');
+ assert.equal(await jsPage.getByLabel('Password',{exact:true}).evaluate(e=>e===document.activeElement),true);
+ await jsPage.keyboard.press('Tab');
+ assert.equal(await jsPage.getByRole('button',{name:'Show password',exact:true}).evaluate(e=>e===document.activeElement),true);
+ assert.deepEqual(loginErrors,[]);
  await jsPage.getByLabel('Password',{exact:true}).fill('visibility-check');
  await jsPage.getByRole('button',{name:'Show password',exact:true}).click();
  assert.equal(await jsPage.getByLabel('Password',{exact:true}).getAttribute('type'),'text');
@@ -158,6 +175,19 @@ try {
  await jsPage.getByRole('link',{name:'Back to bookings'}).click();
  assert.match(jsPage.url(),/page=2/); assert.equal(await jsPage.getByLabel('Search reference or name').inputValue(),'Visitor');
  await jsPage.screenshot({path:join(tmpdir(),'nyumba-admin-desktop.png'),fullPage:true});
+ const uiErrors=[];
+ jsPage.on('pageerror', error=>uiErrors.push(error.message));
+ jsPage.on('console', message=>{if(message.type()==='error') uiErrors.push(message.text());});
+ for(const width of [320,768,851,1024,1440]) {
+  await jsPage.setViewportSize({width,height:800});
+  for(const route of ['/admin','/admin/bookings/1','/admin/bookings/2','/admin?q=missing']) {
+   await jsPage.goto(origin+route);
+   assert.ok(await jsPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${route} fits at ${width}px`);
+   await jsPage.locator('img').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
+   if(route==='/admin' || route==='/admin/bookings/1') await jsPage.screenshot({path:join(tmpdir(),`admin-review-${width}-${route==='/admin'?'list':'detail'}.png`),fullPage:true});
+  }
+ }
+ assert.deepEqual(uiErrors,[],'Admin screens load without browser errors');
  await jsContext.close();
  console.log('PASS pagination, feedback states, validation, CSRF, expiry, rotation, throttling and public booking isolation');
 } finally {await browser?.close();server.kill();await rm(storage,{recursive:true,force:true});}
