@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+if (preg_match('#^/admin(?:/|$)#', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '')) { require __DIR__.'/../src/admin-web.php'; exit; }
 $uiVersion = 'v1';
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/feedback') { require __DIR__.'/../src/feedback-web.php'; exit; }
 require __DIR__.'/../src/web.php';

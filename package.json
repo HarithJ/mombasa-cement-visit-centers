@@ -9,7 +9,8 @@
     "test:feedback": "node tests/feedback.test.mjs",
     "test:feedback-worker": "php tests/feedback-worker.test.php",
     "test:email": "php tests/email.test.php",
-    "test": "node tests/all.test.mjs"
+    "test": "node tests/all.test.mjs",
+    "test:admin": "node tests/admin.test.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"
