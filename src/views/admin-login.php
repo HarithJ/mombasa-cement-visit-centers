@@ -6,6 +6,7 @@
     <title>Sign in · Nyumba Administration</title>
     <link rel="icon" href="/assets/nyumba-group.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/assets/admin/login.css">
+    <script src="/assets/admin/login.js" defer></script>
 </head>
 <body>
     <main class="login-layout">
@@ -27,7 +28,10 @@
                     <label for="admin-username">Username</label>
                     <input id="admin-username" name="username" autocomplete="username" required maxlength="200" autocapitalize="none" spellcheck="false" value="<?=ae(is_string($_POST['username'] ?? null) ? $_POST['username'] : '')?>">
                     <label for="admin-password">Password</label>
-                    <input id="admin-password" type="password" name="password" autocomplete="current-password" required>
+                    <div class="password-field">
+                        <input id="admin-password" type="password" name="password" autocomplete="current-password" required>
+                        <button class="password-toggle" type="button" aria-controls="admin-password" aria-label="Show password" hidden>Show</button>
+                    </div>
                     <button type="submit">Sign in <span aria-hidden="true">↗</span></button>
                 </form>
                 <p class="access-note">For authorised team members.<br>Need access? Contact your site administrator.</p>
