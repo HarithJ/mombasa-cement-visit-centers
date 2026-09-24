@@ -87,7 +87,7 @@ function validate() {
   const name = form.elements.fullName.value.trim();
   if (!name) error('fullName', 'Please enter your full name.');
   const email = form.elements.email; email.value = email.value.trim();
-  if (!email.value || email.value.length > 254 || !email.validity.valid || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) error('email', 'Enter a valid email address.');
+  if (email.value && (email.value.length > 254 || !email.validity.valid || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value))) error('email', 'Enter a valid email address.');
   const phone = form.elements.phone.value.trim(); const digits = phone.replace(/[\s()+-]/g, '');
   if (!/^[+\d][\d\s()+-]*$/.test(phone) || !/^\d{7,15}$/.test(digits)) error('phone', 'Enter a valid phone number (7–15 digits).');
   if (!destinations[locationField.value]) error('location', 'Choose one of the three destinations.');

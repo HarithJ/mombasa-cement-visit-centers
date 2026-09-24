@@ -13,7 +13,7 @@ final class BookingEmail {
             'Destination: '.$team['name'],
             'Visitor: '.$booking['full_name'],
             'Phone: '.$booking['phone'],
-            'Email: '.$booking['email'],
+            'Email: '.($booking['email'] ?: 'Not provided'),
             'Visit date: '.$booking['visit_date'],
             'Time: '.$booking['booked_time'].' (Africa/Nairobi)',
             'Attendees: '.$booking['attendees'],
