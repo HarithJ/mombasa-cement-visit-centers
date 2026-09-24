@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:admin": "node tests/admin.test.mjs",
     "test:ui": "node tests/ui.test.mjs",
     "test:bookings": "node tests/bookings.test.mjs",
     "test:overnight": "node tests/overnight.test.mjs",
