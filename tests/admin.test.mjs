@@ -40,6 +40,12 @@ try {
  await page.getByRole('button',{name:'Sign in'}).click();
  assert.notEqual((await context.cookies()).find(c=>c.name==='nyumba_admin')?.value,preLoginCookie);
  assert.equal(await page.getByRole('heading',{name:'Bookings',exact:true}).count(),1);
+ await page.getByRole('link',{name:'Today',exact:true}).click();
+ assert.match(await page.locator('main').innerText(),/No bookings found/);
+ assert.equal(await page.getByLabel('From date').inputValue(),await page.getByLabel('To date').inputValue());
+ await page.getByRole('link',{name:'Next 7 days',exact:true}).click();
+ assert.equal((Date.parse(await page.getByLabel('To date').inputValue())-Date.parse(await page.getByLabel('From date').inputValue()))/86400000,6);
+ await page.getByRole('link',{name:'All visits',exact:true}).click();
  await page.getByLabel('Search reference or name').fill('Special');
  await page.getByLabel('Destination',{exact:true}).selectOption('galana');
  await page.getByRole('button',{name:'Apply filters'}).click();
@@ -47,6 +53,8 @@ try {
  assert.equal(await page.locator('tbody tr').count(),1);
  await page.locator('tbody a').click();
  assert.match(await page.locator('main').innerText(),/visitor@example.com/);
+ assert.equal(await page.locator('a[href="mailto:visitor@example.com"]').count(),1);
+ await page.locator('.detail-banner img').evaluate(i=>i.decode());
  assert.match(await page.locator('main').innerText(),/5 \/ 5/);
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile booking reference must wrap');
  await page.screenshot({path:join(tmpdir(),'nyumba-admin-mobile.png'),fullPage:true});
@@ -129,6 +137,9 @@ try {
  await page.locator('#visit-date').fill('2099-05-02'); await page.locator('#time-slot').selectOption('11:00'); await page.locator('#attendees').fill('2');
  await page.locator('[type=submit]').click(); await page.waitForURL(/confirmation=1/);
  await page.goto(origin+'/admin?q=Public'); assert.match(await page.locator('tbody').innerText(),/Public Visitor/);
+ await page.setViewportSize({width:320,height:844});
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile booking cards fit without horizontal scrolling');
+ await page.screenshot({path:join(tmpdir(),'nyumba-admin-mobile-list.png'),fullPage:true});
  const jsContext=await browser.newContext({viewport:{width:1440,height:1000}});
  const jsPage=await jsContext.newPage();
  await jsPage.goto(origin+'/admin/login');
