@@ -130,7 +130,16 @@ try {
  await page.locator('[type=submit]').click(); await page.waitForURL(/confirmation=1/);
  await page.goto(origin+'/admin?q=Public'); assert.match(await page.locator('tbody').innerText(),/Public Visitor/);
  const jsContext=await browser.newContext({viewport:{width:1440,height:1000}});
- const jsPage=await jsContext.newPage(); await login(jsPage);
+ const jsPage=await jsContext.newPage();
+ await jsPage.goto(origin+'/admin/login');
+ await jsPage.getByLabel('Password',{exact:true}).fill('visibility-check');
+ await jsPage.getByRole('button',{name:'Show password',exact:true}).click();
+ assert.equal(await jsPage.getByLabel('Password',{exact:true}).getAttribute('type'),'text');
+ assert.equal(await jsPage.getByLabel('Password',{exact:true}).inputValue(),'visibility-check');
+ await jsPage.getByRole('button',{name:'Hide password',exact:true}).click();
+ assert.equal(await jsPage.getByLabel('Password',{exact:true}).getAttribute('type'),'password');
+ assert.match(jsPage.url(),/login$/);
+ await login(jsPage);
  await jsPage.getByLabel('Search reference or name').fill('Visitor');
  await jsPage.getByRole('button',{name:'Apply filters'}).click();
  await jsPage.getByRole('link',{name:'Next',exact:true}).click();
