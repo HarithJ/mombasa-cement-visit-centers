@@ -4,13 +4,17 @@
 
 **Blocked by:** 01 — Secure login and bookings list.
 
-**Status:** claimed
+**Status:** resolved
 
-- [ ] Add reference/name search, destination selection, and inclusive visit-date range filters to the protected bookings list; filters can be combined and cleared.
-- [ ] Date filtering uses the scheduled visit date, which is the arrival date for an overnight booking, rather than every day of the stay.
-- [ ] Preserve filters across pagination while maintaining stable ordering and bounded pages. Fetch only the requested page through parameterized queries.
-- [ ] Validate destination and date inputs server-side, including reversed date ranges, and show useful errors without silently widening the query.
-- [ ] Show clear no-results messaging and a way to reset the filters. Retain entered valid values after validation errors.
-- [ ] Filtering and pagination remain usable without JavaScript, on mobile, and with keyboard navigation and accessible labels.
-- [ ] Exercise the real authenticated PHP interface with isolated data covering all destinations, exact date boundaries, overnight arrivals, combined filters, multiple pages, empty results, invalid inputs, and potentially hostile search values.
-- [ ] Verify unauthenticated filtered requests expose no records and searching does not alter bookings, feedback, or mail queues.
+- [x] Add reference/name search, destination selection, and inclusive visit-date range filters to the protected bookings list; filters can be combined and cleared.
+- [x] Date filtering uses the scheduled visit date, which is the arrival date for an overnight booking, rather than every day of the stay.
+- [x] Preserve filters across pagination while maintaining stable ordering and bounded pages. Fetch only the requested page through parameterized queries.
+- [x] Validate destination and date inputs server-side, including reversed date ranges, and show useful errors without silently widening the query.
+- [x] Show clear no-results messaging and a way to reset the filters. Retain entered valid values after validation errors.
+- [x] Filtering and pagination remain usable without JavaScript, on mobile, and with keyboard navigation and accessible labels.
+- [x] Exercise the real authenticated PHP interface with isolated data covering all destinations, exact date boundaries, overnight arrivals, combined filters, multiple pages, empty results, invalid inputs, and potentially hostile search values.
+- [x] Verify unauthenticated filtered requests expose no records and searching does not alter bookings, feedback, or mail queues.
+
+## Answer
+
+Implemented and verified through the real PHP browser integration suite with isolated storage. Authentication, filter and detail behavior, feedback states, and relevant security cases pass. Rollout across maintained branches is tracked in ticket 04.

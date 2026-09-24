@@ -8,8 +8,16 @@ const storage=await mkdtemp(join(tmpdir(),'nyumba-admin-'));
 const hash=spawnSync('php',['-r',"echo password_hash('test-password', PASSWORD_DEFAULT);"],{encoding:'utf8'}).stdout;
 const seed=spawnSync('php',['-r', `require 'src/BookingStore.php'; $s=new BookingStore($argv[1]); for($i=0;$i<27;$i++) $s->create(['fullName'=>$i===0?'Special Visitor':'Visitor '.$i,'phone'=>'+254712345678','location'=>$i===0?'galana':'sahajanand','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>3,'overnight'=>'','arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null,'email'=>'visitor@example.com'], 'seed-'.$i);`,join(storage,'bookings.sqlite')],{encoding:'utf8',env:{...process.env,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0'}});
 assert.equal(seed.status,0,seed.stderr);
-const fixture=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $db->exec("UPDATE bookings SET overnight=1, arrival_date='2099-05-01', departure_date='2099-05-03', overnight_guests=2 WHERE id=1"); $db->exec("UPDATE bookings SET email=NULL WHERE id=2"); $q=$db->prepare('INSERT INTO feedback_responses VALUES (?,?,?,?,?,?,?)'); $q->execute([1,'attended',5,'The farm','More signs','<script>alert(1)</script>','2026-09-24T09:00:00Z']); $q->execute([2,'not_attended',null,'','','','2026-09-24T09:00:00Z']);`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
+const fixture=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $db->exec("UPDATE bookings SET reference='NY-AAAAAAAAAAAAAAAAAAAAAAA' || char(64+id)"); $db->exec("UPDATE bookings SET overnight=1, arrival_date='2099-05-01', departure_date='2099-05-03', overnight_guests=2 WHERE id=1"); $db->exec("UPDATE bookings SET email=NULL WHERE id=2"); $q=$db->prepare('INSERT INTO feedback_responses VALUES (?,?,?,?,?,?,?)'); $q->execute([1,'attended',5,'The farm','More signs','<script>alert(1)</script>','2026-09-24T09:00:00Z']); $q->execute([2,'not_attended',null,'','','','2026-09-24T09:00:00Z']);`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
 assert.equal(fixture.status,0,fixture.stderr);
+// Reproduce a populated pre-admin schema, including private invitation and queue data.
+const legacy=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $db->exec("INSERT INTO feedback_invitations VALUES (1,'fixture-token-hash','v1')"); $db->exec("INSERT INTO booking_emails (booking_id,payload,idempotency_key) VALUES (1,'{}','fixture-email')"); $db->exec('DROP TABLE admin_login_attempts'); $db->exec("DELETE FROM schema_migrations WHERE version='006-admin-throttle.sql'");`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
+assert.equal(legacy.status,0,legacy.stderr);
+function domainSnapshot() {
+ const result=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $out=[]; foreach(['bookings','feedback_responses','feedback_invitations','booking_emails'] as $table) $out[$table]=$db->query('SELECT * FROM '.$table.' ORDER BY 1')->fetchAll(PDO::FETCH_ASSOC); echo json_encode($out);`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr); return JSON.parse(result.stdout);
+}
+const beforeAdmin=domainSnapshot();
 const clockFile=join(storage,'clock');
 const hashFile=join(storage,'hash');
 await writeFile(clockFile,'1800000000'); await writeFile(hashFile,hash);
@@ -40,6 +48,8 @@ try {
  await page.locator('tbody a').click();
  assert.match(await page.locator('main').innerText(),/visitor@example.com/);
  assert.match(await page.locator('main').innerText(),/5 \/ 5/);
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile booking reference must wrap');
+ await page.screenshot({path:join(tmpdir(),'nyumba-admin-mobile.png'),fullPage:true});
  assert.match(await page.locator('main').innerText(),/3 May 2099/);
  assert.match(await page.locator('main').innerText(),/<script>alert\(1\)<\/script>/);
  assert.equal(await page.locator('main script').count(),0);
@@ -70,6 +80,8 @@ try {
  assert.equal((await page.goto(origin+'/admin?destination=unknown')).status(),400);
  await page.goto(origin+'/admin?from=2099-05-01&to=2099-05-01&q=Special');
  assert.equal(await page.locator('tbody tr').count(),1);
+ await page.goto(origin+'/admin?q=0');
+ assert.equal(await page.locator('tbody tr').count(),2);
  await page.goto(origin+'/admin?q=not-found');
  assert.match(await page.locator('main').innerText(),/No bookings found/);
  const protectedResponse=await page.goto(origin+'/admin');
@@ -110,6 +122,7 @@ try {
  const outsidePage=await outsider.newPage();
  await outsidePage.goto(origin+'/admin/bookings/1'); assert.match(outsidePage.url(),/login$/);
  await outsider.close();
+ assert.deepEqual(domainSnapshot(),beforeAdmin,'Populated migration and admin navigation preserve all domain records');
  // A public booking remains separate from the authenticated admin session.
  await page.goto(origin+'/?book=feeding');
  await page.locator('#full-name').fill('Public Visitor'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('public@example.com');
@@ -124,7 +137,7 @@ try {
  await jsPage.locator('tbody a').first().click();
  await jsPage.getByRole('link',{name:'Back to bookings'}).click();
  assert.match(jsPage.url(),/page=2/); assert.equal(await jsPage.getByLabel('Search reference or name').inputValue(),'Visitor');
- await jsPage.screenshot({path:join(storage,'admin-desktop.png'),fullPage:true});
+ await jsPage.screenshot({path:join(tmpdir(),'nyumba-admin-desktop.png'),fullPage:true});
  await jsContext.close();
  console.log('PASS pagination, feedback states, validation, CSRF, expiry, rotation, throttling and public booking isolation');
 } finally {await browser?.close();server.kill();await rm(storage,{recursive:true,force:true});}

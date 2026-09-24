@@ -54,7 +54,7 @@ final class BookingStore {
         foreach (['destination' => 'destination = ?', 'from' => 'visit_date >= ?', 'to' => 'visit_date <= ?'] as $key => $clause) {
             if (!empty($filters[$key])) { $where[] = $clause; $params[] = $filters[$key]; }
         }
-        if (!empty($filters['q'])) {
+        if (($filters['q'] ?? '') !== '') {
             $where[] = '(instr(lower(reference), lower(?)) > 0 OR instr(lower(full_name), lower(?)) > 0)';
             $params[] = $filters['q']; $params[] = $filters['q'];
         }
