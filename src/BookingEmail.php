@@ -17,6 +17,7 @@ final class BookingEmail {
             'Visit date: '.$booking['visit_date'],
             'Time: '.$booking['booked_time'].' (Africa/Nairobi)',
             'Attendees: '.$booking['attendees'],
+            'Transport: '.(!empty($booking['transport_requested']) ? 'Requested (subject to availability)' : 'Not requested'),
         ];
         if ($booking['overnight']) {
             $lines[] = 'Overnight stay requested: '.$booking['arrival_date'].' to '.$booking['departure_date'];
