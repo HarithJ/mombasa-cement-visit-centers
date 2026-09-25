@@ -62,6 +62,7 @@ try{
    await page.locator('#visit-date').fill('2099-05-01');
    await page.locator('#time-slot').selectOption('09:00');
    await page.locator('#attendees').fill('3');
+   await page.locator('#transport-requested').check();
    await page.locator('#overnight').check();
    await page.locator('#departure-date').fill('2099-05-02');
    await page.locator('#overnight-guests').fill('2');
@@ -70,6 +71,7 @@ try{
    await page.locator('#confirmation-view').waitFor({state:'visible'});
    assert.match(await page.locator('#confirmation-view').innerText(),/No booking has been made/);
    assert.match(await page.locator('#confirmation-details').innerText(),/Overnight stay/);
+   assert.match(await page.locator('#confirmation-details').innerText(),/Requested \(subject to availability\)/);
    assert.equal(await page.locator('.reference-label').count(),0);
    assert.equal(await page.locator('[data-contact-destination]:visible').getAttribute('data-contact-destination'),'galana');
    assert.equal(await page.locator('[data-contact-destination=galana] a[href="mailto:jaco@nyumbagri.com"]').count(),1);

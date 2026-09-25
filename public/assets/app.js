@@ -62,6 +62,7 @@ function showForm() {
 }
 function openBooking(id, button) {
   opener = button; attempt++; form.reset();  clearErrors(); setBusy(false); showForm();
+  form.elements.transportRequested.checked = false;
   locationField.value = id;
   dateField.min = today(); form.elements.departureDate.min = today();
   syncDestination(); dialog.showModal(); document.body.style.overflow = 'hidden';
@@ -101,7 +102,7 @@ function validate() {
   return !errors.length;
 }
 function showConfirmation(data) {
-  const rows = [ ['Name', data.fullName.trim()], ['Destination', destinations[data.location].name], ['Visit date', dateLabel(data.visitDate)], ['Time', timeLabel(data.timeSlot)], ['Attendees', data.attendees], ['Phone', `••• ••• ${data.phone.replace(/\D/g, '').slice(-3)}`] ];
+  const rows = [ ['Name', data.fullName.trim()], ['Destination', destinations[data.location].name], ['Visit date', dateLabel(data.visitDate)], ['Time', timeLabel(data.timeSlot)], ['Attendees', data.attendees], ['Transport', data.transportRequested === 'on' ? 'Requested (subject to availability)' : 'Not requested'], ['Phone', `••• ••• ${data.phone.replace(/\D/g, '').slice(-3)}`] ];
   if (data.overnight === 'on' && data.location === 'galana') rows.push(['Overnight stay', `${dateLabel(data.arrivalDate)} – ${dateLabel(data.departureDate)}`], ['Staying guests', data.overnightGuests]);
   const list = document.querySelector('#confirmation-details'); list.replaceChildren();
   rows.forEach(([label, value]) => { const row = document.createElement('div'); const dt = document.createElement('dt'); const dd = document.createElement('dd'); dt.textContent = label; dd.textContent = value; row.append(dt, dd); list.append(row); });
@@ -118,14 +119,15 @@ if (serverState.openForm || serverState.confirmation) {
   dialog.removeAttribute('open');
   locationField.value = serverState.input.location || serverState.confirmation?.destination || 'sahajanand';
   overnight.checked = serverState.input.overnight === 'on';
+  form.elements.transportRequested.checked = serverState.input.transportRequested === 'on';
   syncDestination();
-  for (const [key, value] of Object.entries(serverState.input)) if (form.elements[key] && key !== 'overnight') form.elements[key].value = value;
+  for (const [key, value] of Object.entries(serverState.input)) if (form.elements[key] && key !== 'overnight' && key !== 'transportRequested') form.elements[key].value = value;
   // Arrival is derived, so stale/tampered values never trap correction in a readonly field.
   syncOvernight();
   dialog.showModal(); document.body.style.overflow = 'hidden';
   if (serverState.confirmation) {
     const booking = serverState.confirmation;
-    showConfirmation({ fullName: booking.full_name, location: booking.destination, visitDate: booking.visit_date, timeSlot: booking.booked_time, attendees: String(booking.attendees), phone: booking.phone, overnight: booking.overnight ? 'on' : '', arrivalDate: booking.arrival_date, departureDate: booking.departure_date, overnightGuests: String(booking.overnight_guests) });
+    showConfirmation({ fullName: booking.full_name, location: booking.destination, visitDate: booking.visit_date, timeSlot: booking.booked_time, attendees: String(booking.attendees), transportRequested: booking.transport_requested ? 'on' : '', phone: booking.phone, overnight: booking.overnight ? 'on' : '', arrivalDate: booking.arrival_date, departureDate: booking.departure_date, overnightGuests: String(booking.overnight_guests) });
   } else {
     const summary = document.querySelector('#error-summary'); summary.hidden = false;
     summary.textContent = Object.values(serverState.errors).join(' ');
