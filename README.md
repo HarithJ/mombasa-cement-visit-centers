@@ -54,3 +54,5 @@ Resend destination notifications are available in the PHP backend. See [configur
 ## Post-visit feedback
 
 Optional next-morning feedback invitations and private forms are available for day and Galana overnight bookings, regardless of attendance. See [feedback configuration and operations](docs/feedback.md). Sending is disabled by default.
+
+Visitors can optionally request company-arranged transport with the unchecked booking checkbox. The saved choice appears in confirmations, admin details, and booking emails. Transport is subject to availability and requires team confirmation; this does not trigger SMS. Existing bookings default to transport not requested.

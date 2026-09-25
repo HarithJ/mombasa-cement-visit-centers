@@ -30,8 +30,8 @@ final class BookingStore {
     public function create(array $booking, string $token, string $version = 'v1', string $basePath = '/v1'): array {
         $this->db->beginTransaction();
         try {
-            $query = $this->db->prepare('INSERT INTO bookings(reference, submission_token, full_name, phone, destination, visit_date, booked_time, attendees, status, created_at, overnight, arrival_date, departure_date, overnight_guests, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(submission_token) DO NOTHING');
-            $query->execute(['NY-'.strtoupper(bin2hex(random_bytes(12))), $token, $booking['fullName'], $booking['phone'], $booking['location'], $booking['visitDate'], $booking['timeSlot'], $booking['attendees'], 'automatically_confirmed', gmdate('Y-m-d\TH:i:s\Z'), $booking['overnight'] === 'on' ? 1 : 0, $booking['arrivalDate'], $booking['departureDate'], $booking['overnightGuests'], $booking['email'] === '' ? null : $booking['email']]);
+            $query = $this->db->prepare('INSERT INTO bookings(reference, submission_token, full_name, phone, destination, visit_date, booked_time, attendees, status, created_at, overnight, arrival_date, departure_date, overnight_guests, email, transport_requested) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(submission_token) DO NOTHING');
+            $query->execute(['NY-'.strtoupper(bin2hex(random_bytes(12))), $token, $booking['fullName'], $booking['phone'], $booking['location'], $booking['visitDate'], $booking['timeSlot'], $booking['attendees'], 'automatically_confirmed', gmdate('Y-m-d\TH:i:s\Z'), $booking['overnight'] === 'on' ? 1 : 0, $booking['arrivalDate'], $booking['departureDate'], $booking['overnightGuests'], $booking['email'] === '' ? null : $booking['email'], ($booking['transportRequested'] ?? '') === 'on' ? 1 : 0]);
             $created = $query->rowCount() === 1;
             $saved = $this->findByToken($token);
             if (!$saved) throw new RuntimeException('Booking not saved');
@@ -65,7 +65,7 @@ final class BookingStore {
         return $query->fetchAll();
     }
     public function adminBooking(int $id): ?array {
-        $query = $this->db->prepare('SELECT b.reference, b.full_name, b.phone, b.email, b.destination, b.visit_date, b.booked_time, b.attendees, b.status, b.created_at, b.overnight, b.arrival_date, b.departure_date, b.overnight_guests, f.attendance, f.rating, f.enjoyment, f.improvement, f.comments, f.submitted_at FROM bookings b LEFT JOIN feedback_responses f ON f.booking_id = b.id WHERE b.id = ?');
+        $query = $this->db->prepare('SELECT b.reference, b.full_name, b.phone, b.email, b.destination, b.visit_date, b.booked_time, b.attendees, b.status, b.created_at, b.overnight, b.arrival_date, b.departure_date, b.overnight_guests, b.transport_requested, f.attendance, f.rating, f.enjoyment, f.improvement, f.comments, f.submitted_at FROM bookings b LEFT JOIN feedback_responses f ON f.booking_id = b.id WHERE b.id = ?');
         $query->execute([$id]);
         return $query->fetch() ?: null;
     }
