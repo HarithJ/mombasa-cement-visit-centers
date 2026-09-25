@@ -3,6 +3,7 @@ import {existsSync} from 'node:fs';
 const checks = [
  [process.execPath,'tests/admin.test.mjs'],
  ['php','tests/email.test.php'],
+ ['php','tests/sms.test.php'],
  ['php','tests/feedback-worker.test.php'],
  ['php','tests/feedback-migration.test.php'],
  [process.execPath,'tests/bookings.test.mjs'],
