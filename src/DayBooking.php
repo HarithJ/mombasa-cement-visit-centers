@@ -3,7 +3,7 @@ declare(strict_types=1);
 final class DayBooking {
     public static function validate(array $input, array $destinations): array {
         $data = [];
-        foreach (['fullName', 'email', 'phone', 'location', 'visitDate', 'timeSlot', 'attendees', 'overnight', 'arrivalDate', 'departureDate', 'overnightGuests'] as $key) $data[$key] = is_string($input[$key] ?? null) ? trim($input[$key]) : '';
+        foreach (['fullName', 'email', 'phone', 'location', 'visitDate', 'timeSlot', 'attendees', 'transportRequested', 'overnight', 'arrivalDate', 'departureDate', 'overnightGuests'] as $key) $data[$key] = is_string($input[$key] ?? null) ? trim($input[$key]) : '';
         $errors = [];
         if ($data['fullName'] === '' || mb_strlen($data['fullName']) > 120 || preg_match('/[\x00-\x1F\x7F]/u', $data['fullName'])) $errors['fullName'] = 'Enter your full name (up to 120 characters).';
         if ($data['email'] !== '' && (strlen($data['email']) > 254 || !filter_var($data['email'], FILTER_VALIDATE_EMAIL))) $errors['email'] = 'Enter a valid email address (up to 254 characters).';
@@ -20,6 +20,7 @@ final class DayBooking {
         if (!$date || $date->format('Y-m-d') !== $data['visitDate']) $errors['visitDate'] = 'Choose a valid visit date.';
         elseif ($data['visitDate'] < (new DateTimeImmutable('now', $zone))->format('Y-m-d')) $errors['visitDate'] = 'Choose today or a future date.';
         if (!preg_match('/^[1-9][0-9]*$/D', $data['attendees']) || filter_var($data['attendees'], FILTER_VALIDATE_INT) === false) $errors['attendees'] = 'Enter a whole number of at least 1, including yourself.';
+        if (isset($input['transportRequested']) && (!is_string($input['transportRequested']) || !in_array($input['transportRequested'], ['', 'on'], true))) $errors['transportRequested'] = 'Choose whether you would like transport arranged.';
         $active = $data['location'] === 'galana' && $data['overnight'] !== '';
         if ($active) {
             if (!in_array($data['overnight'], ['on', '1'], true)) $errors['overnight'] = 'Choose whether you would like to stay overnight.';
