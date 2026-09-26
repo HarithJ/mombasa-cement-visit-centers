@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+putenv('BOOKING_MANAGER_OVERRIDE_ENABLED=0');
 require __DIR__.'/../src/EmailWorker.php';
 require __DIR__.'/../src/DayBooking.php';
 function check(bool $ok, string $message): void { if (!$ok) throw new RuntimeException($message); }
