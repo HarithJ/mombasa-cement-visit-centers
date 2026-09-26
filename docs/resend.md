@@ -39,3 +39,11 @@ The integration is shared across all three PHP versions. The design-preview bran
 Run `php tests/email.test.php` for isolated queue and retry tests, and `node tests/contacts.test.mjs` for real booking/confirmation tests. Tests use temporary databases and mock delivery.
 
 API references: [Send email](https://resend.com/docs/api-reference/emails/send-email) and [idempotency keys](https://resend.com/docs/dashboard/emails/idempotency-keys).
+
+## Email presentation
+
+New visitor confirmations, destination notifications, and feedback invitations use the shared Nyumba email layout: forest green header, cream background, warm typography, clear booking details, and contact/action links. Booking copy adapts to day/overnight and transport/no-transport scenarios; manager messages retain total attendees and visitor contact details. Both HTML and plain-text alternatives are generated. No external fonts, images, scripts, or tracking pixels are required.
+
+Run `php bin/render-email-previews.php` to generate sample HTML/text under `test-results/emails/`, including an index. This does not access the database or send mail. Run `php tests/email-design.test.php` for content, escaping, link, and recipient checks. Browser previews have been checked at mobile and desktop widths; actual mailbox rendering can vary.
+
+Previously queued messages keep their saved payloads and retry keys. The redesign applies to newly queued emails; it does not resend or rewrite existing messages.

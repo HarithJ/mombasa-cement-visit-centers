@@ -64,7 +64,7 @@ try {
  assert.equal(worker('2100-01-03T05:59:59Z').messages.length,0);
  const overnight=worker('2100-01-03T06:00:00Z').messages;
  assert.equal(overnight.length,1,'invitation after overnight departure');
- assert.match(overnight[0].payload.text,/2099-12-30.*2100-01-02/);
+ assert.match(overnight[0].payload.text,/30 December 2099 to 2 January 2100/);
  const overnightUrl=overnight[0].payload.text.match(/https:\/\/visits\.example\.com\/\S+/)[0].replace('https://visits.example.com',origin);
  const native=await browser.newContext({javaScriptEnabled:false});
  const nativePage=await native.newPage();

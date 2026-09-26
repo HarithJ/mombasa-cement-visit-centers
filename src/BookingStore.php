@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/BookingEmail.php';
+require_once __DIR__.'/BookingSms.php';
 require_once __DIR__.'/Feedback.php';
 final class BookingStore {
     private PDO $db;
@@ -39,6 +40,7 @@ final class BookingStore {
                 $this->db->prepare('INSERT INTO booking_emails(booking_id, payload, idempotency_key) VALUES (?, ?, ?)')->execute([$saved['id'], json_encode(BookingEmail::payload($saved), JSON_THROW_ON_ERROR), 'booking/'.$saved['reference']]);
                 if ($saved['email']) $this->db->prepare("INSERT INTO booking_emails(booking_id, kind, payload, idempotency_key) VALUES (?, 'visitor', ?, ?)")->execute([$saved['id'], json_encode(BookingEmail::visitorPayload($saved), JSON_THROW_ON_ERROR), 'visitor/'.$saved['reference']]);
             }
+            if ($created) BookingSms::enqueue($this->db, $saved);
             if ($created) Feedback::schedule($this->db, $saved, $version, $basePath);
             $this->db->commit();
             return $saved;
