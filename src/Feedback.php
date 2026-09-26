@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/FeedbackEmail.php';
 final class Feedback {
     public static function enabled(): bool { return getenv('FEEDBACK_EMAIL_ENABLED') === '1'; }
     public static function schedule(PDO $db, array $booking, string $version, string $basePath): void {
@@ -13,10 +14,7 @@ final class Feedback {
         $due = (new DateTimeImmutable($booking['overnight'] ? $booking['departure_date'] : $booking['visit_date'], new DateTimeZone('Africa/Nairobi')))->modify('+1 day')->setTime((int)$hour, 0)->getTimestamp();
         $token = bin2hex(random_bytes(32));
         $link = $site.rtrim($basePath, '/').'/feedback?token='.$token;
-        $contacts = require __DIR__.'/../config/contacts.php';
-        $dates = $booking['overnight'] ? $booking['arrival_date'].' – '.$booking['departure_date'] : $booking['visit_date'];
-        $text = "How was your visit?\n\n".$contacts[$booking['destination']]['name']."\nVisit date: ".$dates."\n\nShare your feedback:\n".$link."\n\nIf you didn't attend, you can let us know in the form.";
-        $payload = ['to'=>[$booking['email']], 'subject'=>'How was your Nyumba visit?', 'text'=>$text, 'html'=>'<h1>How was your visit?</h1><p>'.htmlspecialchars($contacts[$booking['destination']]['name'], ENT_QUOTES, 'UTF-8').'</p><p>Visit date: '.htmlspecialchars($dates, ENT_QUOTES, 'UTF-8').'</p><p><a href="'.htmlspecialchars($link, ENT_QUOTES, 'UTF-8').'">Share your feedback</a></p><p>If you didn’t attend, you can let us know in the form.</p>'];
+        $payload = FeedbackEmail::payload($booking, $link);
         $db->prepare('INSERT INTO feedback_invitations(booking_id, token_hash, version) VALUES (?, ?, ?)')->execute([$booking['id'], hash('sha256', $token), $version]);
         $db->prepare("INSERT INTO booking_emails(booking_id, kind, payload, idempotency_key, due_at) VALUES (?, 'feedback', ?, ?, ?)")->execute([$booking['id'], json_encode($payload, JSON_THROW_ON_ERROR), 'feedback/'.$booking['reference'], $due]);
     }
