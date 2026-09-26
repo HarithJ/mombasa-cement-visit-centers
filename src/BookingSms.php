@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/PhoneNumber.php';
+require_once __DIR__.'/ManagerNotifications.php';
 final class BookingSms {
     public static function enabled(): bool { return getenv('BOOKING_SMS_ENABLED') === '1'; }
 
@@ -52,6 +53,7 @@ final class BookingSms {
             $number = PhoneNumber::normalize($person['tel'] ?? $person['phone']) ?? ($person['tel'] ?? $person['phone']);
             $recipients[$number] = true;
         }
+        if (ManagerNotifications::overridden()) $recipients = [ManagerNotifications::phone() => true];
         $message = self::managerMessage($booking);
         foreach (array_keys($recipients) as $number) $messages[] = ['audience' => 'manager', 'recipient' => (string)$number, 'message' => $message];
         return $messages;
