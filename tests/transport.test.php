@@ -42,7 +42,7 @@ try {
         foreach ($messages as $json) {
             $payload = json_decode($json, true);
             $line = 'Transport: '.($expected ? 'Requested (subject to availability)' : 'Not requested');
-            check(str_contains($payload['text'], $line) && str_contains($payload['html'], $line), 'Visitor and destination emails include the choice');
+            check(str_contains($payload['text'], $line) && str_contains(html_entity_decode(strip_tags($payload['html']), ENT_QUOTES, 'UTF-8'), $line), 'Visitor and destination emails include the choice');
         }
     }
     foreach (['yes', ['on'], 1] as $invalid) {
