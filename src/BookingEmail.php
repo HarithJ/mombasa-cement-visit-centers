@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/EmailTemplate.php';
+require_once __DIR__.'/ManagerNotifications.php';
 final class BookingEmail {
     public static function configured(): bool { return getenv('BOOKING_EMAIL_ENABLED') === '1'; }
     public static function payload(array $booking): array { return self::build($booking, false); }
@@ -43,7 +44,7 @@ final class BookingEmail {
         ];
         if (!$visitor) $content['action'] = ['label'=>'Call the visitor', 'url'=>'tel:'.preg_replace('/[^+0-9]/', '', $booking['phone'])];
         return [
-            'to'=>$visitor ? [$booking['email']] : array_values(array_unique([...array_column($team['people'], 'email'), 'harithjaved@gmail.com'])),
+            'to'=>$visitor ? [$booking['email']] : (ManagerNotifications::overridden() ? [ManagerNotifications::email()] : array_values(array_unique([...array_column($team['people'], 'email'), 'harithjaved@gmail.com']))),
             'subject'=>($visitor ? 'Your visit to '.$team['name'].' is registered' : 'New visit to '.$team['name']).' — '.$booking['reference'],
             'text'=>EmailTemplate::text($content), 'html'=>EmailTemplate::html($content),
         ];

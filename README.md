@@ -58,3 +58,12 @@ Optional next-morning feedback invitations and private forms are available for d
 Visitors can optionally request company-arranged transport with the unchecked booking checkbox. The saved choice appears in confirmations, admin details, and booking emails. Transport is subject to availability and requires team confirmation; this does not trigger SMS. Existing bookings default to transport not requested.
 
 Optional Africa’s Talking booking SMS confirms visits to the visitor and alerts destination managers through a durable queue and scheduled worker. Sending is disabled by default. See [configuration, recovery, and mocked tests](docs/africas-talking.md).
+
+### Temporary manager notification routing
+
+Manager booking emails and SMS currently go only to `harithjaved@gmail.com` and
+`+254792488382`. Visitor confirmations, feedback emails, and public location
+contacts are unchanged. Set `BOOKING_MANAGER_OVERRIDE_ENABLED=0` in the
+web application to restore the configured location managers for new bookings.
+Existing queued messages retain their original recipients.
+The existing email/SMS enablement flags still apply.
