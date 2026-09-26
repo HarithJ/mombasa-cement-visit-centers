@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+putenv('BOOKING_MANAGER_OVERRIDE_ENABLED=0');
 require __DIR__.'/../src/BookingStore.php';
 require __DIR__.'/../src/DayBooking.php';
 require __DIR__.'/../src/SmsWorker.php';
