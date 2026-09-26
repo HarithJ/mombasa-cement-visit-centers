@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/SmsFailure.php';
+require_once __DIR__.'/PhoneNumber.php';
 final class AfricasTalkingClient {
     /** @param ?Closure(string, array, string): array{status: int, body: string} $transport */
     public function __construct(
@@ -20,17 +22,26 @@ final class AfricasTalkingClient {
         );
     }
 
-    /** Returns provider acceptance ID, not a handset delivery receipt. */
-    public function send(string $recipient, string $message): string {
+    public function validateConfiguration(): void {
         if (!in_array($this->environment, ['sandbox', 'live'], true)
             || !preg_match('/^[^\s\x00-\x1F\x7F]+$/D', $this->username)
             || !preg_match('/^[^\s\x00-\x1F\x7F]+$/D', $this->apiKey)
             || preg_match('/[\x00-\x1F\x7F]/', $this->senderId)
             || ($this->environment === 'sandbox') !== ($this->username === 'sandbox')) {
-            throw new RuntimeException('Invalid Africa’s Talking configuration');
+            throw new SmsFailure('Invalid Africa’s Talking configuration', 'configuration');
         }
-        if (!preg_match('/^\+[1-9][0-9]{6,14}$/D', $recipient) || trim($message) === '') {
-            throw new RuntimeException('Provide one international-format recipient and a nonempty message');
+        if ($this->transport === null && !extension_loaded('curl')) throw new SmsFailure('PHP cURL is required', 'configuration');
+    }
+
+    public function profile(): string {
+        return json_encode([$this->environment, $this->username, $this->senderId], JSON_THROW_ON_ERROR);
+    }
+
+    /** Returns provider acceptance ID, not a handset delivery receipt. */
+    public function send(string $recipient, string $message): string {
+        $this->validateConfiguration();
+        if (!PhoneNumber::smsRoutable($recipient) || trim($message) === '') {
+            throw new SmsFailure('Provide one international-format recipient and a nonempty message', 'rejected');
         }
         $url = $this->environment === 'sandbox'
             ? 'https://api.sandbox.africastalking.com/version1/messaging'
@@ -41,22 +52,24 @@ final class AfricasTalkingClient {
         $body = http_build_query($form, '', '&', PHP_QUERY_RFC3986);
         try {
             $response = ($this->transport ?? $this->request(...))($url, $headers, $body);
+        } catch (SmsFailure $error) {
+            throw $error;
         } catch (Throwable $error) {
-            throw new RuntimeException('SMS transport failure; acceptance unknown');
+            throw new SmsFailure('SMS transport failure; acceptance unknown');
         }
         if ($response['status'] < 200 || $response['status'] >= 300) {
-            throw new RuntimeException('SMS API HTTP '.$response['status'].'; request not confirmed');
+            throw new SmsFailure('SMS API HTTP '.$response['status'].'; request not confirmed', in_array($response['status'], [401, 403], true) ? 'configuration' : ($response['status'] === 429 ? 'retryable' : 'uncertain'));
         }
         $result = json_decode($response['body'], true);
         $recipients = $result['SMSMessageData']['Recipients'] ?? null;
         if (!is_array($recipients) || count($recipients) !== 1 || !is_array($recipients[0] ?? null)
             || ($recipients[0]['number'] ?? null) !== $recipient || !is_int($recipients[0]['statusCode'] ?? null)) {
-            throw new RuntimeException('Invalid SMS API response; acceptance unknown');
+            throw new SmsFailure('Invalid SMS API response; acceptance unknown');
         }
         $entry = $recipients[0];
-        if ($entry['statusCode'] !== 101) throw new RuntimeException('SMS recipient rejected (code '.$entry['statusCode'].')');
+        if (!in_array($entry['statusCode'], [100, 101, 102], true)) throw new SmsFailure('SMS recipient rejected (code '.$entry['statusCode'].')', in_array($entry['statusCode'], [401, 402, 405], true) ? 'configuration' : 'rejected');
         if (!is_string($entry['messageId'] ?? null) || trim($entry['messageId']) === '') {
-            throw new RuntimeException('Invalid SMS API response; acceptance unknown');
+            throw new SmsFailure('Invalid SMS API response; acceptance unknown');
         }
         return $entry['messageId'];
     }
@@ -71,7 +84,10 @@ final class AfricasTalkingClient {
                 CURLOPT_FOLLOWLOCATION => false, CURLOPT_SSL_VERIFYPEER => true, CURLOPT_SSL_VERIFYHOST => 2,
             ]);
             $response = curl_exec($curl);
-            if ($response === false) throw new RuntimeException('SMS transport failure; acceptance unknown');
+            if ($response === false) {
+                if (in_array(curl_errno($curl), [CURLE_COULDNT_RESOLVE_HOST, CURLE_COULDNT_CONNECT], true)) throw new SmsFailure('SMS connection unavailable', 'retryable');
+                throw new SmsFailure('SMS transport failure; acceptance unknown');
+            }
             return ['status' => curl_getinfo($curl, CURLINFO_RESPONSE_CODE), 'body' => $response];
         } finally { unset($curl); }
     }

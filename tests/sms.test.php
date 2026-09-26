@@ -86,3 +86,17 @@ foreach ([['0712345678', 'hello'], ['+254700000000,+254711111111', 'hello'], ['+
     fails(fn() => $client->send($recipient, $message), 'Provide one international-format recipient and a nonempty message');
 }
 echo "PASS SMS input validation (no transport calls)\n";
+foreach ([100,102] as $code) {
+    $response=accepted();$body=json_decode($response['body'],true);
+    $body['SMSMessageData']['Recipients'][0]['statusCode']=$code;$response['body']=json_encode($body);
+    $client=new AfricasTalkingClient('sandbox','key','sandbox','',fn()=>$response);
+    check($client->send('+254700000000','hello')==='mock-id','Processed/queued are provider acceptance');
+}
+foreach ([401=>'configuration',402=>'configuration',405=>'configuration',403=>'rejected',404=>'rejected',406=>'rejected'] as $code=>$category) {
+    $response=accepted();$body=json_decode($response['body'],true);
+    $body['SMSMessageData']['Recipients'][0]['statusCode']=$code;$response['body']=json_encode($body);
+    $client=new AfricasTalkingClient('sandbox','key','sandbox','',fn()=>$response);
+    try {$client->send('+254700000000','hello');throw new LogicException('Expected provider failure');}
+    catch(SmsFailure $e) {check($e->category===$category,'Recipient status classified independently of HTTP status');}
+}
+echo "PASS SMS accepted states and operational error categories\n";
