@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/PhoneNumber.php';
 final class DayBooking {
     public static function validate(array $input, array $destinations): array {
         $data = [];
@@ -7,12 +8,9 @@ final class DayBooking {
         $errors = [];
         if ($data['fullName'] === '' || mb_strlen($data['fullName']) > 120 || preg_match('/[\x00-\x1F\x7F]/u', $data['fullName'])) $errors['fullName'] = 'Enter your full name (up to 120 characters).';
         if ($data['email'] !== '' && (strlen($data['email']) > 254 || !filter_var($data['email'], FILTER_VALIDATE_EMAIL))) $errors['email'] = 'Enter a valid email address (up to 254 characters).';
-        $phone = $data['phone'];
-        $digits = preg_replace('/\D/', '', $phone);
-        if (strlen($phone) > 40 || !preg_match('/^\+?[0-9][0-9 ()-]*$/D', $phone) || strlen($digits) < 7 || strlen($digits) > 15) $errors['phone'] = 'Enter a phone number with 7–15 digits, optionally using +, spaces, parentheses or hyphens.';
-        elseif (preg_match('/^0[17]\d{8}$/D', $digits)) $data['phone'] = '+254'.substr($digits, 1);
-        elseif (str_starts_with($phone, '+') || preg_match('/^254\d{9}$/D', $digits)) $data['phone'] = '+'.$digits;
-        else $data['phone'] = $digits;
+        $phone = PhoneNumber::normalize($data['phone']);
+        if ($phone === null) $errors['phone'] = 'Enter a phone number with 7–15 digits, optionally using +, spaces, parentheses or hyphens.';
+        else $data['phone'] = $phone;
         if (!isset($destinations[$data['location']])) $errors['location'] = 'Choose one of the three destinations.';
         if (!in_array($data['timeSlot'], $destinations[$data['location']]['slots'] ?? [], true)) $errors['timeSlot'] = 'Choose a time offered for this destination.';
         $zone = new DateTimeZone('Africa/Nairobi');
