@@ -83,7 +83,7 @@ try{
    await page.locator('.close-button').click();
    await page.locator('[data-destination="galana"] .photo-toggle').click();
    await page.locator('#gallery-next').click();
-   await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 / 14'));
+   await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 / '+String(document.querySelectorAll('#gallery-thumbnails button').length).padStart(2,'0')));
    await page.locator('#gallery-close').click();
    for(const width of [320,390,768]){
     await page.setViewportSize({width,height:900});

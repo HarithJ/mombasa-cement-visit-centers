@@ -36,7 +36,7 @@ try {
     await page.locator('[data-destination="galana"] .photo-toggle').click();
     await page.locator('#photo-lightbox').waitFor({state:'visible'});
     await page.locator('#gallery-next').click();
-    await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 / 14'));
+    await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 / '+String(document.querySelectorAll('#gallery-thumbnails button').length).padStart(2,'0')));
     await page.keyboard.press('Escape');
     await page.locator('[data-book="galana"]').click();
     await page.locator('#full-name').fill(`Visitor ${version}`);
