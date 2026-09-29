@@ -12,7 +12,7 @@ try {
     putenv('BOOKING_MANAGER_OVERRIDE_ENABLED');
     foreach (['galana','sahajanand','feeding'] as $destination) {
         $booking = $store->create(array_merge($input,['location'=>$destination]),$destination);
-        check(BookingEmail::payload($booking)['to'] === ['harithjaved@gmail.com'], 'Only override email receives manager message');
+        check(BookingEmail::payload($booking)['to'] === ['harithjaved@gmail.com','kp@nyumba.com'], 'Both override emails receive manager message');
         check(BookingEmail::visitorPayload($booking)['to'] === ['visitor@example.com'], 'Visitor email unchanged');
         $sms = BookingSms::messagesFor($booking);
         check(array_column($sms,'recipient') === ['+254712345678','+254788738085'], 'Visitor and override SMS only');
@@ -22,7 +22,7 @@ try {
         $emailRecipients = [...$emailRecipients,...$payload['to']]; return 'fake-email-id';
     },'sender@example.com');
     check($emailResult['review'] === 0 && $emailResult['accepted'] === 6, 'Visitor and override emails sent');
-    check(array_diff($emailRecipients,['visitor@example.com','harithjaved@gmail.com']) === [], 'No original manager email delivered');
+    check(array_diff($emailRecipients,['visitor@example.com','harithjaved@gmail.com','kp@nyumba.com']) === [], 'No original manager email delivered');
     $smsRecipients = [];
     $client = new AfricasTalkingClient('sandbox','fake-key','sandbox','',function($url,$headers,$body) use (&$smsRecipients) {
         parse_str($body,$form); $smsRecipients[]=$form['to'];
