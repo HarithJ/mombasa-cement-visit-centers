@@ -15,7 +15,7 @@ try {
         check(BookingEmail::payload($booking)['to'] === ['harithjaved@gmail.com'], 'Only override email receives manager message');
         check(BookingEmail::visitorPayload($booking)['to'] === ['visitor@example.com'], 'Visitor email unchanged');
         $sms = BookingSms::messagesFor($booking);
-        check(array_column($sms,'recipient') === ['+254712345678','+254792488382'], 'Visitor and override SMS only');
+        check(array_column($sms,'recipient') === ['+254712345678','+254788738085'], 'Visitor and override SMS only');
     }
     $emailRecipients = [];
     $emailResult = (new EmailWorker($db))->run(function($payload) use (&$emailRecipients) {
@@ -30,7 +30,7 @@ try {
     });
     $smsResult = (new SmsWorker($db))->run($client);
     check($smsResult['review'] === 0 && $smsResult['accepted'] === 6, 'Visitor and override SMS sent');
-    check(array_diff($smsRecipients,['+254712345678','+254792488382']) === [], 'No original manager SMS delivered');
+    check(array_diff($smsRecipients,['+254712345678','+254788738085']) === [], 'No original manager SMS delivered');
     $contacts = require __DIR__.'/../config/contacts.php';
     check($contacts['galana']['people'][0]['email'] === 'jaco@nyumbagri.com', 'Public contacts unchanged');
     putenv('BOOKING_MANAGER_OVERRIDE_ENABLED=0');
