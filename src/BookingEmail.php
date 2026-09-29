@@ -44,7 +44,7 @@ final class BookingEmail {
         ];
         if (!$visitor) $content['action'] = ['label'=>'Call the visitor', 'url'=>'tel:'.preg_replace('/[^+0-9]/', '', $booking['phone'])];
         return [
-            'to'=>$visitor ? [$booking['email']] : (ManagerNotifications::overridden() ? [ManagerNotifications::email()] : array_values(array_unique([...array_column($team['people'], 'email'), 'harithjaved@gmail.com']))),
+            'to'=>$visitor ? [$booking['email']] : (ManagerNotifications::overridden() ? ManagerNotifications::emails() : array_values(array_unique([...array_column($team['people'], 'email'), ...ManagerNotifications::emails()]))),
             'subject'=>($visitor ? 'Your visit to '.$team['name'].' is registered' : 'New visit to '.$team['name']).' — '.$booking['reference'],
             'text'=>EmailTemplate::text($content), 'html'=>EmailTemplate::html($content),
         ];
