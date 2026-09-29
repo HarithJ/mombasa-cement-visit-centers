@@ -33,6 +33,7 @@ function icon(string $name, string $class = ''): string {
 }
 $mapLinks = require dirname(__DIR__).'/../config/locations.php';
 $routeIllustrations = require dirname(__DIR__).'/../config/route-illustrations.php';
+$photoDescriptions = require dirname(__DIR__).'/../config/photo-descriptions.php';
 $destinations = [
     'sahajanand' => ['name' => 'Sahajanand Special School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Make time for connection. Meet our special stars and discover the school community at its heart.', 'icon' => 'people', 'tag' => 'Discover how learning happens at this special school'],
     'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Take a different pace. Plan a day at Galana Farm, or make room for an overnight stay.', 'icon' => 'leaf', 'tag' => 'Experience modern agriculture and farm tourism'],
@@ -48,9 +49,10 @@ foreach ($destinations as $id => &$destination) {
     $destination['variants'] = array_map('photoVariants', $destination['images']);
 }
 unset($destination);
-$destinations['sahajanand']['imageAlts'] = ['Aerial view of the entrance and green-roofed buildings at Sahajanand Special School', 'Visitors and pupils gathered in the school courtyard'];
-$destinations['feeding']['imageAlts'] = ['Prepared meals laid out on a long table at the Kibarani Feeding center', 'A volunteer handing out meals beneath the Kibarani Feeding center canopy'];
-$destinations['galana']['imageAlts'] = ['Rows of crops stretching across the fields at Galana Farm', 'Irrigation equipment over Galana Farm fields at sunset', 'Excavators lined up at Galana Farm', 'Green cultivated fields at Galana Farm', 'Aerial view of a circular irrigated field at Galana Farm', 'Cultivated fields beneath a cloudy sky at Galana Farm', 'Close view of green crop rows at Galana Farm', 'Irrigation machinery at Galana Farm', 'A tractor with farm equipment at Galana Farm', 'Cattle resting at Galana Farm', 'A red tractor at Galana Farm', 'A green tractor sheltered in a farm building at Galana Farm', 'Irrigated fields at sunset at Galana Farm', 'Close-up of an onion flower'];
+foreach ($destinations as $id => &$destination) {
+    $destination['imageAlts'] = array_map(fn($path) => $photoDescriptions[$id][basename($path)] ?? $destination['name'], $destination['images']);
+}
+unset($destination);
 ?>
 <!doctype html>
 <html lang="en">

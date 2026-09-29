@@ -1,0 +1,317 @@
+[
+  {
+    "original": "Feeding Center/Screenshot 2026-09-23 122145.png",
+    "source": "Feeding Center/feeding-meal-service.png",
+    "destination": "feeding",
+    "description": "meal-service",
+    "asset": "11-meal-service.webp"
+  },
+  {
+    "original": "Feeding Center/Screenshot 2026-09-23 122250.png",
+    "source": "Feeding Center/feeding-centre-building.png",
+    "destination": "feeding",
+    "description": "centre-building",
+    "asset": "03-centre-building.webp"
+  },
+  {
+    "original": "Feeding Center/Screenshot 2026-09-23 122325.png",
+    "source": "Feeding Center/feeding-serving-station.png",
+    "destination": "feeding",
+    "description": "serving-station",
+    "asset": "17-serving-station.webp"
+  },
+  {
+    "original": "Feeding Center/Screenshot 2026-09-23 122545.png",
+    "source": "Feeding Center/feeding-centre-aerial.png",
+    "destination": "feeding",
+    "description": "centre-aerial",
+    "asset": "02-centre-aerial.webp"
+  },
+  {
+    "original": "Feeding Center/Screenshot 2026-09-23 122633.png",
+    "source": "Feeding Center/feeding-meal-queue-aerial.png",
+    "destination": "feeding",
+    "description": "meal-queue-aerial",
+    "asset": "10-meal-queue-aerial.webp"
+  },
+  {
+    "original": "Feeding Center/Screenshot 2026-09-23 122758 (1).png",
+    "source": "Feeding Center/feeding-river-aerial.png",
+    "destination": "feeding",
+    "description": "river-aerial",
+    "asset": "14-river-aerial.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.04.jpeg",
+    "source": "Feeding Center/feeding-serving-meals.jpeg",
+    "destination": "feeding",
+    "description": "serving-meals",
+    "asset": "16-serving-meals.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.05 (1).jpeg",
+    "source": "Feeding Center/feeding-meal-collection.jpeg",
+    "destination": "feeding",
+    "description": "meal-collection",
+    "asset": "09-meal-collection.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.05 (2).jpeg",
+    "source": "Feeding Center/feeding-food-service.jpeg",
+    "destination": "feeding",
+    "description": "food-service",
+    "asset": "08-food-service.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.05.jpeg",
+    "source": "Feeding Center/feeding-prepared-meals.jpeg",
+    "destination": "feeding",
+    "description": "prepared-meals",
+    "asset": "01-meals.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.07 (1).jpeg",
+    "source": "Feeding Center/feeding-meal-tables.jpeg",
+    "destination": "feeding",
+    "description": "meal-tables",
+    "asset": "12-meal-tables.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.07.jpeg",
+    "source": "Feeding Center/feeding-visitors-collecting-meals.jpeg",
+    "destination": "feeding",
+    "description": "visitors-collecting-meals",
+    "asset": "20-visitors-collecting-meals.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.09.jpeg",
+    "source": "Feeding Center/feeding-meals-ready.jpeg",
+    "destination": "feeding",
+    "description": "meals-ready",
+    "asset": "13-meals-ready.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.10 (1).jpeg",
+    "source": "Feeding Center/feeding-serving-line.jpeg",
+    "destination": "feeding",
+    "description": "serving-line",
+    "asset": "15-serving-line.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.10.jpeg",
+    "source": "Feeding Center/feeding-food-distribution.jpeg",
+    "destination": "feeding",
+    "description": "food-distribution",
+    "asset": "07-food-distribution.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.12.jpeg",
+    "source": "Feeding Center/feeding-visitor-queue.jpeg",
+    "destination": "feeding",
+    "description": "visitor-queue",
+    "asset": "19-visitor-queue.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.13 (1).jpeg",
+    "source": "Feeding Center/feeding-community-queue.jpeg",
+    "destination": "feeding",
+    "description": "community-queue",
+    "asset": "05-community-queue.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.13.jpeg",
+    "source": "Feeding Center/feeding-centre-courtyard.jpeg",
+    "destination": "feeding",
+    "description": "centre-courtyard",
+    "asset": "04-centre-courtyard.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.14.jpeg",
+    "source": "Feeding Center/feeding-sheltered-queue.jpeg",
+    "destination": "feeding",
+    "description": "sheltered-queue",
+    "asset": "18-sheltered-queue.webp"
+  },
+  {
+    "original": "Feeding Center/WhatsApp Image 2026-09-14 at 11.03.16.jpeg",
+    "source": "Feeding Center/feeding-dining-shelter.jpeg",
+    "destination": "feeding",
+    "description": "dining-shelter",
+    "asset": "06-dining-shelter.webp"
+  },
+  {
+    "original": "Sahajanand/Aerial Shots (43 of 66).jpg",
+    "source": "Sahajanand/sahajanand-school-entrance.jpg",
+    "destination": "sahajanand",
+    "description": "school-entrance",
+    "asset": "01-entrance.webp"
+  },
+  {
+    "original": "Sahajanand/Sahajanand Special School (38 of 134).jpg",
+    "source": "Sahajanand/sahajanand-wheelchairs.jpg",
+    "destination": "sahajanand",
+    "description": "wheelchairs",
+    "asset": "10-wheelchairs.webp"
+  },
+  {
+    "original": "Sahajanand/Sahajanand Special School (62 of 134).jpg",
+    "source": "Sahajanand/sahajanand-classroom-learning.jpg",
+    "destination": "sahajanand",
+    "description": "classroom-learning",
+    "asset": "05-classroom-learning.webp"
+  },
+  {
+    "original": "Sahajanand/Sahajanand Special School (63 of 134).jpg",
+    "source": "Sahajanand/sahajanand-classroom-support.jpg",
+    "destination": "sahajanand",
+    "description": "classroom-support",
+    "asset": "06-classroom-support.webp"
+  },
+  {
+    "original": "Sahajanand/Sahajanand Special School (78 of 134).jpg",
+    "source": "Sahajanand/sahajanand-school-bus.jpg",
+    "destination": "sahajanand",
+    "description": "school-bus",
+    "asset": "08-school-bus.webp"
+  },
+  {
+    "original": "Sahajanand/Sahajanand Special School (82 of 134).jpg",
+    "source": "Sahajanand/sahajanand-school-courtyard.jpg",
+    "destination": "sahajanand",
+    "description": "school-courtyard",
+    "asset": "09-school-courtyard.webp"
+  },
+  {
+    "original": "Sahajanand/Sahajanand Special School (85 of 134).jpg",
+    "source": "Sahajanand/sahajanand-assembly-hall.jpg",
+    "destination": "sahajanand",
+    "description": "assembly-hall",
+    "asset": "03-assembly-hall.webp"
+  },
+  {
+    "original": "Sahajanand/Sahajanand Special School (92 of 134).jpg",
+    "source": "Sahajanand/sahajanand-school-assembly.jpg",
+    "destination": "sahajanand",
+    "description": "school-assembly",
+    "asset": "07-school-assembly.webp"
+  },
+  {
+    "original": "Sahajanand/Screenshot 2026-09-23 122219 (1).png",
+    "source": "Sahajanand/sahajanand-campus-aerial.png",
+    "destination": "sahajanand",
+    "description": "campus-aerial",
+    "asset": "04-campus-aerial.webp"
+  },
+  {
+    "original": "Sahajanand/Screenshot 2026-09-23 123121.png",
+    "source": "Sahajanand/sahajanand-assembly-gathering.png",
+    "destination": "sahajanand",
+    "description": "assembly-gathering",
+    "asset": "02-assembly-gathering.webp"
+  },
+  {
+    "original": "galana/DJI_0023.jpg",
+    "source": "galana/galana-green-fields.jpg",
+    "destination": "galana",
+    "description": "green-fields",
+    "asset": "07-green-fields.webp"
+  },
+  {
+    "original": "galana/DJI_0063.jpg",
+    "source": "galana/galana-crop-rows.jpg",
+    "destination": "galana",
+    "description": "crop-rows",
+    "asset": "01-farm.webp"
+  },
+  {
+    "original": "galana/DJI_0107.jpg",
+    "source": "galana/galana-circular-fields-aerial.jpg",
+    "destination": "galana",
+    "description": "circular-fields-aerial",
+    "asset": "02-circular-fields-aerial.webp"
+  },
+  {
+    "original": "galana/DJI_0112.jpg",
+    "source": "galana/galana-cultivated-fields.jpg",
+    "destination": "galana",
+    "description": "cultivated-fields",
+    "asset": "03-cultivated-fields.webp"
+  },
+  {
+    "original": "galana/DJI_0113.jpg",
+    "source": "galana/galana-maize-fields.jpg",
+    "destination": "galana",
+    "description": "maize-fields",
+    "asset": "12-maize-fields.webp"
+  },
+  {
+    "original": "galana/Galana-109.jpg",
+    "source": "galana/galana-farm-sprayer.jpg",
+    "destination": "galana",
+    "description": "farm-sprayer",
+    "asset": "04-farm-sprayer.webp"
+  },
+  {
+    "original": "galana/Galana-65.jpg",
+    "source": "galana/galana-tractor.jpg",
+    "destination": "galana",
+    "description": "tractor",
+    "asset": "14-tractor.webp"
+  },
+  {
+    "original": "galana/Galana-91.jpg",
+    "source": "galana/galana-irrigation-at-dusk.jpg",
+    "destination": "galana",
+    "description": "irrigation-at-dusk",
+    "asset": "10-irrigation-at-dusk.webp"
+  },
+  {
+    "original": "galana/Galana-93.jpg",
+    "source": "galana/galana-irrigation-at-sunset.jpg",
+    "destination": "galana",
+    "description": "irrigation-at-sunset",
+    "asset": "11-irrigation-at-sunset.webp"
+  },
+  {
+    "original": "galana/Onion flower 1.jpg",
+    "source": "galana/galana-onion-flower.jpg",
+    "destination": "galana",
+    "description": "onion-flower",
+    "asset": "13-onion-flower.webp"
+  },
+  {
+    "original": "galana/Screenshot 2026-09-23 122718.png",
+    "source": "galana/galana-tractor-in-field.png",
+    "destination": "galana",
+    "description": "tractor-in-field",
+    "asset": "15-tractor-in-field.webp"
+  },
+  {
+    "original": "galana/Screenshot 2026-09-23 122746.png",
+    "source": "galana/galana-farmland-aerial.png",
+    "destination": "galana",
+    "description": "farmland-aerial",
+    "asset": "05-farmland-aerial.webp"
+  },
+  {
+    "original": "galana/Screenshot 2026-09-23 122817.png",
+    "source": "galana/galana-field-irrigation.png",
+    "destination": "galana",
+    "description": "field-irrigation",
+    "asset": "06-field-irrigation.webp"
+  },
+  {
+    "original": "galana/Screenshot 2026-09-23 122832.png",
+    "source": "galana/galana-harvesting-aerial.png",
+    "destination": "galana",
+    "description": "harvesting-aerial",
+    "asset": "08-harvesting-aerial.webp"
+  },
+  {
+    "original": "galana/Screenshot 2026-09-23 122931.png",
+    "source": "galana/galana-irrigated-plots.png",
+    "destination": "galana",
+    "description": "irrigated-plots",
+    "asset": "09-irrigated-plots.webp"
+  }
+]
