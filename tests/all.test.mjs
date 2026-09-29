@@ -1,14 +1,15 @@
 import {spawnSync} from 'node:child_process';
 import {existsSync} from 'node:fs';
 const checks = [
+ [process.execPath,'tests/photos.test.mjs'],
  [process.execPath,'tests/admin.test.mjs'],
  ['php','tests/email.test.php'],
  ['php','tests/email-design.test.php'],
  ['php','tests/manager-override.test.php'],
- ['php','tests/sms.test.php'],
- ['php','tests/booking-sms.test.php'],
  ['php','tests/transport.test.php'],
  [process.execPath,'tests/transport.test.mjs'],
+ ['php','tests/sms.test.php'],
+ ['php','tests/booking-sms.test.php'],
  ['php','tests/feedback-worker.test.php'],
  ['php','tests/feedback-migration.test.php'],
  [process.execPath,'tests/bookings.test.mjs'],
