@@ -77,7 +77,7 @@ Optional Africa’s Talking booking SMS confirms visits to the visitor and alert
 ### Temporary manager notification routing
 
 Manager booking emails and SMS currently go only to `harithjaved@gmail.com` and
-`+254792488382`. Visitor confirmations, feedback emails, and public location
+`+254788738085`. Visitor confirmations, feedback emails, and public location
 contacts are unchanged. Set `BOOKING_MANAGER_OVERRIDE_ENABLED=0` in the
 web application to restore the configured location managers for new bookings.
 Existing queued messages retain their original recipients.
