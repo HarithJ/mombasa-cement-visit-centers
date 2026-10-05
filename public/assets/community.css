@@ -3,3 +3,123 @@
 @media(prefers-reduced-motion:reduce){.community-action{transition:none}}
 @media(max-width:900px){.header .explorer-nav>a:not(.nav-plan){display:flex}.header .explorer-nav{flex-wrap:wrap;gap:8px 18px}.header .explorer-nav .nav-plan{display:none}}
 @media(max-width:700px){.header .header-inner{flex-direction:column;gap:4px;padding-block:14px;align-items:flex-start}.header .explorer-nav{width:100%;justify-content:flex-start}.header .explorer-nav a{min-height:36px}.header .group-logo{height:44px;width:34px}}
+
+.school-placeholder-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:32px 0}.school-placeholder-gallery figure{margin:0;min-width:0}.school-placeholder-gallery img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:4px}.school-placeholder-gallery figcaption{display:flex;flex-direction:column;gap:3px;padding-top:14px}.school-placeholder-gallery figcaption strong{font-size:16px;font-weight:600}.school-placeholder-gallery figcaption span{color:#526459;font-size:12px}@media(max-width:700px){.school-placeholder-gallery{grid-template-columns:1fr;gap:28px}}
+
+.mpesa-demo{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:48px;max-width:900px;margin-top:36px;padding-top:32px;border-top:1px solid #d4ddd4}.mpesa-demo h3{font-size:24px;line-height:1.35;letter-spacing:-.025em;margin:12px 0 32px;max-width:360px}.mpesa-demo p{line-height:1.7}.mpesa-demo label{display:block;font-size:14px;font-weight:600;margin:0 0 12px}.mpesa-demo input{box-sizing:border-box;width:100%;max-width:360px;height:52px;padding:12px 16px;border:1px solid #aab9ad;background:#fff;color:#173f35;font:inherit}.mpesa-demo button{font:inherit;cursor:pointer}.mpesa-demo .mpesa-demo-presets{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 28px}.mpesa-demo-presets button{min-height:44px;padding:10px 16px;border:1px solid #cad4ca;border-radius:4px;background:transparent;color:#173f35;font-size:13px;line-height:1.4}.mpesa-demo-presets button:hover{background:#e9efe4}.mpesa-demo .community-action{display:inline-flex;align-items:center;min-height:48px;padding:14px 24px;border:0;margin:0;font-size:14px;line-height:1.5}.mpesa-demo [role=status]{font-size:14px;color:#526459;margin:20px 0 0}.mpesa-demo [role=status]:empty{display:none}.mpesa-demo figure{margin:0;align-self:center;text-align:center}.mpesa-demo figure img{display:block;width:360px;max-width:100%;height:auto;margin:0 auto}.mpesa-demo figcaption{font-size:12px;line-height:1.7;color:#526459;margin-top:12px}@media(max-width:700px){.mpesa-demo{grid-template-columns:1fr;gap:24px}}
+
+/* School requests share the visit form's visual treatment. */
+.school-request-dialog{width:min(1120px,calc(100% - 48px));max-width:1120px;max-height:calc(100dvh - 48px);margin:auto;padding:0;border:1px solid #35574b;border-radius:20px;overflow:hidden;background:#f7f7f0}
+.school-request-dialog::backdrop{background:#16261ed0;backdrop-filter:blur(6px)}
+.school-dialog-toolbar{display:flex;align-items:center;justify-content:space-between;min-height:70px;padding:10px 28px;box-sizing:border-box;background:#173f35;color:#f7f7f0;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+.school-dialog-toolbar span span{margin-left:20px;color:#b9cebd;font-size:11px}
+.school-dialog-toolbar button{display:grid;place-items:center;width:44px;height:44px;flex-shrink:0;border:0;border-radius:50%;background:#ffffff15;color:#fff;font-size:28px;font-weight:400;cursor:pointer}
+.school-dialog-toolbar button:hover{background:#ffffff25}
+.school-dialog-shell{display:grid;grid-template-columns:34% 66%;height:calc(100dvh - 120px);max-height:920px;overflow:hidden;overscroll-behavior:contain}
+.school-dialog-aside{position:relative;min-height:0;overflow:hidden;background:#173f35;color:white}
+.school-dialog-aside>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.school-dialog-aside:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#173f3520,#102d25ed)}
+.school-dialog-aside>div{position:absolute;bottom:0;left:0;right:0;z-index:1;padding:24px 30px 32px}
+.school-dialog-aside .eyebrow{font-size:10px}
+.school-dialog-aside h2{font-size:34px;line-height:1.15;letter-spacing:-1px;margin:22px 0}
+.school-dialog-aside p:not(.eyebrow){font-size:14px;line-height:1.8;color:#e1e9df}
+.school-dialog-aside span{display:block;margin-top:36px;padding-top:22px;border-top:1px solid #ffffff40;font-size:13px}
+.school-request-dialog main{box-sizing:border-box;width:100%;min-width:0;min-height:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain;margin:0;padding:36px 40px 40px}
+.school-request-dialog h1{font-size:clamp(30px,3vw,42px);font-weight:700;line-height:1.15;letter-spacing:-1.5px;margin:18px 0 12px}
+.school-request-dialog main>.eyebrow{font-size:10px;color:#35634e;letter-spacing:1.6px}
+.school-request-dialog main>p:not(.eyebrow){font-size:14px;line-height:1.65;color:#66776b}
+.school-request-dialog main>.form-hint{background:#e6ecdd;border-radius:8px;padding:13px 16px;margin-top:22px;font-size:12px}
+.school-request-dialog .community-form{gap:18px 20px;margin-top:26px}
+.school-request-dialog .community-form label{font-size:13px;gap:8px;margin:0;font-weight:700}
+.school-request-dialog .community-form input,.school-request-dialog .community-form select,.school-request-dialog .community-form textarea{border:1px solid #c4d0bd;border-radius:8px;background:#fffef8;font-size:14px;padding:12px 14px}
+.school-request-dialog .community-form input,.school-request-dialog .community-form select{height:48px}
+.school-request-dialog .community-form textarea{min-height:120px}
+.school-request-dialog .community-error:empty{display:none}
+.school-request-dialog .community-form .form-hint{font-size:12px;margin:0}
+.school-request-dialog .community-form button{border-radius:7px;margin-top:0}
+.school-request-dialog .community-form button:disabled{opacity:.6;cursor:wait}
+@media(max-width:700px){.school-request-dialog{width:calc(100% - 24px);max-height:calc(100dvh - 24px);border-radius:14px}.school-dialog-toolbar{min-height:64px;padding:10px 18px;font-size:11px}.school-dialog-toolbar span span{display:none}.school-dialog-shell{display:block;height:auto;max-height:calc(100dvh - 90px);overflow:auto}.school-dialog-aside{display:none}.school-request-dialog main{max-height:none;overflow:visible;padding:28px 22px 32px}.school-request-dialog .community-form input,.school-request-dialog .community-form select,.school-request-dialog .community-form textarea{font-size:16px}}
+
+/* A large QR balances the full introduction and form on desktop. */
+@media(min-width:1100px){
+  #donations:has(.mpesa-demo){display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);column-gap:72px;align-items:start}
+  #donations:has(.mpesa-demo)>.community-heading{grid-column:1;grid-row:1}
+  #donations .mpesa-demo{display:contents}
+  #donations .mpesa-demo>div{grid-column:1;grid-row:2;margin-top:36px;padding-top:32px;border-top:1px solid #d4ddd4}
+  #donations .mpesa-demo>figure{grid-column:2;grid-row:1/3;align-self:center;width:100%;margin:0}
+  #donations .mpesa-demo figure img{width:100%;max-width:520px}
+}
+
+.school-request-dialog .community-form input:focus-visible,
+.school-request-dialog .community-form select:focus-visible,
+.school-request-dialog .community-form textarea:focus-visible{outline:none;border-color:#35634e;box-shadow:0 0 0 1px #35634e}
+
+/* Feature the classroom interior beside the supporting photos and request action. */
+#school-projects>.community-action{display:inline-flex;align-items:center;justify-content:center;gap:20px;min-height:64px;padding:20px 30px;font-size:17px;font-weight:700;border-radius:6px;box-shadow:0 5px 0 #0d2c24}
+@media(max-width:700px){#school-projects>.community-action{font-size:16px;padding:18px 22px;width:100%;box-sizing:border-box;text-align:center}}
+
+#school-projects .school-feature-photo{width:100%;height:auto;aspect-ratio:1.9;margin:32px 0 16px;border-radius:22px;overflow:hidden}#school-projects .school-feature-photo .photo-bottom{left:32px;right:32px;bottom:28px}#school-projects .school-feature-photo .photo-bottom>span{font-size:17px}@media(max-width:700px){#school-projects .school-feature-photo{aspect-ratio:1.15;border-radius:16px}#school-projects .school-feature-photo .photo-bottom{left:20px;right:20px;bottom:20px;gap:16px}#school-projects .school-feature-photo .photo-bottom>span{font-size:13px}}
+
+/* School impact: spacious copy beside a tall, contained gallery. */
+#school-projects{padding-block:72px}
+#school-projects>.community-action{box-shadow:none;border-radius:6px;min-height:56px;padding:17px 26px;font-size:15px;font-weight:600;line-height:1.5}
+#school-projects .school-feature-photo{height:440px;aspect-ratio:auto;margin:32px 0 12px;border-radius:20px}
+#school-projects .school-feature-photo .photo-bottom{left:28px;right:28px;bottom:28px;gap:20px}
+#school-projects .school-feature-photo .photo-bottom>span{font-size:15px;line-height:1.6;max-width:calc(100% - 76px)}
+@media(min-width:1000px){
+  #school-projects:has(.school-feature-photo){display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:auto auto;gap:40px 72px;align-content:center;min-height:680px;box-sizing:border-box}
+  #school-projects:has(.school-feature-photo)>.community-heading{grid-column:1;grid-row:1;align-self:center;max-width:none}
+  #school-projects .community-heading h2{font-size:clamp(48px,4.8vw,68px);line-height:1.08;max-width:550px;margin:24px 0 32px}
+  #school-projects .community-heading p:not(.eyebrow){max-width:460px;font-size:18px;line-height:1.8}
+  #school-projects .school-feature-photo{grid-column:2;grid-row:1/3;align-self:center;height:clamp(480px,62svh,620px);width:100%;margin:0}
+  #school-projects:has(.school-feature-photo)>.community-action{grid-column:1;grid-row:2;align-self:start;justify-self:start;margin:0}
+}
+@media(max-width:700px){#school-projects{padding-block:40px}#school-projects .school-feature-photo{height:auto;aspect-ratio:1.15;border-radius:16px}#school-projects>.community-action{width:auto;max-width:100%;font-size:14px;padding:16px 22px}#school-projects .school-feature-photo .photo-bottom{left:20px;right:20px;bottom:20px}#school-projects .school-feature-photo .photo-bottom>span{font-size:13px}}
+
+@media(min-width:1000px){
+  #school-projects:has(.school-feature-photo){grid-template-rows:auto auto auto auto;row-gap:24px}
+  #school-projects:has(.school-feature-photo)>.community-heading{display:contents}
+  #school-projects:has(.school-feature-photo)>.community-heading>.eyebrow{grid-column:1/-1;grid-row:1}
+  #school-projects:has(.school-feature-photo)>.community-heading>h2{grid-column:1/-1;grid-row:2;max-width:none;margin:0 0 8px}
+  #school-projects:has(.school-feature-photo)>.community-heading>p:not(.eyebrow){grid-column:1;grid-row:3;align-self:start;margin:8px 0 0}
+  #school-projects .school-feature-photo{grid-column:2;grid-row:3/5;height:clamp(380px,50svh,520px)}
+  #school-projects:has(.school-feature-photo)>.community-action{grid-column:1;grid-row:4;align-self:start}
+}
+
+.school-support-details{max-width:480px;margin:28px 0 0}
+.school-support-details>div{display:flex;align-items:flex-start;gap:18px;padding:20px 0;border-top:1px solid #d4ddd4}
+.school-support-icon{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:50%;background:#e5ebdd;color:#35634e}
+.school-support-icon .icon{width:21px;height:21px}
+.school-support-details h3{font-size:19px;line-height:1.4;font-weight:600;letter-spacing:-.02em;margin:0 0 6px}
+.school-support-details>div p{font-size:14px;line-height:1.7;color:#526459;max-width:350px;margin:0}
+.school-support-details .school-request-prompt{font-size:13px;line-height:1.6;color:#526459;margin:18px 0 0}
+@media(min-width:1000px){
+  #school-projects:has(.school-feature-photo){grid-template-rows:auto auto auto auto auto;row-gap:18px;column-gap:64px;padding-block:56px;min-height:0}
+  #school-projects:has(.school-feature-photo)>.community-heading>h2{margin-bottom:16px}
+  #school-projects:has(.school-feature-photo)>.community-heading>p:not(.eyebrow){margin:0;max-width:510px}
+  #school-projects .school-support-details{grid-column:1;grid-row:4;margin:8px 0 0;align-self:start}
+  #school-projects .school-feature-photo{grid-row:3/6;height:100%;min-height:470px;max-height:560px;align-self:stretch}
+  #school-projects:has(.school-feature-photo)>.community-action{grid-row:5;margin:0;align-self:start;justify-self:start}
+}
+@media(max-width:700px){.school-support-details{margin-top:24px}.school-support-details h3{font-size:18px}}
+
+.school-support-details .school-request-prompt{font-size:16px;font-weight:600;line-height:1.6;color:#173f35;margin-top:22px}
+#school-projects>.school-request-action{display:inline-flex;align-items:center;justify-content:space-between;gap:24px;padding:10px 12px 10px 22px;min-height:58px;border:1px solid #173f35;border-radius:10px;background:#173f35;color:#fff;box-shadow:none;font-size:15px;font-weight:600;text-align:left;transition:background .18s,border-color .18s}
+.school-request-arrow{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:7px;background:#ffffff14;font-size:23px;font-weight:400;transition:transform .18s,background .18s}
+#school-projects>.school-request-action:hover{background:#245547;border-color:#245547}
+.school-request-action:hover .school-request-arrow{background:#ffffff24;transform:translate(1px,-1px)}
+@media(max-width:700px){#school-projects>.school-request-action{font-size:14px;gap:16px;padding-left:18px}.school-support-details .school-request-prompt{font-size:15px}}
+@media(prefers-reduced-motion:reduce){#school-projects>.school-request-action,.school-request-arrow{transition:none}.school-request-action:hover .school-request-arrow{transform:none}}
+
+/* A concise invitation and a quiet, clearly actionable control. */
+.school-support-details .school-request-prompt{font-size:16px;font-weight:500;line-height:1.55;max-width:400px;margin-top:20px}
+#school-projects>.school-request-action{justify-content:center;gap:24px;min-height:48px;padding:12px 20px;border-radius:5px;font-size:14px;font-weight:600;line-height:1.5}
+.school-request-action .school-request-arrow{flex:0 0 auto;width:auto;height:auto;background:transparent;border-radius:0;font-size:21px;line-height:1;font-weight:400}
+.school-request-action:hover .school-request-arrow{background:transparent;transform:translateX(3px)}
+@media(min-width:1000px){#school-projects:has(.school-feature-photo)>.school-request-action{margin-top:-4px}}
+@media(prefers-reduced-motion:reduce){.school-request-action:hover .school-request-arrow{transform:none}}
+
+#school-projects>.school-request-action{gap:24px;margin-top:8px}
+@media(min-width:1000px){#school-projects:has(.school-feature-photo)>.school-request-action{margin-top:-10px}}
+.school-request-action:hover .school-request-arrow{transform:translate(2px,-2px)}
+@media(prefers-reduced-motion:reduce){.school-request-action:hover .school-request-arrow{transform:none}}

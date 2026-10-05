@@ -1,0 +1,18 @@
+{
+  "tool": "Built-in image_gen",
+  "purpose": "User-requested illustrative placeholders; not real Nyumba project photographs",
+  "images": [
+    {
+      "file": "classroom-block.png",
+      "prompt": "Create a landscape 3:2 editorial architectural photograph-style placeholder for a Kenyan community school website. A fictional single-storey classroom block in coastal Kenya, cream plaster walls with deep green doors and window frames, simple corrugated roof, shaded veranda, neat sandy courtyard, a mature tree. Warm natural morning light, believable modest construction, calm hopeful atmosphere, tactile realistic materials. Wide eye-level composition showing the whole classroom block. No people, no signage, no logos, no text, no watermark. This is illustrative placeholder imagery, not documentation of any real school or charity project."
+    },
+    {
+      "file": "school-wall.png",
+      "prompt": "Create a landscape 3:2 editorial architectural photograph-style placeholder for a Kenyan community school website. A fictional completed school perimeter wall in coastal Kenya: neat pale cement masonry with evenly spaced structural pillars, a simple dark green steel entrance gate, school roof and leafy trees visible behind it, tidy earthen roadside and green planting. Soft warm daylight, believable practical construction, realistic textures, dignified welcoming mood. Wide oblique view emphasizing wall and gate. No people, no signage, no logos, no text, no watermark. Illustrative placeholder, not a real charity project."
+    },
+    {
+      "file": "classroom-interior.png",
+      "prompt": "Create a landscape 3:2 editorial interior photograph-style placeholder for a Kenyan community school website. A fictional bright modest classroom, orderly rows of sturdy timber desks and benches, cream plaster walls, deep green window frames, a clean blank dark chalkboard, daylight through large windows, simple concrete floor and exposed practical roof structure. Quiet, warm, hopeful, realistic architectural photography, restrained natural cream and forest-green palette. Wide view from the back corner toward the front. No people, no writing, no signage, no logos, no text, no watermark. Illustrative placeholder, not evidence of a real project."
+    }
+  ]
+}

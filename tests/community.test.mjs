@@ -5,9 +5,9 @@ const site=await app();
 try {
  await site.page.goto(site.origin);
  assert.equal(await site.page.getByRole('heading',{name:'Schools we have helped'}).count(),1);
- assert.match(await site.page.locator('#school-projects').innerText(),/classrooms and school walls/i);
- assert.match(await site.page.locator('#school-projects').innerText(),/Project stories will be shared here/);
- assert.equal(await site.page.locator('#school-projects img').count(),0);
+ assert.match(await site.page.locator('#school-projects').innerText(),/340\+ classrooms built and still going/);
+ assert.equal(await site.page.locator('#school-projects img').count(),2);
+ assert.doesNotMatch(await site.page.locator('#school-projects').innerText(),/AI-generated placeholders|Illustrative placeholder/);
  console.log('PASS honest school showcase without invented projects');
  await site.page.goto(site.origin+'/school-request');
  await site.page.getByLabel('Your name',{exact:true}).fill('Amina Example');

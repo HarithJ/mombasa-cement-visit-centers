@@ -2,6 +2,23 @@ import assert from 'node:assert/strict';
 import {PNG} from 'pngjs';
 import jsQR from 'jsqr';
 import {app} from './helpers/community-app.mjs';
+const demo=await app();
+try {
+ const context=await demo.context.browser().newContext({javaScriptEnabled:true,viewport:{width:390,height:844}});
+ const page=await context.newPage();await page.goto(demo.origin);
+ await page.locator('[data-demo-amount="1000"]').click();
+ assert.equal(await page.getByLabel('Donation amount (KES)').inputValue(),'1000');
+ await page.getByRole('button',{name:'Preview donation'}).click();
+ assert.match(await page.locator('[data-demo-status]').innerText(),/KES 1,000 selected/);
+ assert.equal(await page.getByAltText('Payment preview QR code').count(),1);
+ await page.getByLabel('Donation amount (KES)').fill('-1');
+ await page.getByRole('button',{name:'Preview donation'}).click();
+ assert.doesNotMatch(await page.locator('[data-demo-status]').innerText(),/selected/);
+ await demo.login();await demo.page.goto(demo.origin+'/admin/donations/attempts');
+ assert.equal(await demo.page.locator('tbody a').count(),0);
+ await context.close();
+ console.log('PASS unconfigured M-Pesa demo previews amounts without recording payment attempts');
+} finally {await demo.close();}
 const site=await app({MPESA_ENABLED:'1',MPESA_ENVIRONMENT:'production',MPESA_MERCHANT_NAME:'Example Foundation',MPESA_MERCHANT_TYPE:'paybill',MPESA_SHORTCODE:'600000',MPESA_DEDICATED:'1',MPESA_DONATION_REFERENCE:'NYUMBA',MPESA_TRUSTED_CALLBACK_IPS:'127.0.0.1',MPESA_QR_ENABLED:'1',MPESA_CONSUMER_KEY:'mock',MPESA_CONSUMER_SECRET:'mock',COMMUNITY_TEST_NODE:process.execPath}, `
 $mpesaTransport=static function($method,$url,$headers,$body){
  if(str_contains($url,'oauth/v1/generate'))return ['access_token'=>'fixture-token'];

@@ -256,7 +256,7 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
   const alts = JSON.parse(photo.dataset.alts);
   const layers = [photo.querySelector('.photo-primary'), photo.querySelector('.photo-secondary')];
   const button = photo.querySelector('.photo-toggle');
-  const name = destinations[photo.closest('[data-destination]').dataset.destination].name;
+  const name = photo.dataset.galleryName || destinations[photo.closest('[data-destination]').dataset.destination].name;
   let index = 0, layer = 0;
   const zoomAnimations = [null, null];
   const startZoom = () => {

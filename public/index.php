@@ -87,7 +87,7 @@ unset($destination);
 
 
         </div>
-        <nav class="explorer-nav" aria-label="Main navigation"><a href="#destinations">The destinations</a><a href="#planning">How it works</a><a href="#school-projects">School projects</a><a href="#donations">Donate</a><a href="#destinations" class="nav-plan">Let’s go <?= icon('diagonal') ?></a></nav>
+        <nav class="explorer-nav" aria-label="Main navigation"><a href="#destinations">The destinations</a><a href="#school-projects">School projects</a><a href="#donations">Donate</a><a href="#destinations" class="nav-plan">Let’s go <?= icon('diagonal') ?></a></nav>
     </div>
 </header>
 <main>
@@ -128,19 +128,11 @@ unset($destination);
         <div class="hero-footnote wrap"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
     </section>
     <?php require __DIR__.'/../src/views/school-projects.php'; ?>
-    <section class="planning wrap reveal" id="planning" aria-labelledby="planning-title">
-        <div class="planning-heading"><p class="eyebrow">LESS PLANNING. MORE EXPLORING.</p><h2 id="planning-title">Your day out,<br>in three steps.</h2><p>From choosing a place to planning your day,<br>your next visit starts here.</p></div>
-        <ol class="steps">
-            <li><span class="step-number">01</span><div><h3>Find your place</h3><p>Choose the destination you’d like to explore.</p></div></li>
-            <li><span class="step-number">02</span><div><h3>Make a plan</h3><p>Pick a date and time, and let us know how many are coming.</p></div></li>
-            <li><span class="step-number">03</span><div><h3>You’re ready to visit</h3><p>See your visit details together in one clear confirmation.</p></div></li>
-        </ol>
-    </section>
     <?php require __DIR__.'/../src/views/donations.php'; ?>
     <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
 </main>
 <footer class="footer wrap">
-    <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Places to visit</a><a href="#planning">Plan your visit</a><a href="https://www.nyumba.com/nyumba-foundation/" target="_blank" rel="noopener noreferrer">Nyumba Foundation <?= icon('diagonal') ?></a></div></div>
+    <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Places to visit</a><a href="https://www.nyumba.com/nyumba-foundation/" target="_blank" rel="noopener noreferrer">Nyumba Foundation <?= icon('diagonal') ?></a></div></div>
     <div class="footer-bottom"><span>© <?= date('Y') ?> Nyumba Group</span><span>Visit Nyumba · Day bookings</span><a href="https://www.nyumba.com/" target="_blank" rel="noopener noreferrer">Visit nyumba.com <?= icon('diagonal') ?></a></div>
 </footer>
 <dialog id="booking-dialog" aria-labelledby="<?= $confirmation ? 'confirmation-title' : 'booking-title' ?>" <?= $openForm || $confirmation ? 'open' : '' ?>>
