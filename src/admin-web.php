@@ -40,6 +40,7 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['GET','POST'], true)) { http_response
 $authenticated = AdminAuth::authenticated($now);
 if ($path !== '/admin/login' && !$authenticated) adminRedirect('/admin/login');
 try {
+    if ($authenticated && preg_match('#^/admin/(school-requests|donations)(?:/|$)#', $path)) { require __DIR__.'/community-admin.php'; return; }
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!is_string($_POST['csrf'] ?? null) || !hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
             http_response_code(403); echo 'This form has expired. <a href="/admin">Please try again</a>.'; return;

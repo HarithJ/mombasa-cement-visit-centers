@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 if (preg_match('#^/admin(?:/|$)#', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '')) { require __DIR__.'/../src/admin-web.php'; exit; }
+if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/school-request') { require __DIR__.'/../src/school-web.php'; exit; }
+if (preg_match('#^/mpesa/(confirmation|result/[a-f0-9]{64})$#D', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '')) { require __DIR__.'/../src/mpesa-web.php'; exit; }
+if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/donate') { require __DIR__.'/../src/donate-web.php'; exit; }
 $uiVersion = 'v3';
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/feedback') { require __DIR__.'/../src/feedback-web.php'; exit; }
 require __DIR__.'/../src/web.php';
@@ -69,6 +72,7 @@ unset($destination);
     <link rel="icon" href="assets/nyumba-group.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/travel.css">
+    <link rel="stylesheet" href="assets/community.css">
     <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
@@ -83,7 +87,7 @@ unset($destination);
 
 
         </div>
-        <nav class="explorer-nav" aria-label="Main navigation"><a href="#destinations">The destinations</a><a href="#planning">How it works</a><a href="#destinations" class="nav-plan">Let’s go <?= icon('diagonal') ?></a></nav>
+        <nav class="explorer-nav" aria-label="Main navigation"><a href="#destinations">The destinations</a><a href="#planning">How it works</a><a href="#school-projects">School projects</a><a href="#donations">Donate</a><a href="#destinations" class="nav-plan">Let’s go <?= icon('diagonal') ?></a></nav>
     </div>
 </header>
 <main>
@@ -123,6 +127,7 @@ unset($destination);
         </div>
         <div class="hero-footnote wrap"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
     </section>
+    <?php require __DIR__.'/../src/views/school-projects.php'; ?>
     <section class="planning wrap reveal" id="planning" aria-labelledby="planning-title">
         <div class="planning-heading"><p class="eyebrow">LESS PLANNING. MORE EXPLORING.</p><h2 id="planning-title">Your day out,<br>in three steps.</h2><p>From choosing a place to planning your day,<br>your next visit starts here.</p></div>
         <ol class="steps">
@@ -131,6 +136,7 @@ unset($destination);
             <li><span class="step-number">03</span><div><h3>You’re ready to visit</h3><p>See your visit details together in one clear confirmation.</p></div></li>
         </ol>
     </section>
+    <?php require __DIR__.'/../src/views/donations.php'; ?>
     <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
 </main>
 <footer class="footer wrap">

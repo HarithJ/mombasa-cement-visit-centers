@@ -145,7 +145,9 @@ try {
   const runtimeErrors = []; page.on('pageerror', error => runtimeErrors.push(error.message));
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 }); await page.goto('http://127.0.0.1:8091/');
-    assert.equal(await page.locator('header a, header nav').count(), 0);
+    const navigation=page.getByRole('navigation',{name:'Main navigation'});
+    assert.equal(await navigation.getByRole('link',{name:'School projects',exact:true}).getAttribute('href'),'#school-projects');
+    assert.equal(await navigation.getByRole('link',{name:'Donate',exact:true}).getAttribute('href'),'#donations');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: `test-results/day-${width}-home.png`, animations: 'disabled' });
     await page.locator('[data-book="galana"]').click();

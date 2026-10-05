@@ -67,3 +67,7 @@ contacts are unchanged. Set `BOOKING_MANAGER_OVERRIDE_ENABLED=0` in the
 web application to restore the configured location managers for new bookings. All three additional email recipients remain included.
 Existing queued messages retain their original recipients.
 The existing email/SMS enablement flags still apply.
+
+## School support and optional donations (v3)
+
+The school-project section and `/school-request` form support private requests and queued staff email, with `/admin/school-requests` for review. Optional M-Pesa donations support merchant instructions, provider-generated payment QRs, callback receipt recording, admin transaction/attempt views, and reconciliation. Approved project content and merchant/recipient configuration are required before launch; no recipient or completed project is invented. See [community operations and launch inputs](docs/community.md).

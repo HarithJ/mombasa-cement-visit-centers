@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="/assets/admin/workspace.css"></head><body>
 <header><a class="brand" href="/admin"><img src="/assets/nyumba-group.svg" alt="Nyumba Group" width="42" height="55"><span>NYUMBA GROUP<small>Visit administration</small></span></a><?php if ($authenticated): ?><form action="/admin/logout" method="post"><input type="hidden" name="csrf" value="<?=ae($_SESSION['csrf'])?>"><button>Sign out</button></form><?php endif; ?></header>
 <main>
+<nav class="shortcuts" aria-label="Administration"><a href="/admin">Bookings</a><a href="/admin/school-requests">School requests</a><a href="/admin/donations">Donations</a></nav>
 <?php if ($error): ?><p class="error" role="alert"><?=ae($error)?></p><?php endif; ?>
 <?php if ($booking): ?>
 <a href="<?=ae(adminListUrl($filters,$page))?>">Back to bookings</a>
