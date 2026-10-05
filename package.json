@@ -16,6 +16,9 @@
     "test:donations": "node tests/donations.test.mjs && php tests/reconciliation.test.php"
   },
   "devDependencies": {
-    "playwright": "1.62.1"
+    "jsqr": "1.4.0",
+    "playwright": "1.62.1",
+    "pngjs": "7.0.0",
+    "qrcode": "1.5.4"
   }
 }

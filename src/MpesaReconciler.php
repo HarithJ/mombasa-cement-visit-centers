@@ -8,10 +8,10 @@ final class MpesaReconciler {
         if(!preg_match('/^[A-Z0-9]{8,32}$/D',$receipt))throw new InvalidArgumentException('Invalid receipt');
         $this->db->prepare('INSERT OR IGNORE INTO mpesa_queries(environment,merchant,receipt) VALUES (?,?,?)')->execute([$this->config['environment'],$this->config['merchant'],$receipt]);
     }
-    public function acceptResult(string $token,array $payload,bool $trusted):void {
+    public function acceptResult(string $token,array $payload,bool $trusted,bool $timedOut=false):void {
         $q=$this->db->prepare('SELECT 1 FROM mpesa_query_runs r JOIN mpesa_queries q ON q.id=r.query_id WHERE r.token=? AND q.environment=? AND q.merchant=?');$q->execute([$token,$this->config['environment'],$this->config['merchant']]);
         if(!$q->fetchColumn())throw new InvalidArgumentException('Unknown query');
-        $json=json_encode($payload,JSON_THROW_ON_ERROR);
+        $json=json_encode(['kind'=>$timedOut?'timeout':'result','body'=>$payload],JSON_THROW_ON_ERROR);
         $this->db->prepare('INSERT OR IGNORE INTO mpesa_query_results(token,fingerprint,payload,trusted,created_at) VALUES (?,?,?,?,?)')->execute([$token,hash('sha256',$json),$json,$trusted?1:0,gmdate('Y-m-d\TH:i:s\Z')]);
     }
     private function confirmedReceipt(array $payload,array $run):array {
@@ -34,7 +34,16 @@ final class MpesaReconciler {
         $q->bindValue(1,$this->config['environment']);$q->bindValue(2,$this->config['merchant']);$q->bindValue(3,$limit,PDO::PARAM_INT);$q->execute();
         foreach($q->fetchAll()as $result){
             try{
-                $body=$this->confirmedReceipt(json_decode($result['payload'],true,32,JSON_THROW_ON_ERROR),$result);
+                $event=json_decode($result['payload'],true,32,JSON_THROW_ON_ERROR);
+                $payload=$event['body']??$event;
+                if(($event['kind']??'result')==='timeout'){
+                    $timeout=$payload['Result']??$payload;
+                    foreach(['ConversationID'=>'conversation','OriginatorConversationID'=>'originator']as $field=>$column)if(isset($timeout[$field])&&$timeout[$field]!==$result[$column])throw new InvalidArgumentException('Mismatched timeout');
+                    $this->db->prepare("UPDATE mpesa_queries SET last_error='Provider queue timeout; retry scheduled' WHERE id=? AND status IN ('pending','waiting')")->execute([$result['query_id']]);
+                    $this->db->prepare('UPDATE mpesa_query_results SET processed=1 WHERE id=?')->execute([$result['id']]);
+                    $counts['retry']++;continue;
+                }
+                $body=$this->confirmedReceipt($payload,$result);
                 $ledger=new DonationLedger($this->db,$this->config);$id=$ledger->receive($body,true,'status-query','query '.$result['query_id']);
                 $state=$this->db->prepare('SELECT state FROM mpesa_transactions WHERE id=?');$state->execute([$id]);$needsReview=$state->fetchColumn()==='conflict';
                 $this->db->prepare('UPDATE mpesa_queries SET status=?,last_error=? WHERE id=?')->execute([$needsReview?'review':'complete',$needsReview?'Conflicting verified evidence':null,$result['query_id']]);$counts[$needsReview?'review':'verified']++;

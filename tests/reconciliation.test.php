@@ -32,4 +32,28 @@ try{
  check($db->query('SELECT state FROM mpesa_transactions')->fetchColumn()==='reversed','Reversal preserves original transaction and updates state');
  check((int)$db->query('SELECT COUNT(*) FROM mpesa_adjustments')->fetchColumn()===1,'Reversal adjustment applied once');
  echo "PASS verified statement reconciliation and linked full reversal are idempotent\n";
+ $ledger->receive([...$body,'TransID'=>'TESTLATE0002'],false);
+ $now=1800000000;$retryWorker=new MpesaReconciler($db,$config,function()use(&$now){return $now;});
+ for($i=0;$i<5;$i++){$result=$retryWorker->run(fn()=>throw new RuntimeException('Timeout'));check($result['retry']===1,'Unknown result retries without charging');$now+=3601;}
+ check($retryWorker->run(fn()=>throw new RuntimeException('No sixth query'))['review']===1,'Bounded query attempts reach review');
+ $row=$db->query("SELECT state FROM mpesa_transactions WHERE receipt='TESTLATE0002'")->fetchColumn();check($row==='unverified','Timeout never verifies funds');
+ $ledger->receive([...$body,'TransID'=>'TESTLATE0003'],false);
+ $retryWorker->run(fn()=>['ResponseCode'=>'0','ConversationID'=>'conversation-3','OriginatorConversationID'=>'origin-3']);
+ $token=$db->query("SELECT r.token FROM mpesa_query_runs r JOIN mpesa_queries q ON q.id=r.query_id WHERE q.receipt='TESTLATE0003'")->fetchColumn();
+ $incomplete=['Result'=>['ResultCode'=>0,'ConversationID'=>'conversation-3','OriginatorConversationID'=>'origin-3']];
+ $retryWorker->acceptResult($token,$incomplete,false);$result=$retryWorker->run(fn()=>throw new RuntimeException('No early query'));check($result['verified']===0,'Untrusted query callback ignored');
+ $retryWorker->acceptResult($token,$incomplete,true);$result=$retryWorker->run(fn()=>throw new RuntimeException('No early query'));check($result['review']===1,'Query acceptance alone is insufficient evidence');
+ echo "PASS status-query backoff, bounded retries, untrusted results and incomplete evidence\n";
+ $ledger->receive([...$body,'TransID'=>'TESTLATE0004'],false);
+ $retryWorker->run(fn()=>['ResponseCode'=>'0','ConversationID'=>'conversation-4','OriginatorConversationID'=>'origin-4']);
+ $token=$db->query("SELECT r.token FROM mpesa_query_runs r JOIN mpesa_queries q ON q.id=r.query_id WHERE q.receipt='TESTLATE0004'")->fetchColumn();
+ $retryWorker->acceptResult($token,['Result'=>['ConversationID'=>'conversation-4','OriginatorConversationID'=>'origin-4']],true,true);
+ $retryWorker->run(fn()=>throw new RuntimeException('Wait for scheduled retry'));
+ $now+=3601;
+ check($retryWorker->run(fn()=>['ResponseCode'=>'0','ConversationID'=>'conversation-4-retry','OriginatorConversationID'=>'origin-4-retry'])['requested']===1,'Asynchronous provider timeout remains retryable');
+ $token=$db->query("SELECT r.token FROM mpesa_query_runs r JOIN mpesa_queries q ON q.id=r.query_id WHERE q.receipt='TESTLATE0004' AND r.conversation='conversation-4-retry'")->fetchColumn();
+ $recovered=$callback;$recovered['Result']['ConversationID']='conversation-4-retry';$recovered['Result']['OriginatorConversationID']='origin-4-retry';$recovered['Result']['ResultParameters']['ResultParameter'][0]['Value']='TESTLATE0004';
+ $retryWorker->acceptResult($token,$recovered,true);
+ check($retryWorker->run(fn()=>throw new RuntimeException('Already recovered'))['verified']===1,'Timeout followed by success verifies payment');
+ echo "PASS asynchronous provider timeout retries and later confirms\n";
 }finally{if(isset($db))$db=null;if(is_file($dir.'/db'))unlink($dir.'/db');if(is_dir($dir))rmdir($dir);}

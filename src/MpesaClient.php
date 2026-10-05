@@ -28,7 +28,7 @@ final class MpesaClient {
     public function status(string $receipt,string $token):array {
         if(!self::statusConfigured())throw new RuntimeException('Status queries unavailable');
         $url=rtrim(getenv('COMMUNITY_BASE_URL'),'/').'/mpesa/result/'.$token;
-        return $this->request('/mpesa/transactionstatus/v1/query',['Initiator'=>getenv('MPESA_INITIATOR'),'SecurityCredential'=>getenv('MPESA_SECURITY_CREDENTIAL'),'CommandID'=>'TransactionStatusQuery','TransactionID'=>$receipt,'PartyA'=>$this->config['merchant'],'IdentifierType'=>'4','ResultURL'=>$url,'QueueTimeOutURL'=>$url,'Remarks'=>'Donation reconciliation','Occasion'=>'Donation status']);
+        return $this->request('/mpesa/transactionstatus/v1/query',['Initiator'=>getenv('MPESA_INITIATOR'),'SecurityCredential'=>getenv('MPESA_SECURITY_CREDENTIAL'),'CommandID'=>'TransactionStatusQuery','TransactionID'=>$receipt,'PartyA'=>$this->config['merchant'],'IdentifierType'=>'4','ResultURL'=>$url,'QueueTimeOutURL'=>str_replace('/mpesa/result/','/mpesa/timeout/',$url),'Remarks'=>'Donation reconciliation','Occasion'=>'Donation status']);
     }
     public function qr(array $attempt):array {
         $result=$this->request('/mpesa/qrcode/v1/generate',['MerchantName'=>$attempt['merchant_name'],'RefNo'=>$attempt['reference'],'Amount'=>intdiv((int)$attempt['amount'],100),'TrxCode'=>$attempt['merchant_type']==='paybill'?'PB':'BG','CPI'=>$attempt['payment_number'],'Size'=>'300']);

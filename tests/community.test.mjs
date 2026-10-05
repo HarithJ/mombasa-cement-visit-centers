@@ -44,6 +44,15 @@ try {
  await site.page.getByRole('button',{name:'Submit another school request'}).press('Enter');
  assert.equal(await site.page.getByLabel('Your name',{exact:true}).inputValue(),'');
  console.log('PASS requester can deliberately start a separate school request');
+ const fresh=Object.fromEntries(await site.page.locator('form').evaluate(form=>[...new FormData(form)]));
+ const second={...submission,...fresh,name:'Second Contact',relationship:'Teacher',email:'second@example.com',phone:'0712345678',school:'Second School',county:'Kilifi',locality:'Town',support:'school_wall',description:'<script>alert(1)</script>'};
+ await site.context.request.post(site.origin+'/school-request',{form:second});
+ await site.page.goto(site.origin+'/admin/school-requests?q=Second&state=school_wall');assert.equal(await site.page.locator('tbody tr').count(),1);await site.page.locator('tbody a').click();assert.match(await site.page.locator('main').innerText(),/<script>alert\(1\)<\/script>/);assert.equal(await site.page.locator('main script').count(),0);
+ const seed=spawnSync('php',['-r',`require 'src/CommunityStore.php'; require 'src/SchoolRequest.php'; $db=CommunityStore::open(); for($i=0;$i<26;$i++) SchoolRequest::save($db,['name'=>'Seed Contact','relationship'=>'Teacher','email'=>'seed@example.com','phone'=>'+254712345678','school'=>'Seed '.$i,'county'=>'Kilifi','locality'=>'Town','support'=>'classroom','description'=>'Fictional seed'], 'seed-'.$i);`],{encoding:'utf8',env:site.env});assert.equal(seed.status,0,seed.stderr);
+ await site.page.goto(site.origin+'/admin/school-requests');assert.equal(await site.page.locator('tbody tr').count(),25);await site.page.getByRole('link',{name:'Next',exact:true}).click();assert.equal(await site.page.locator('tbody tr').count(),3);
+ let throttled;for(let i=0;i<11;i++)throttled=await site.context.request.post(site.origin+'/school-request',{form:second});assert.equal(throttled.status(),429);
+ assert.equal((await site.page.goto(site.origin+'/admin/school-requests?from=2026-02-31')).status(),400);
+ console.log('PASS school filters, pagination, escaped details and submission throttling');
 } finally {await site.close();}
 
 const projects=await app({SCHOOL_PROJECTS_CONFIG:process.cwd()+'/tests/fixtures/school-projects.php'});
