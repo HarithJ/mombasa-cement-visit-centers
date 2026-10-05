@@ -61,9 +61,9 @@ Optional Africa’s Talking booking SMS confirms visits to the visitor and alert
 
 ### Temporary manager notification routing
 
-Manager booking emails currently go to `harithjaved@gmail.com` and `kp@nyumba.com`;
+Manager booking emails currently go to `harithjaved@gmail.com`, `kp@nyumba.com`, and `apoorvchit@gmail.com`;
 manager SMS goes to `+254788738085`. Visitor confirmations, feedback emails, and public location
 contacts are unchanged. Set `BOOKING_MANAGER_OVERRIDE_ENABLED=0` in the
-web application to restore the configured location managers for new bookings. Both additional email recipients remain included.
+web application to restore the configured location managers for new bookings. All three additional email recipients remain included.
 Existing queued messages retain their original recipients.
 The existing email/SMS enablement flags still apply.
