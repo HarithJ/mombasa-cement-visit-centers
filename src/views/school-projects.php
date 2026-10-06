@@ -16,8 +16,8 @@
     </article>
     <?php endforeach; ?>
     <div class="school-support-details">
-        <div><span class="school-support-icon" aria-hidden="true"><?=icon('people')?></span><div><h3>More room to learn</h3><p>Classroom construction that gives schools space for their next chapter.</p></div></div>
-        <div><span class="school-support-icon" aria-hidden="true"><?=icon('check')?></span><div><h3>Safer spaces to grow</h3><p>School walls that help create a secure, defined space for learning.</p></div></div>
+        <p class="school-mission">Every child deserves a place to <span class="school-mission-emphasis">learn—and feel safe.</span></p>
+        <p class="school-mission-copy">We help schools build the classrooms and boundary walls that make that possible.</p>
         <p class="school-request-prompt">Does your school need a classroom or boundary wall?</p>
     </div>
     <a class="community-action school-request-action" href="/school-request"><span>Request school support</span><span class="school-request-arrow" aria-hidden="true">↗</span></a>
@@ -30,3 +30,5 @@
     </div>
 </dialog>
 <script src="/assets/school-request-dialog.js" defer></script>
+
+<script src="/assets/school-measurements.js" defer></script>

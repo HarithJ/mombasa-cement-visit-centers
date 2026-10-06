@@ -8,11 +8,11 @@ try {
  const page=await context.newPage();await page.goto(demo.origin);
  await page.locator('[data-demo-amount="1000"]').click();
  assert.equal(await page.getByLabel('Donation amount (KES)').inputValue(),'1000');
- await page.getByRole('button',{name:'Preview donation'}).click();
+ await page.getByRole('button',{name:'Donate'}).click();
  assert.match(await page.locator('[data-demo-status]').innerText(),/KES 1,000 selected/);
  assert.equal(await page.getByAltText('Payment preview QR code').count(),1);
  await page.getByLabel('Donation amount (KES)').fill('-1');
- await page.getByRole('button',{name:'Preview donation'}).click();
+ await page.getByRole('button',{name:'Donate'}).click();
  assert.doesNotMatch(await page.locator('[data-demo-status]').innerText(),/selected/);
  await demo.login();await demo.page.goto(demo.origin+'/admin/donations/attempts');
  assert.equal(await demo.page.locator('tbody a').count(),0);

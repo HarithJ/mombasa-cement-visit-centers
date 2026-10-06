@@ -26,6 +26,7 @@ if($detail){
  if(!$record){http_response_code(404);echo 'Request not found.';return;}
  $detailFields=['Reference'=>$record['reference']];
  foreach(SchoolRequest::FIELDS as $key=>[$label])$detailFields[$label]=$key==='support'?SchoolRequest::TYPES[$record[$key]]:$record[$key];
+ $detailFields+=SchoolRequest::measurementDetails($record);
  $detailFields['Submitted']=adminTimestamp($record['created_at']);$detailFields['Notification']=$notificationState($record);
 }else{
  $where=[];$params=[];

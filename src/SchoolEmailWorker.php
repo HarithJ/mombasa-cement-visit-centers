@@ -15,6 +15,7 @@ final class SchoolEmailWorker {
     }
     private function payload(array $request,array $config):array {
         $details=['Reference'=>$request['reference']];foreach(SchoolRequest::FIELDS as $key=>[$label])$details[$label]=$key==='support'?SchoolRequest::TYPES[$request[$key]]:$request[$key];
+        $details+=SchoolRequest::measurementDetails($request);
         $content=['title'=>'New school support request','preheader'=>$request['school'].' has requested support.','eyebrow'=>'School support','paragraphs'=>['A new request is ready for consideration.'],'details'=>$details,'notes'=>['Receiving this request does not approve construction.'],'action'=>['label'=>'Review request','url'=>$config['base'].'/admin/school-requests/'.$request['id']],'footer'=>'Private notification for the Nyumba team.'];
         return ['from'=>$config['from'],'to'=>$config['to'],'subject'=>'New school support request '.$request['reference'],'html'=>EmailTemplate::html($content),'text'=>EmailTemplate::text($content)];
     }

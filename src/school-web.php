@@ -24,18 +24,29 @@ CommunityWeb::header('Request school support');
 ?>
 <p class="eyebrow">BUILDING FOR EDUCATION</p><h1>Request school support</h1>
 <?php if ($saved): ?>
-<div class="community-success"><h2>Your request has been received</h2><p class="reference"><?=$e($saved['reference'])?></p><p>Our team will consider your school's needs. Submission does not guarantee construction or a completion date.</p></div><p><a href="/#school-projects">Back to school projects</a></p><form method="post" class="community-form"><input type="hidden" name="csrf" value="<?=$e($_SESSION['csrf'])?>"><input type="hidden" name="submissionToken" value="<?=$e($token)?>"><input type="hidden" name="action" value="new"><button class="community-action">Submit another school request</button></form>
+<div class="community-success school-confirmation"><h2>Your request has been received</h2><p class="school-reference-label">Request reference</p><p class="reference"><?=$e($saved['reference'])?></p><p>Our team will consider your school's needs. Submission does not guarantee construction or a completion date.</p></div><div class="school-confirmation-actions"><a href="/#school-projects">Back to school projects ↗</a><form method="post" class="community-form"><input type="hidden" name="csrf" value="<?=$e($_SESSION['csrf'])?>"><input type="hidden" name="submissionToken" value="<?=$e($token)?>"><input type="hidden" name="action" value="new"><button class="community-action">Submit another school request</button></form></div>
 <?php else: ?>
-<p>Tell us about your school's need for a classroom or school wall. No booking or donation is needed.</p><p class="form-hint">All fields are required. Please include only school and contact information needed for follow-up, not pupils' personal information.</p>
+<p>Tell us about your school's need for a classroom or school wall. No booking or donation is needed.</p><p class="form-hint">Fields marked * are required. Complete the contact and school details, then enter measurements in metres for the support you need. Please include only school and contact information needed for follow-up, not pupils' personal information.</p>
 <?php if (isset($errors['_form'])): ?><p role="alert" class="community-alert"><?=$e($errors['_form'])?></p><?php endif; ?>
 <form class="community-form" method="post" action="/school-request">
 <input type="hidden" name="csrf" value="<?=$e($_SESSION['csrf'])?>"><input type="hidden" name="submissionToken" value="<?=$e($token)?>">
-<?php foreach (SchoolRequest::FIELDS as $key=>[$label,$max]): ?>
-<label class="<?=$key==='description'?'wide':''?>" for="school-<?=$e($key)?>"><?=$e($label)?>
-<?php if ($key==='support'): ?><select name="support" id="school-support" required aria-describedby="school-support-error"><option value="">Choose support</option><?php foreach (SchoolRequest::TYPES as $value=>$text): ?><option value="<?=$e($value)?>" <?=($values[$key]??'')===$value?'selected':''?>><?=$e($text)?></option><?php endforeach; ?></select>
-<?php elseif ($key==='description'): ?><textarea name="description" id="school-description" required maxlength="3000" aria-describedby="school-description-error"><?=$e($values[$key]??'')?></textarea>
+<?php foreach (['Contact details'=>['name','relationship','email','phone'], 'School details'=>['school','county','locality'], 'Construction requirements'=>['support']] as $section=>$keys): ?>
+<fieldset class="school-form-section wide"><legend><?=$e($section)?></legend><div class="school-fields">
+<?php foreach ($keys as $key): [$label,$max]=SchoolRequest::FIELDS[$key]; ?>
+<label class="<?=$key==='description'?'wide':''?>" for="school-<?=$e($key)?>"><span><?=$e($label)?> <span aria-hidden="true">*</span></span>
+<?php if ($key==='support'): ?><select name="support" id="school-support" required aria-describedby="school-support-error"><option value="" disabled <?=empty($values['support'])?'selected':''?>>Classroom or wall?</option><?php foreach (SchoolRequest::TYPES as $value=>$text): ?><option value="<?=$e($value)?>" <?=($values[$key]??'')===$value?'selected':''?>><?=$e($text)?></option><?php endforeach; ?></select>
 <?php else: ?><input id="school-<?=$e($key)?>" name="<?=$e($key)?>" type="<?=$key==='email'?'email':($key==='phone'?'tel':'text')?>" maxlength="<?=$max?>" required value="<?=$e($values[$key]??'')?>" aria-describedby="school-<?=$e($key)?>-error"><?php endif; ?>
 <span class="community-error" id="school-<?=$e($key)?>-error"><?=$e($errors[$key]??'')?></span></label>
+<?php endforeach; ?></div></fieldset>
 <?php endforeach; ?>
+<?php foreach (['classroom'=>'Classroom measurements','school_wall'=>'Boundary wall measurements'] as $type=>$heading): ?>
+<fieldset class="school-form-section wide" data-measurement-type="<?=$e($type)?>"><legend><?=$e($heading)?></legend><p class="form-hint">In metres. Complete this section when requesting <?=$type==='classroom'?'a classroom':'a boundary wall'?>.</p><div class="school-fields">
+<?php foreach (SchoolRequest::MEASUREMENTS as $key=>[$label,$measurementType]): if ($measurementType!==$type) continue; ?>
+<label for="school-<?=$e($key)?>"><span><?=$e($label)?> <span aria-hidden="true">*</span></span><input id="school-<?=$e($key)?>" name="<?=$e($key)?>" type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" value="<?=$e((string)($values[$key]??''))?>" aria-describedby="school-<?=$e($key)?>-error"><span class="community-error" id="school-<?=$e($key)?>-error"><?=$e($errors[$key]??'')?></span></label>
+<?php endforeach; ?></div></fieldset>
+<?php endforeach; ?>
+<label class="wide" for="school-description"><?=$e(SchoolRequest::FIELDS['description'][0])?>
+<textarea name="description" id="school-description" maxlength="3000" aria-describedby="school-description-error"><?=$e($values['description']??'')?></textarea>
+<span class="community-error" id="school-description-error"><?=$e($errors['description']??'')?></span></label>
 <p class="wide form-hint">Your details are shared privately with Nyumba's team for follow-up. This is a request for consideration, not an approval.</p><button class="community-action wide">Submit school request</button>
-</form><?php endif; ?></main></body></html>
+</form><?php endif; ?></main><script src="/assets/school-measurements.js" defer></script></body></html>

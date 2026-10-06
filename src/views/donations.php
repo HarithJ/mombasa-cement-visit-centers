@@ -10,11 +10,11 @@
     <label for="demo-donation-amount">Donation amount (KES)</label>
     <input id="demo-donation-amount" type="number" min="1" max="250000" step="1" value="500" inputmode="numeric">
     <p class="mpesa-demo-presets" aria-label="Suggested donation amounts"><button type="button" data-demo-amount="500">KES 500</button><button type="button" data-demo-amount="1000">KES 1,000</button><button type="button" data-demo-amount="2500">KES 2,500</button></p>
-    <button type="button" class="community-action" data-demo-confirm>Preview donation ↗</button>
+    <button type="button" class="community-action" data-demo-confirm>Donate ↗</button>
     <p role="status" data-demo-status></p>
     <noscript><p>Enable JavaScript to preview your donation.</p></noscript>
   </div>
-  <figure><img src="/assets/mpesa-demo-qr.svg" alt="Payment preview QR code" width="240" height="240"><figcaption>Payment preview</figcaption></figure>
+  <figure><img src="/assets/mpesa-demo-qr.svg" alt="Payment preview QR code" width="240" height="240"></figure>
 </div>
 <script src="/assets/mpesa-demo.js" defer></script>
 <?php endif; ?>

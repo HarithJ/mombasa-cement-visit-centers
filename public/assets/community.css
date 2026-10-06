@@ -123,3 +123,80 @@
 @media(min-width:1000px){#school-projects:has(.school-feature-photo)>.school-request-action{margin-top:-10px}}
 .school-request-action:hover .school-request-arrow{transform:translate(2px,-2px)}
 @media(prefers-reduced-motion:reduce){.school-request-action:hover .school-request-arrow{transform:none}}
+
+.school-form-section{min-width:0;margin:0;padding:24px 0 0;border:0;border-top:1px solid #d4ddd4}
+.school-form-section legend{padding:0 14px 0 0;font-size:17px;font-weight:700;color:#173f35}
+.school-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px}
+.school-form-section>.form-hint{margin:0 0 16px!important}
+.school-form-section[hidden]{display:none}
+@media(max-width:700px){.school-fields{grid-template-columns:1fr}}
+
+.community-form #school-support:invalid{color:#7b877f}.community-form #school-support option{color:#173f35}.community-form #school-support option:disabled{color:#7b877f}
+
+.school-support-details .school-mission{font-size:clamp(24px,2.4vw,32px);font-weight:600;line-height:1.35;letter-spacing:-.025em;margin:0 0 16px;color:#173f35}.school-support-details .school-mission-copy{font-size:16px;line-height:1.8;color:#526459;margin:0 0 28px;max-width:440px}
+
+/* Keep the mission close to the impact copy; let spare height sit below the action. */
+@media(min-width:1000px){
+  #school-projects:has(.school-feature-photo){grid-template-rows:auto auto max-content max-content minmax(0,1fr)}
+  #school-projects .school-support-details{margin-top:2px}
+}
+.school-support-details .school-mission{padding:0}
+.school-support-details .school-mission-copy{padding-left:0}
+
+.school-mission-emphasis{display:inline-block;position:relative;padding-bottom:8px}
+.school-mission-emphasis::after{content:'';position:absolute;left:0;right:0;bottom:0;height:9px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12' preserveAspectRatio='none'%3E%3Cpath d='M3 8 Q95 1 170 5 T297 4' fill='none' stroke='%23899e78' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center/100% 100% no-repeat;pointer-events:none}
+
+/* Give the mission and invitation breathing room within the gallery's height. */
+.school-support-details .school-mission{line-height:1.45;margin-bottom:24px}
+.school-support-details .school-mission-copy{margin-bottom:34px}
+.school-support-details .school-request-prompt{margin-top:28px}
+@media(min-width:1000px){
+  #school-projects:has(.school-feature-photo){grid-template-rows:auto auto auto auto auto}
+  #school-projects .school-support-details{margin-top:16px;align-self:center}
+  #school-projects:has(.school-feature-photo)>.school-request-action{align-self:end;margin-top:0;margin-bottom:8px}
+}
+
+/* Match the gaps around the mission and keep its invitation with the action. */
+.school-support-details .school-mission-copy{margin-bottom:0}
+.school-support-details .school-request-prompt{margin-top:52px}
+@media(min-width:1000px){
+  #school-projects:has(.school-feature-photo){grid-template-rows:auto auto max-content max-content minmax(0,1fr);row-gap:0}
+  #school-projects:has(.school-feature-photo)>.community-heading>.eyebrow{margin-bottom:18px}
+  #school-projects:has(.school-feature-photo)>.community-heading>h2{margin-bottom:34px}
+  #school-projects .school-support-details{margin-top:52px;align-self:start}
+  #school-projects:has(.school-feature-photo)>.school-request-action{align-self:start;margin:8px 0 0}
+}
+
+.community-page .school-confirmation{margin-top:32px;padding:28px 30px;border-left:3px solid #35704f;border-radius:0 8px 8px 0}
+.community-page .school-confirmation h2{font-size:clamp(23px,2.3vw,30px);line-height:1.3;letter-spacing:-.025em;margin:0 0 24px}
+.community-page .school-confirmation .school-reference-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#526459;margin:0 0 6px}
+.community-page .school-confirmation .reference{font-size:16px;line-height:1.5;font-weight:600;letter-spacing:.03em;margin:0 0 24px}
+.community-page .school-confirmation>p:last-child{font-size:15px;line-height:1.8;max-width:580px;margin:0;color:#526459}
+.school-confirmation-actions{display:flex;flex-wrap:wrap;align-items:center;gap:20px 28px;margin-top:28px}
+.school-confirmation-actions>a{font-size:14px;font-weight:600;text-underline-offset:4px}
+.school-confirmation-actions .community-form{display:block;margin:0}
+.school-confirmation-actions .community-form button{margin:0;padding:12px 18px;background:transparent;color:#173f35;border:1px solid #aab9ad;border-radius:6px;font-size:13px;line-height:1.5}
+.school-confirmation-actions .community-form button:hover{background:#e9efe4}
+@media(max-width:700px){.community-page .school-confirmation{padding:24px 20px}.school-confirmation-actions{align-items:flex-start;flex-direction:column}}
+
+.school-admin-detail{margin-top:28px;max-width:1120px}
+.school-admin-summary{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:28px 0 32px;border-top:2px solid #173f35;border-bottom:1px solid #d4ddd4}
+.school-admin-eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#526459;margin:0 0 10px;font-weight:600}
+.school-admin-summary h2{font-family:inherit;font-size:30px;line-height:1.2;letter-spacing:-.03em;margin:0 0 12px;overflow-wrap:anywhere}
+.school-admin-reference{font-size:12px;letter-spacing:.04em;color:#526459;overflow-wrap:anywhere;margin:0}
+.school-admin-detail dl{display:grid;grid-template-columns:1fr;gap:18px;margin:0}
+.school-admin-detail dl>div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px}
+.school-admin-detail dt{font-size:12px;line-height:1.6}
+.school-admin-detail dd{font-size:14px;line-height:1.6;color:#173f35}
+.school-admin-status{display:inline-block;padding:4px 9px;border-radius:4px;background:#eeede5;font-size:12px}
+.school-admin-columns{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.school-admin-section{padding:30px 0;border-bottom:1px solid #d4ddd4;min-width:0}
+.school-admin-section h2{font-family:inherit;font-size:18px;font-weight:650;line-height:1.4;margin:0 0 22px}
+.school-admin-hint{font-size:13px;color:#647168;margin:-12px 0 22px}
+.school-admin-measurement-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:32px}
+.school-admin-measurement-groups h3{font-size:13px;font-weight:600;margin:0 0 16px}
+.school-admin-detail .school-admin-measurements{grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:24px}
+.school-admin-detail .school-admin-measurements>div{display:block;border-left:2px solid #d4ddd4;padding-left:16px}
+.school-admin-measurements dd{font-size:26px;font-weight:600;margin-top:8px;line-height:1.2}
+.school-admin-notes{font-size:14px;line-height:1.8;max-width:800px;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;color:#526459}
+@media(max-width:750px){.school-admin-summary,.school-admin-columns{grid-template-columns:1fr;gap:24px}.school-admin-columns{gap:0}.school-admin-detail dl>div{grid-template-columns:120px minmax(0,1fr);gap:12px}.school-admin-summary h2{font-size:25px}}

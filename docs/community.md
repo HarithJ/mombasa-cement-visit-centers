@@ -97,3 +97,7 @@ Before launch supply approved project facts/photos, publication permission, desi
 Provider references: [C2B](https://developer.safaricom.co.ke/apis/CustomerToBusiness), [Dynamic QR](https://developer.safaricom.co.ke/apis/DynamicQRCode), [Transaction Status](https://developer.safaricom.co.ke/apis/TransactionStatus). Current authenticated merchant contracts and onboarding remain authoritative.
 
 When M-Pesa merchant settings are unavailable, the homepage shows a labelled client-side donation demo with suggested amounts and a sample QR. The QR contains demo text only, and the simulation does not contact M-Pesa or create donation records. Configured merchants continue to use the existing payment flow.
+
+School requests collect measurements in metres (up to two decimal places). Classroom requests require length, width and height; boundary-wall requests require total length and height. Requests for both require both groups. Irrelevant dimensions are discarded. Migration 013 adds nullable columns so existing requests remain readable as “Not supplied”. Measurements are included in admin details and new staff notification payloads. The form groups contact details, school details, construction requirements, and applicable measurements.
+
+Additional details are optional. Migration 014 removes the classroom perimeter column and previously stored perimeter values; submitted perimeter fields are ignored.
