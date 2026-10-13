@@ -1,4 +1,5 @@
 <?php $schoolProjects = require (getenv('SCHOOL_PROJECTS_CONFIG') ?: __DIR__.'/../../config/school-projects.php'); ?>
+<?php if (($design ?? '') === 'sunset' && !$schoolProjects): require __DIR__.'/designs/sunset-schools.php'; else: ?>
 <section class="community-section wrap" id="school-projects" aria-labelledby="school-projects-title">
     <div class="community-heading"><p class="eyebrow">BUILDING FOR EDUCATION</p><h2 id="school-projects-title"><?= designText('schools_title', 'Schools we have helped') ?></h2><p><strong>340+ classrooms built and still going</strong>. Safer schools. Brighter futures.</p></div>
     <?php if (!$schoolProjects): ?>
@@ -22,6 +23,7 @@
     </div>
     <a class="community-action school-request-action" href="/school-request"><span>Request school support</span><span class="school-request-arrow" aria-hidden="true">↗</span></a>
 </section>
+<?php endif; ?>
 <dialog id="school-request-dialog" class="school-request-dialog community-page" aria-labelledby="school-dialog-title">
     <div class="school-dialog-toolbar"><span id="school-dialog-title">School support <span>/ VISIT NYUMBA</span></span><button type="button" data-school-close aria-label="Close school request form">×</button></div>
     <div class="school-dialog-shell">
