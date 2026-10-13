@@ -146,3 +146,9 @@
   [data-design=night] .final-cta-inner{padding:44px 24px;border-radius:24px}
   [data-design=night] .final-cta h2{letter-spacing:-3px}
 }
+
+/* School projects fill the screen as a section of their own in the new designs. */
+@media(min-width:1000px){
+  :is([data-design=night],[data-design=mosaic],[data-design=sunset]) #school-projects:has(.school-feature-photo){min-height:100svh;grid-template-rows:auto auto max-content max-content auto;align-content:center;padding-block:80px}
+  :is([data-design=night],[data-design=mosaic],[data-design=sunset]) #school-projects .school-feature-photo{height:min(66svh,720px);min-height:0;max-height:none;align-self:center}
+}
