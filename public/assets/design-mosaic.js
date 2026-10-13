@@ -1,16 +1,7 @@
 'use strict';
-// Mosaic design: school section layout preview, the 340+ count-up, and tiles that pre-select the request type.
+// Mosaic design: the 340+ count-up, and tiles that open the request form with the type pre-selected.
 const schools = document.querySelector('.mo-schools');
 if (schools) {
-  const options = schools.querySelectorAll('[data-layout-option]');
-  const setLayout = layout => {
-    schools.dataset.layout = layout;
-    options.forEach(option => option.setAttribute('aria-pressed', String(option.dataset.layoutOption === layout)));
-    try { localStorage.setItem('mosaic-school-layout', layout); } catch {}
-  };
-  options.forEach(option => option.addEventListener('click', () => setLayout(option.dataset.layoutOption)));
-  try { const saved = localStorage.getItem('mosaic-school-layout'); if (saved && schools.querySelector(`[data-layout-option="${saved}"]`)) setLayout(saved); } catch {}
-
   const count = schools.querySelector('.mo-count');
   if (count && 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const target = Number(count.dataset.count);
