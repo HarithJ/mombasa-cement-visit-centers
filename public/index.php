@@ -59,10 +59,28 @@ foreach ($destinations as $id => &$destination) {
     $destination['imageAlts'] = array_map(fn($path) => $photoDescriptions[$id][basename($path)] ?? $destination['name'], $destination['images']);
 }
 unset($destination);
-$designs = ['original' => 'Original', 'coast' => 'Coast', 'concrete' => 'Concrete', 'night' => 'Night'];
+$designs = ['original' => 'Original', 'night' => 'Night', 'departures' => 'Departures', 'mosaic' => 'Mosaic'];
 $design = is_string($_GET['design'] ?? null) ? $_GET['design'] : (is_string($_COOKIE['design'] ?? null) ? $_COOKIE['design'] : 'original');
 if (!isset($designs[$design])) $design = 'original';
 if (isset($_GET['design'])) setcookie('design', $design, ['expires' => time() + 60 * 60 * 24 * 365, 'path' => '/', 'samesite' => 'Lax']);
+$designFonts = [
+    'night' => 'family=Space+Grotesk:wght@400..700',
+    'departures' => 'family=Inter+Tight:wght@400..900&family=JetBrains+Mono:wght@400..700',
+    'mosaic' => 'family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800',
+];
+$placeKickers = ['sahajanand' => 'A place to connect.', 'galana' => 'Room to roam.', 'feeding' => 'Care, in action.'];
+// Renders a destination photo gallery with the markup app.js expects (cycling layers, gallery button, lightbox).
+function galleryPhoto(array $destination, string $sizes, bool $priority = false): string {
+    $placeholder = $destination['placeholder'];
+    $alt = fn(int $index) => $placeholder ? ($index ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : 'Illustrated landscape placeholder; destination photography not yet supplied') : ($destination['imageAlts'][$index] ?? $destination['name']);
+    $html = '<div class="destination-photo'.($placeholder ? ' placeholder' : '').'" data-images="'.e(json_encode($destination['images'], JSON_THROW_ON_ERROR)).'" data-variants="'.e(json_encode($destination['variants'], JSON_THROW_ON_ERROR)).'" data-alts="'.e(json_encode($destination['imageAlts'] ?? [], JSON_THROW_ON_ERROR)).'" tabindex="0" aria-label="'.e($destination['name']).' image gallery. Photos change automatically; use the photo button for the next view.">';
+    $html .= '<img class="photo-primary" src="'.e($destination['variants'][0][720] ?? $destination['images'][0]).'" srcset="'.e(photoSrcset($destination['variants'][0])).'" sizes="'.e($sizes).'" decoding="async" alt="'.e($alt(0)).'" width="800" height="900" fetchpriority="'.($priority ? 'high' : 'auto').'">';
+    $html .= '<img class="photo-secondary" decoding="async" alt="'.e($alt(1)).'" width="800" height="900">';
+    $html .= '<noscript><img class="photo-secondary" src="'.e($destination['variants'][1][720] ?? $destination['images'][1]).'" srcset="'.e(photoSrcset($destination['variants'][1])).'" sizes="'.e($sizes).'" alt="'.e($alt(1)).'" width="800" height="900"></noscript>';
+    if ($placeholder) $html .= '<span class="placeholder-label">Illustration · Photo coming soon</span>';
+    $html .= '<div class="photo-bottom"><span>'.icon($destination['icon']).' '.e($destination['tag']).'</span><button class="photo-toggle" type="button" aria-label="Show alternate view of '.e($destination['name']).'" aria-pressed="false">'.icon('photo').($placeholder ? '' : '<svg class="photo-progress" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" pathLength="100" /></svg>').'</button></div>';
+    return $html.'</div>';
+}
 ?>
 <!doctype html>
 <html lang="en" data-design="<?= e($design) ?>">
@@ -77,19 +95,26 @@ if (isset($_GET['design'])) setcookie('design', $design, ['expires' => time() + 
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/travel.css">
     <link rel="stylesheet" href="assets/community.css">
+    <link rel="stylesheet" href="assets/designs.css">
+<?php if (isset($designFonts[$design])): ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&amp;family=IBM+Plex+Mono:wght@400;600&amp;family=Space+Grotesk:wght@400..700&amp;display=swap">
-    <link rel="stylesheet" href="assets/designs.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?<?= e($designFonts[$design]) ?>&amp;display=swap">
+<?php endif; ?>
+<?php if (in_array($design, ['departures', 'mosaic'], true)): ?>
+    <link rel="stylesheet" href="assets/design-<?= e($design) ?>.css">
+<?php endif; ?>
     <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
     <script src="assets/app.js" defer></script>
-    <script src="assets/design-switcher.js" defer></script>
+<?php if ($design === 'departures'): ?>
+    <script src="assets/design-departures.js" defer></script>
+<?php endif; ?>
 </head>
 <body>
 <a class="skip-link" href="#destinations">Skip to destinations</a>
-<nav class="design-switcher" aria-label="Design preview"><div class="design-switcher-inner"><span class="design-switcher-label">Preview design</span><div class="design-switcher-options"><?php foreach ($designs as $id => $label): ?><a href="?design=<?= e($id) ?>" data-design-option="<?= e($id) ?>" aria-current="<?= $id === $design ? 'true' : 'false' ?>"><?= e($label) ?></a><?php endforeach; ?></div></div></nav>
+<nav class="design-switcher" aria-label="Design preview"><div class="design-switcher-inner"><span class="design-switcher-label">Preview design</span><div class="design-switcher-options"><?php foreach ($designs as $id => $label): ?><a href="?design=<?= e($id) ?>" aria-current="<?= $id === $design ? 'true' : 'false' ?>"><?= e($label) ?></a><?php endforeach; ?></div></div></nav>
 <header class="header">
     <div class="header-inner">
         <div class="brand-lockup" aria-label="Nyumba Group">
@@ -101,6 +126,9 @@ if (isset($_GET['design'])) setcookie('design', $design, ['expires' => time() + 
     </div>
 </header>
 <main>
+<?php if (in_array($design, ['departures', 'mosaic'], true)): ?>
+    <?php require __DIR__.'/../src/views/designs/'.$design.'.php'; ?>
+<?php else: ?>
     <section class="visit-hero" aria-labelledby="hero-title">
         <div class="explorer-hero">
             <img class="explorer-landscape" src="assets/photos/galana/01-farm.webp" alt="Long rows of green crops stretching to the horizon at Galana Farm" width="1600" height="1065" fetchpriority="high">
@@ -128,7 +156,7 @@ if (isset($_GET['design'])) setcookie('design', $design, ['expires' => time() + 
                 </div>
                 <div class="destination-info">
                     <p class="eyebrow category"><span>0<?= $number ?> /</span> <?= e($destination['category']) ?></p>
-                    <p class="place-kicker"><?= ['sahajanand' => 'A place to connect.', 'galana' => 'Room to roam.', 'feeding' => 'Care, in action.'][$id] ?></p><h2><?= e($destination['name']) ?></h2>
+                    <p class="place-kicker"><?= e($placeKickers[$id]) ?></p><h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
                     <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>
                 </div>
@@ -137,6 +165,7 @@ if (isset($_GET['design'])) setcookie('design', $design, ['expires' => time() + 
         </div>
         <div class="hero-footnote wrap"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
     </section>
+<?php endif; ?>
     <?php require __DIR__.'/../src/views/school-projects.php'; ?>
     <?php require __DIR__.'/../src/views/donations.php'; ?>
     <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>

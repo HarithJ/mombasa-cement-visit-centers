@@ -1,0 +1,169 @@
+/* Mosaic: kinetic and colourful. A drifting wall of real destination photographs, a rotating badge,
+   and full-colour destination panels that stack over each other as you scroll. Loaded only for this design. */
+[data-design=mosaic]{--paper:#fbf5ec;--white:#fff;--ink:#17130f;--muted:#5f574d;--line:#e6dccb;--soft:#f3eadb;--green:#17130f;--green-dark:#17130f;--orange:#ff6a45;--coral:#ff6a45;--lime:#c3e84b;--saffron:#ffb72b;--display:'Bricolage Grotesque',Manrope,Arial,sans-serif}
+[data-design=mosaic] body{background:var(--paper);color:var(--ink)}
+[data-design=mosaic] h1,[data-design=mosaic] h2,[data-design=mosaic] h3{font-family:var(--display);font-weight:800;letter-spacing:-.04em}
+[data-design=mosaic] .eyebrow{letter-spacing:.14em}
+
+/* Header */
+[data-design=mosaic] .header{background:var(--paper);border:0}
+[data-design=mosaic] .header .header-inner{min-height:80px}
+[data-design=mosaic] .header .group-logo{width:44px;height:60px}
+[data-design=mosaic] .explorer-nav{font-size:14px;font-weight:600;gap:6px}
+[data-design=mosaic] .explorer-nav a{padding:0 16px;border-radius:100px;transition:background .2s}
+[data-design=mosaic] .explorer-nav a:hover{background:var(--soft)}
+[data-design=mosaic] .explorer-nav .nav-plan{border:0;background:var(--ink);color:var(--paper);padding:0 22px;margin-left:8px}
+[data-design=mosaic] .explorer-nav .nav-plan:hover{background:var(--coral);color:var(--ink)}
+
+/* Hero: photo wall */
+.mo-hero{position:relative;isolation:isolate;overflow:hidden;background:var(--ink);color:var(--paper);height:calc(100svh - 124px);min-height:640px;max-height:900px;margin:0 16px;border-radius:40px;display:grid;place-items:center}
+.mo-wall{position:absolute;inset:-20% -10%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;transform:rotate(-8deg);z-index:-2}
+.mo-col{overflow:hidden}
+.mo-col-track{display:flex;flex-direction:column;gap:16px;animation:mo-drift 70s linear infinite}
+.mo-col:nth-child(even) .mo-col-track{animation-direction:reverse;animation-duration:85s}
+.mo-col img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:22px}
+.mo-shade{position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse 60% 55% at 50% 50%,#17130fd9,#17130f80 70%,#17130f40)}
+.mo-hero-content{display:flex;flex-direction:column;align-items:center;text-align:center}
+.mo-tag{font-size:11px;font-weight:700;letter-spacing:.18em;padding:9px 16px;border:1px solid #fbf5ec40;border-radius:100px;background:#fbf5ec14;backdrop-filter:blur(8px)}
+.mo-tag span{opacity:.7;margin-left:12px}
+.mo-hero h1{font-size:clamp(110px,15.5vw,250px);line-height:.78;letter-spacing:-.055em;margin:28px 0 0;animation:mo-rise .9s cubic-bezier(.2,.8,.2,1) both}
+.mo-hero h1>span:not(.hero-spark){color:var(--lime)}
+.mo-hero .hero-spark{display:inline-block;color:var(--coral);font-size:.42em;vertical-align:top;margin:.05em 0 0 .06em;animation:mo-spin 12s linear infinite}
+.mo-promise{font-size:clamp(19px,1.8vw,26px);font-weight:600;margin-top:30px;animation:mo-rise .9s .12s cubic-bezier(.2,.8,.2,1) both}
+.mo-jumps{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:34px;animation:mo-rise .9s .22s cubic-bezier(.2,.8,.2,1) both}
+.mo-jumps a{display:inline-flex;align-items:center;gap:10px;padding:13px 18px;border-radius:100px;color:var(--ink);font-size:14px;font-weight:700;transition:transform .25s}
+.mo-jumps a:hover{transform:translateY(-3px) rotate(-2deg)}
+.mo-jumps a>span{font-size:11px;opacity:.65}
+.mo-jumps .icon{width:16px;height:16px}
+.mo-jump-sahajanand{background:var(--coral)}.mo-jump-galana{background:var(--lime)}.mo-jump-feeding{background:var(--saffron)}
+.mo-badge{position:absolute;right:44px;bottom:44px;width:136px;height:136px;border-radius:50%;background:var(--paper);color:var(--ink);display:grid;place-items:center;transition:transform .3s}
+.mo-badge:hover{transform:scale(1.06)}
+.mo-badge svg{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);animation:mo-spin 16s linear infinite;font-family:var(--display);font-size:11px;font-weight:700;fill:currentColor}
+.mo-badge>.icon{width:30px;height:30px;transform:rotate(90deg)}
+
+/* Marquee band */
+.mo-marquee{overflow:hidden;background:var(--paper);padding-block:34px 10px}
+.mo-marquee>div{display:flex;align-items:center;gap:40px;width:max-content;animation:mo-slide 30s linear infinite}
+.mo-marquee span{font-family:var(--display);font-size:clamp(56px,8vw,120px);font-weight:800;letter-spacing:-.04em;line-height:1}
+.mo-marquee span:nth-of-type(3n+2){-webkit-text-stroke:2px var(--ink);color:transparent}
+.mo-marquee b{font-size:clamp(36px,5vw,70px);color:var(--coral)}
+
+/* Stacked destination panels */
+.mo-stack-head{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:end;gap:20px 40px;padding-block:80px 70px}
+.mo-stack-head .eyebrow{grid-column:1/-1}
+.mo-stack-head h2{font-size:clamp(56px,7.4vw,124px);line-height:.86}
+.mo-stack-head h2 span{color:var(--coral)}
+.mo-stack-head>p:last-child{font-size:20px;line-height:1.55;color:var(--muted);max-width:380px;justify-self:end}
+.mo-panel{position:relative;margin:0 16px;border-radius:40px 40px 0 0;padding-block:72px;min-height:calc(100svh - 32px);display:flex;align-items:center;box-shadow:0 -24px 60px -20px #17130f40;scroll-margin-top:0}
+.mo-panel+.mo-panel{margin-top:-1px}
+.mo-panel-sahajanand{background:var(--coral)}
+.mo-panel-galana{background:var(--lime)}
+.mo-panel-feeding{background:var(--saffron)}
+.mo-panel-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:64px;align-items:center}
+.mo-panel-text{position:relative}
+.mo-num{position:absolute;top:-.42em;left:-.06em;z-index:-0;font-family:var(--display);font-size:clamp(220px,25vw,400px);font-weight:800;line-height:.8;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:2px #17130f30;pointer-events:none}
+.mo-panel-text>*:not(.mo-num){position:relative}
+.mo-panel .eyebrow{font-size:11px}
+.mo-panel .eyebrow span{opacity:.6}
+.mo-kicker{font-family:var(--display);font-size:clamp(22px,2vw,30px);font-weight:600;margin:24px 0 8px}
+.mo-panel h2{font-size:clamp(52px,6vw,100px);line-height:.86}
+.mo-description{font-size:18px;line-height:1.6;max-width:440px;margin-top:24px}
+.mo-book{display:inline-flex;align-items:center;gap:22px;margin-top:36px;padding:9px 9px 9px 28px;border-radius:100px;background:var(--ink);color:var(--paper);font-size:16px;font-weight:700;transition:transform .25s}
+.mo-book-arrow{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--paper);color:var(--ink);transition:transform .3s}
+.mo-book:hover{transform:translateY(-2px)}
+.mo-book:hover .mo-book-arrow{transform:rotate(45deg)}
+.mo-panel-photo{min-width:0}
+[data-design=mosaic] .mo-panel-photo .destination-photo{width:100%;height:min(64svh,600px);border-radius:32px;box-shadow:0 40px 70px -30px #17130f80;margin:0;transform:rotate(2deg);transition:transform .5s}
+[data-design=mosaic] .mo-panel-galana .destination-photo{transform:rotate(-2deg)}
+[data-design=mosaic] .mo-panel-photo .destination-photo:hover{transform:rotate(0)}
+[data-design=mosaic] .mo-panel-photo .photo-bottom{left:22px;right:22px;bottom:22px}
+[data-design=mosaic] .mo-panel-photo .photo-bottom>span{background:var(--paper);color:var(--ink);border-radius:100px;padding:10px 16px;font-size:12px;max-width:320px}
+[data-design=mosaic] .photo-toggle{background:var(--paper);color:var(--ink);border:0}
+[data-design=mosaic] .mo-stack>.hero-footnote{position:relative;z-index:2;background:var(--paper);margin:0 auto;padding-block:28px;border-bottom:0;width:100%;padding-inline:max(56px,calc((100% - 1280px)/2))}
+[data-design=mosaic] .motion-toggle{color:var(--ink)}
+
+/* Shared sections */
+[data-design=mosaic] .community-section{position:relative;z-index:2;background:var(--paper);border-top:0}
+[data-design=mosaic] .community-heading h2{font-size:clamp(48px,6vw,96px);line-height:.88}
+[data-design=mosaic] .community-section .eyebrow{color:var(--ink)}
+[data-design=mosaic] .school-support-details .school-mission{font-family:var(--display);font-weight:700;letter-spacing:-.03em;color:var(--ink)}
+[data-design=mosaic] .school-mission-emphasis{color:var(--coral)}
+[data-design=mosaic] #school-projects .school-feature-photo{border-radius:32px;transform:rotate(-1.5deg);box-shadow:0 30px 60px -30px #17130f80}
+[data-design=mosaic] #school-projects>.school-request-action,[data-design=mosaic] .community-action{background:var(--ink);border-color:var(--ink);color:var(--paper);border-radius:100px;padding-inline:26px}
+[data-design=mosaic] #school-projects>.school-request-action:hover,[data-design=mosaic] .community-action:hover{background:var(--coral);border-color:var(--coral);color:var(--ink)}
+[data-design=mosaic] .mpesa-demo input{border:1.5px solid #17130f30;border-radius:16px}
+[data-design=mosaic] .mpesa-demo-presets button{border-radius:100px;border-color:#17130f30}
+[data-design=mosaic] .mpesa-demo-presets button:hover{background:var(--lime)}
+[data-design=mosaic] .mpesa-demo figure img{background:#fff;border-radius:32px;padding:18px;box-shadow:0 30px 60px -30px #17130f60}
+[data-design=mosaic] .final-cta{position:relative;z-index:2;background:transparent;border:0;padding:0 16px}
+[data-design=mosaic] .final-cta-inner{background:var(--ink);color:var(--paper);border-radius:40px;padding:90px 64px;width:100%;max-width:none}
+[data-design=mosaic] .final-cta .eyebrow{color:var(--lime);font-size:11px}
+[data-design=mosaic] .final-cta h2{font-size:clamp(76px,11vw,190px);line-height:.82;letter-spacing:-.055em}
+[data-design=mosaic] .final-cta h2 span{color:var(--lime)}
+[data-design=mosaic] .final-cta .dark-button{background:var(--lime);color:var(--ink);border-radius:100px;padding:20px 28px;font-size:14px;font-weight:700}
+[data-design=mosaic] .final-cta .dark-button:hover{background:var(--saffron)}
+[data-design=mosaic] .footer{position:relative;z-index:2}
+[data-design=mosaic] .footer-brand strong{font-family:var(--display);letter-spacing:-.03em}
+
+/* Booking */
+[data-design=mosaic] #booking-dialog{border-radius:32px;background:var(--paper)}
+[data-design=mosaic] .dialog-toolbar{background:var(--ink);color:var(--paper)}
+[data-design=mosaic] .itinerary-label span{color:#fbf5ecaa}
+[data-design=mosaic] .dialog-toolbar .close-button{background:var(--paper);color:var(--ink)}
+[data-design=mosaic] .booking-aside{background:var(--coral)}
+[data-design=mosaic] .booking-aside>img{opacity:.85}
+[data-design=mosaic] .aside-overlay h2{font-family:var(--display);font-weight:800;letter-spacing:-.04em;font-size:42px;line-height:.9}
+[data-design=mosaic] .aside-overlay>.eyebrow{color:var(--lime)}
+[data-design=mosaic] .booking-main h2,[data-design=mosaic] #confirmation-view h2{font-size:56px;line-height:.9;letter-spacing:-.05em}
+[data-design=mosaic] .dialog-eyebrow,[data-design=mosaic] #confirmation-view>.eyebrow{color:var(--coral)}
+[data-design=mosaic] input,[data-design=mosaic] select{border:1.5px solid #17130f30;border-radius:14px;background-color:#fff}
+[data-design=mosaic] input:focus-visible,[data-design=mosaic] select:focus-visible{outline:3px solid var(--coral);outline-offset:1px}
+[data-design=mosaic] .checkbox-label,[data-design=mosaic] .overnight-fields{background:var(--soft);border-radius:18px}
+[data-design=mosaic] .checkbox-label input{accent-color:var(--ink)}
+[data-design=mosaic] .prototype-notice,[data-design=mosaic] .confirmation-preview{background:#c3e84b55;color:var(--ink);border-radius:14px}
+[data-design=mosaic] .submit-button,[data-design=mosaic] .confirmation-close{background:var(--ink);color:var(--paper);border-radius:100px}
+[data-design=mosaic] .submit-button:hover,[data-design=mosaic] .confirmation-close:hover{background:var(--coral);color:var(--ink)}
+[data-design=mosaic] .confirmation-icon{background:var(--lime);border-radius:50%}
+[data-design=mosaic] #photo-lightbox{border-radius:32px}
+[data-design=mosaic] .gallery-thumbnails button[aria-pressed=true]{border-color:var(--lime)}
+
+@keyframes mo-drift{to{transform:translateY(-50%)}}
+@keyframes mo-slide{to{transform:translateX(-50%)}}
+@keyframes mo-spin{to{transform:rotate(360deg)}}
+@keyframes mo-rise{from{opacity:0;transform:translateY(30px)}}
+
+/* Panels stack on roomy screens; on small or short screens they simply follow each other. */
+@media(min-width:901px) and (min-height:820px){
+  .mo-panel{position:sticky;top:0}
+}
+@media(max-width:900px){
+  .mo-hero{margin:0 10px;border-radius:28px;height:auto;min-height:calc(100svh - 160px);padding-block:70px 150px}
+  .mo-wall{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;inset:-10% -30%}
+  .mo-col:nth-child(4){display:none}
+  .mo-col-track{gap:10px}
+  .mo-col img{border-radius:14px}
+  .mo-tag span{display:none}
+  .mo-hero h1{font-size:26vw}
+  .mo-jumps a{padding:11px 14px;font-size:13px}
+  .mo-badge{right:50%;margin-right:-48px;bottom:24px;width:96px;height:96px}
+  .mo-badge svg{font-size:13px}
+  .mo-badge>.icon{width:24px;height:24px}
+  .mo-stack-head{display:block;padding-block:50px 44px}
+  .mo-stack-head h2{margin:14px 0 18px}
+  .mo-stack-head>p:last-child{font-size:17px}
+  .mo-panel{margin:0 10px;border-radius:28px 28px 0 0;padding-block:48px 56px;min-height:0}
+  .mo-panel-inner{display:flex;flex-direction:column;align-items:stretch;gap:36px}
+  .mo-num{font-size:190px}
+  .mo-panel h2{font-size:52px}
+  .mo-description{font-size:16px}
+  .mo-book{width:100%;justify-content:space-between}
+  [data-design=mosaic] .mo-panel-photo .destination-photo{height:auto;aspect-ratio:.9;border-radius:24px}
+  [data-design=mosaic] .mo-panel-photo .photo-bottom>span{font-size:11px;max-width:220px}
+  [data-design=mosaic] .mo-stack>.hero-footnote{padding-inline:20px}
+  [data-design=mosaic] .final-cta{padding:0 10px}
+  [data-design=mosaic] .final-cta-inner{padding:56px 24px;border-radius:28px}
+  [data-design=mosaic] .booking-main h2,[data-design=mosaic] #confirmation-view h2{font-size:42px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mo-col-track,.mo-marquee>div,.mo-badge svg,.mo-hero .hero-spark,.mo-hero h1,.mo-promise,.mo-jumps{animation:none}
+}
