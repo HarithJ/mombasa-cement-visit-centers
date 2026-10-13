@@ -59,9 +59,13 @@ foreach ($destinations as $id => &$destination) {
     $destination['imageAlts'] = array_map(fn($path) => $photoDescriptions[$id][basename($path)] ?? $destination['name'], $destination['images']);
 }
 unset($destination);
+$designs = ['original' => 'Original', 'coast' => 'Coast', 'concrete' => 'Concrete', 'night' => 'Night'];
+$design = is_string($_GET['design'] ?? null) ? $_GET['design'] : (is_string($_COOKIE['design'] ?? null) ? $_COOKIE['design'] : 'original');
+if (!isset($designs[$design])) $design = 'original';
+if (isset($_GET['design'])) setcookie('design', $design, ['expires' => time() + 60 * 60 * 24 * 365, 'path' => '/', 'samesite' => 'Lax']);
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="en" data-design="<?= e($design) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -73,13 +77,19 @@ unset($destination);
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/travel.css">
     <link rel="stylesheet" href="assets/community.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&amp;family=IBM+Plex+Mono:wght@400;600&amp;family=Space+Grotesk:wght@400..700&amp;display=swap">
+    <link rel="stylesheet" href="assets/designs.css">
     <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
     <script src="assets/app.js" defer></script>
+    <script src="assets/design-switcher.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#destinations">Skip to destinations</a>
+<nav class="design-switcher" aria-label="Design preview"><div class="design-switcher-inner"><span class="design-switcher-label">Preview design</span><div class="design-switcher-options"><?php foreach ($designs as $id => $label): ?><a href="?design=<?= e($id) ?>" data-design-option="<?= e($id) ?>" aria-current="<?= $id === $design ? 'true' : 'false' ?>"><?= e($label) ?></a><?php endforeach; ?></div></div></nav>
 <header class="header">
     <div class="header-inner">
         <div class="brand-lockup" aria-label="Nyumba Group">
