@@ -1,0 +1,152 @@
+/* Sunset: warm and immersive. A sunset-graded full-screen hero, then a scroll story in which the
+   full-screen photograph behind the page changes to each destination as its card passes. */
+[data-design=sunset]{--paper:#fff3ea;--white:#fff;--ink:#2b1330;--muted:#76586c;--line:#f0d9cb;--soft:#ffe7d8;--green:#2b1330;--green-dark:#2b1330;--orange:#ff6b3d;--pink:#ff3d7f;--gold:#ffb347;--grad:linear-gradient(120deg,#ffb347,#ff6b3d 45%,#ff3d7f);--display:Outfit,Manrope,Arial,sans-serif}
+[data-design=sunset] body{position:relative;background:var(--paper);color:var(--ink)}
+[data-design=sunset] h1,[data-design=sunset] h2,[data-design=sunset] h3{font-family:var(--display);font-weight:700;letter-spacing:-.035em}
+[data-design=sunset] .eyebrow{letter-spacing:.16em;color:var(--orange)}
+
+/* Header floats over the hero */
+[data-design=sunset] .header{position:absolute;top:44px;left:0;right:0;z-index:20;background:transparent;border:0;color:#fff}
+[data-design=sunset] .header .header-inner{min-height:84px}
+[data-design=sunset] .header .group-logo,[data-design=sunset] .footer-brand img{filter:brightness(0) invert(1)}
+[data-design=sunset] .footer-brand img{filter:none}
+[data-design=sunset] .explorer-nav{font-size:14px;font-weight:500;gap:30px}
+[data-design=sunset] .explorer-nav a:hover{color:#ffd3b8}
+[data-design=sunset] .explorer-nav .nav-plan{border:1px solid #ffffff70;border-radius:100px;padding:0 22px;background:#ffffff1a;backdrop-filter:blur(10px)}
+[data-design=sunset] .explorer-nav .nav-plan:hover{background:#fff;color:var(--ink)}
+
+/* Buttons */
+.ss-button{display:inline-flex;align-items:center;gap:24px;padding:16px 18px 16px 26px;border-radius:100px;background:var(--grad);color:#fff;font-size:15px;font-weight:600;box-shadow:0 16px 34px -14px #ff3d7fb0;transition:transform .25s,box-shadow .25s,filter .25s}
+.ss-button:hover{transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 22px 40px -14px #ff3d7fd0}
+.ss-button .icon{width:20px;height:20px}
+
+/* Hero */
+.ss-hero{position:relative;isolation:isolate;overflow:hidden;min-height:calc(100svh - 44px);max-height:960px;color:#fff;display:flex;flex-direction:column;justify-content:center;background:var(--ink)}
+.ss-hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 60%;z-index:-3;animation:ss-zoom 14s ease-out both}
+.ss-hero-tint{position:absolute;inset:0;z-index:-2;background:linear-gradient(180deg,#2b133080,transparent 28%),linear-gradient(18deg,#2b1330f2 8%,#8c1f5ab8 42%,#ff7a3d50 76%,#ffb34720 100%)}
+.ss-sun{position:absolute;z-index:-1;right:9%;top:16%;width:min(36vw,520px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffe0a0 0%,#ffb347 30%,#ff6b3d 52%,#ff3d7f00 72%);mix-blend-mode:screen;opacity:.85;animation:ss-float 9s ease-in-out infinite alternate}
+.ss-hero-content{position:relative;padding-block:150px 110px}
+.ss-pill{display:inline-flex;gap:12px;font-size:11px;font-weight:600;letter-spacing:.16em;padding:9px 16px;border-radius:100px;background:#ffffff1c;border:1px solid #ffffff40;backdrop-filter:blur(10px)}
+.ss-pill span{opacity:.75}
+.ss-hero h1{font-size:clamp(100px,13.5vw,230px);line-height:.84;letter-spacing:-.05em;margin:30px 0 0;animation:ss-rise 1s cubic-bezier(.2,.8,.2,1) both}
+.ss-hero .hero-spark{display:inline-block;font-size:.4em;vertical-align:top;margin:.06em 0 0 .06em;color:var(--gold)}
+.ss-promise{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-top:40px;max-width:900px;animation:ss-rise 1s .15s cubic-bezier(.2,.8,.2,1) both}
+.ss-promise p{font-size:clamp(22px,2.1vw,30px);font-weight:500;line-height:1.3}
+.ss-hero-foot{position:absolute;left:0;right:0;bottom:28px;display:flex;justify-content:space-between;font-size:13px;opacity:.85}
+.ss-hero-foot span{display:flex;align-items:center;gap:8px}
+.ss-hero-foot .icon{width:16px;height:16px}
+
+/* Scroll story */
+.ss-story{position:relative;background:var(--ink);color:#fff;padding-bottom:20px}
+.ss-backdrop{position:sticky;top:0;height:100vh;margin-bottom:-100vh;overflow:hidden;z-index:0}
+.ss-backdrop-layer{position:absolute;inset:0;opacity:0;transition:opacity 1.1s ease}
+.ss-backdrop-layer.is-active{opacity:1}
+.ss-backdrop-layer img{width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 7s ease-out}
+.ss-backdrop-layer.is-active img{transform:scale(1)}
+.ss-backdrop-layer:after{content:'';position:absolute;inset:0}
+.ss-tint-sahajanand:after{background:linear-gradient(90deg,#2b1330f0 0%,#2b133090 48%,#ff7a3d38 100%)}
+.ss-tint-galana:after{background:linear-gradient(90deg,#3a1a10f0 0%,#7a3a1090 48%,#ffb34738 100%)}
+.ss-tint-feeding:after{background:linear-gradient(90deg,#2b1330f0 0%,#8c1f5a96 48%,#ff3d7f38 100%)}
+.ss-dots{position:absolute;right:32px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none;z-index:2}
+.ss-dots li{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1px solid #ffffff50;font-size:12px;font-weight:600;opacity:.6;transition:all .4s}
+.ss-dots li.is-active{background:#fff;color:var(--ink);opacity:1;transform:scale(1.08)}
+.ss-intro{position:relative;z-index:1;min-height:85vh;display:flex;flex-direction:column;justify-content:center;padding-block:100px}
+.ss-intro .eyebrow{color:#ffc29e}
+.ss-intro h2{font-size:clamp(58px,7.4vw,124px);line-height:.88;letter-spacing:-.05em;margin:18px 0 26px}
+.ss-intro h2 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ss-intro>p:last-child{font-size:20px;line-height:1.55;max-width:460px;opacity:.85}
+.ss-chapter{position:relative;z-index:1;min-height:115vh;display:flex;align-items:center}
+.ss-card{width:min(540px,100%);padding:36px;border-radius:32px;background:#fff3eaf0;color:var(--ink);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 50px 90px -40px #000c;scroll-margin-top:60px}
+.ss-card-count{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.ss-card-count span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:15px;font-weight:800}
+.ss-card-kicker{font-family:var(--display);font-size:21px;font-weight:500;color:var(--orange);margin:18px 0 6px}
+.ss-card h2{font-size:clamp(40px,3.9vw,60px);line-height:.95;letter-spacing:-.04em}
+.ss-card-description{font-size:16px;line-height:1.7;color:var(--muted);margin-top:16px}
+[data-design=sunset] .ss-card .destination-photo{width:100%;height:270px;margin:24px 0 26px;border-radius:22px;box-shadow:none}
+[data-design=sunset] .ss-card .photo-bottom>span{background:#2b1330b0;backdrop-filter:blur(8px);padding:8px 13px;border-radius:100px;font-size:11px;max-width:300px}
+[data-design=sunset] .photo-toggle{background:#fff;color:var(--ink);border:0}
+[data-design=sunset] .photo-toggle:hover{background:var(--gold)}
+[data-design=sunset] .ss-footnote{position:relative;z-index:1;color:#ffe0cf;border:0;margin:0 auto;padding-block:26px 30px}
+[data-design=sunset] .ss-footnote .motion-toggle{color:#ffc29e}
+
+/* Shared sections */
+[data-design=sunset] .community-section{border-top:1px solid var(--line)}
+[data-design=sunset] #school-projects{border-top:0}
+[data-design=sunset] .community-heading h2{font-size:clamp(44px,5.4vw,90px);line-height:.92;letter-spacing:-.045em}
+[data-design=sunset] .school-support-details .school-mission{font-family:var(--display);font-weight:600;letter-spacing:-.02em;color:var(--ink)}
+[data-design=sunset] .school-mission-emphasis{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+[data-design=sunset] .school-mission-emphasis::after{display:none}
+[data-design=sunset] #school-projects .school-feature-photo{border-radius:32px;box-shadow:0 40px 70px -40px #8c1f5a90}
+[data-design=sunset] #school-projects>.school-request-action,[data-design=sunset] .community-action{background:var(--grad);border:0;color:#fff;border-radius:100px;padding-inline:26px;box-shadow:0 14px 30px -14px #ff3d7fb0}
+[data-design=sunset] #school-projects>.school-request-action:hover,[data-design=sunset] .community-action:hover{background:var(--grad);filter:brightness(1.06)}
+[data-design=sunset] .mpesa-demo input{border:1.5px solid #ead2c4;border-radius:16px;background:#fff}
+[data-design=sunset] .mpesa-demo-presets button{border-color:#ead2c4;border-radius:100px;color:var(--ink)}
+[data-design=sunset] .mpesa-demo-presets button:hover{background:var(--soft)}
+[data-design=sunset] .mpesa-demo figure img{background:#fff;border-radius:32px;padding:18px;box-shadow:0 40px 70px -40px #8c1f5a80}
+[data-design=sunset] .final-cta{position:relative;isolation:isolate;overflow:hidden;margin:0 16px;border-radius:40px;border:0;background:linear-gradient(160deg,#2b1330 10%,#8c1f5a 55%,#ff6b3d 100%);color:#fff}
+[data-design=sunset] .final-cta:before{content:'';position:absolute;z-index:-1;right:-6%;bottom:-40%;width:min(46vw,620px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffe0a0,#ffb347 32%,#ff6b3d 55%,#ff3d7f00 72%);opacity:.9}
+[data-design=sunset] .final-cta-inner{padding-block:100px}
+[data-design=sunset] .final-cta .eyebrow{color:#ffc29e;font-size:11px}
+[data-design=sunset] .final-cta h2{font-size:clamp(72px,10vw,170px);line-height:.88;letter-spacing:-.03em}
+[data-design=sunset] .final-cta h2 span{color:var(--gold)}
+[data-design=sunset] .final-cta .dark-button{background:#fff;color:var(--ink);border-radius:100px;padding:20px 28px;font-size:15px;font-weight:600}
+[data-design=sunset] .final-cta .dark-button:hover{background:var(--ink);color:#fff}
+[data-design=sunset] .footer-brand strong{font-family:var(--display);letter-spacing:-.02em}
+
+/* Booking */
+[data-design=sunset] #booking-dialog{border-radius:28px;background:var(--paper)}
+[data-design=sunset] .dialog-toolbar{background:var(--grad);color:#fff}
+[data-design=sunset] .itinerary-label span{color:#ffe6d6}
+[data-design=sunset] .dialog-toolbar .close-button{background:#ffffff30;color:#fff}
+[data-design=sunset] .booking-aside{background:var(--ink)}
+[data-design=sunset] .booking-aside:after{background:linear-gradient(180deg,#8c1f5a30,#2b1330ee)}
+[data-design=sunset] .aside-overlay h2{font-family:var(--display);font-weight:700;font-size:36px;line-height:.98;letter-spacing:-.035em}
+[data-design=sunset] .aside-overlay>.eyebrow{color:#ffc29e}
+[data-design=sunset] .booking-main{background:var(--paper)}
+[data-design=sunset] .booking-main h2,[data-design=sunset] #confirmation-view h2{font-size:50px;line-height:.95;letter-spacing:-.045em}
+[data-design=sunset] .dialog-eyebrow,[data-design=sunset] #confirmation-view>.eyebrow{color:var(--orange)}
+[data-design=sunset] input,[data-design=sunset] select{border:1.5px solid #ead2c4;border-radius:14px;background-color:#fff}
+[data-design=sunset] input:focus-visible,[data-design=sunset] select:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
+[data-design=sunset] .checkbox-label,[data-design=sunset] .overnight-fields{background:var(--soft);border-radius:18px}
+[data-design=sunset] .checkbox-label input{accent-color:var(--orange)}
+[data-design=sunset] .prototype-notice,[data-design=sunset] .confirmation-preview{background:#ffe1cf;color:var(--ink);border-radius:14px}
+[data-design=sunset] .submit-button,[data-design=sunset] .confirmation-close{background:var(--grad);color:#fff;border-radius:100px}
+[data-design=sunset] .submit-button:hover,[data-design=sunset] .confirmation-close:hover{filter:brightness(1.06)}
+[data-design=sunset] .confirmation-icon{background:var(--grad);color:#fff;border-radius:50%}
+[data-design=sunset] #photo-lightbox{border-radius:28px}
+[data-design=sunset] .gallery-thumbnails button[aria-pressed=true]{border-color:var(--gold)}
+
+@keyframes ss-zoom{from{transform:scale(1.12)}to{transform:scale(1)}}
+@keyframes ss-float{from{transform:translateY(0)}to{transform:translateY(30px) scale(1.05)}}
+@keyframes ss-rise{from{opacity:0;transform:translateY(30px)}}
+
+@media(max-width:700px){
+  [data-design=sunset] .header .header-inner{padding-block:12px}
+  [data-design=sunset] .header .explorer-nav a{font-size:13px!important}
+  .ss-hero{min-height:calc(100svh - 44px)}
+  .ss-hero-content{padding-block:170px 100px}
+  .ss-pill span{display:none}
+  .ss-hero h1{font-size:23vw}
+  .ss-sun{width:80vw;right:-20%;top:22%}
+  .ss-promise{display:block;margin-top:30px}
+  .ss-promise .ss-button{margin-top:22px}
+  .ss-hero-foot span:last-child{display:none}
+  .ss-dots{display:none}
+  .ss-intro{min-height:70vh;padding-block:70px}
+  .ss-intro h2{font-size:52px}
+  .ss-intro>p:last-child{font-size:17px}
+  .ss-chapter{min-height:105vh}
+  .ss-card{padding:24px;border-radius:26px}
+  .ss-card h2{font-size:38px}
+  [data-design=sunset] .ss-card .destination-photo{height:220px}
+  [data-design=sunset] .ss-card .photo-bottom>span{display:none}
+  [data-design=sunset] .ss-card .photo-bottom{justify-content:flex-end}
+  .ss-card .ss-button{width:100%;justify-content:space-between}
+  [data-design=sunset] .final-cta{margin:0 10px;border-radius:28px}
+  [data-design=sunset] .final-cta-inner{padding-block:60px}
+  [data-design=sunset] .booking-main h2,[data-design=sunset] #confirmation-view h2{font-size:38px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ss-hero-photo,.ss-sun,.ss-hero h1,.ss-promise{animation:none}
+  .ss-backdrop-layer,.ss-backdrop-layer img{transition:none}
+}

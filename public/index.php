@@ -59,13 +59,13 @@ foreach ($destinations as $id => &$destination) {
     $destination['imageAlts'] = array_map(fn($path) => $photoDescriptions[$id][basename($path)] ?? $destination['name'], $destination['images']);
 }
 unset($destination);
-$designs = ['original' => 'Original', 'night' => 'Night', 'mosaic' => 'Mosaic', 'horizon' => 'Horizon'];
+$designs = ['original' => 'Original', 'night' => 'Night', 'mosaic' => 'Mosaic', 'sunset' => 'Sunset'];
 $design = is_string($_GET['design'] ?? null) ? $_GET['design'] : (is_string($_COOKIE['design'] ?? null) ? $_COOKIE['design'] : 'original');
 if (!isset($designs[$design])) $design = 'original';
 if (isset($_GET['design'])) setcookie('design', $design, ['expires' => time() + 60 * 60 * 24 * 365, 'path' => '/', 'samesite' => 'Lax']);
 $designFonts = [
     'night' => 'family=Space+Grotesk:wght@400..700',
-    'horizon' => 'family=Syne:wght@500..800',
+    'sunset' => 'family=Outfit:wght@300..800',
     'mosaic' => 'family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800',
 ];
 $placeKickers = ['sahajanand' => 'A place to connect.', 'galana' => 'Room to roam.', 'feeding' => 'Care, in action.'];
@@ -101,15 +101,15 @@ function galleryPhoto(array $destination, string $sizes, bool $priority = false)
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?<?= e($designFonts[$design]) ?>&amp;display=swap">
 <?php endif; ?>
-<?php if (in_array($design, ['mosaic', 'horizon'], true)): ?>
+<?php if (in_array($design, ['mosaic', 'sunset'], true)): ?>
     <link rel="stylesheet" href="assets/design-<?= e($design) ?>.css">
 <?php endif; ?>
     <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
     <script src="assets/app.js" defer></script>
-<?php if ($design === 'horizon'): ?>
-    <script src="assets/design-horizon.js" defer></script>
+<?php if ($design === 'sunset'): ?>
+    <script src="assets/design-sunset.js" defer></script>
 <?php endif; ?>
 </head>
 <body>
@@ -126,7 +126,7 @@ function galleryPhoto(array $destination, string $sizes, bool $priority = false)
     </div>
 </header>
 <main>
-<?php if (in_array($design, ['mosaic', 'horizon'], true)): ?>
+<?php if (in_array($design, ['mosaic', 'sunset'], true)): ?>
     <?php require __DIR__.'/../src/views/designs/'.$design.'.php'; ?>
 <?php else: ?>
     <section class="visit-hero" aria-labelledby="hero-title">
