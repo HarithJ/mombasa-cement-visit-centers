@@ -13,8 +13,8 @@
 
 /* School projects fill the screen as a section of their own in the new designs. */
 @media(min-width:1000px){
-  :is([data-design=mosaic],[data-design=sunset]) #school-projects:has(.school-feature-photo){min-height:100svh;grid-template-rows:auto auto max-content max-content auto;align-content:center;padding-block:80px}
-  :is([data-design=mosaic],[data-design=sunset]) #school-projects .school-feature-photo{height:min(66svh,720px);min-height:0;max-height:none;align-self:center}
+  [data-design=mosaic] #school-projects:has(.school-feature-photo){min-height:100svh;grid-template-rows:auto auto max-content max-content auto;align-content:center;padding-block:80px}
+  [data-design=mosaic] #school-projects .school-feature-photo{height:min(66svh,720px);min-height:0;max-height:none;align-self:center}
 }
 
 /* Donations in the new designs: the official Lipa na M-Pesa paybill card in place of the demo form. */
@@ -22,9 +22,9 @@
 @media(max-width:700px){.mpesa-paybill figure img{border-radius:16px}}
 /* Give the donations section room to breathe between the dark panels around it. */
 @media(min-width:1000px){
-  :is([data-design=mosaic],[data-design=sunset]) #donations:has(.mpesa-paybill){min-height:100svh;align-content:center;padding-block:120px;margin-block:16px;row-gap:0}
-  :is([data-design=mosaic],[data-design=sunset]) #donations .mpesa-paybill figure img{max-width:640px}
+  [data-design=mosaic] #donations:has(.mpesa-paybill){min-height:100svh;align-content:center;padding-block:120px;margin-block:16px;row-gap:0}
+  [data-design=mosaic] #donations .mpesa-paybill figure img{max-width:640px}
 }
 @media(max-width:999px){
-  :is([data-design=mosaic],[data-design=sunset]) #donations:has(.mpesa-paybill){padding-block:90px;margin-block:10px}
+  [data-design=mosaic] #donations:has(.mpesa-paybill){padding-block:90px;margin-block:10px}
 }

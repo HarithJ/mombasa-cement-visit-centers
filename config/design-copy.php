@@ -20,20 +20,4 @@ return [
         'dialog_title' => 'Let’s do this.',
         'dialog_subtitle' => 'Tell us who’s coming and when.',
     ],
-    'sunset' => [
-        'names' => ['feeding' => 'Kibarani Feeding Centre'],
-        'donations_intro' => 'Your visit to Sahajanand Special School, Galana Farm or Kibarani Feeding Centre is already enough of a contribution. If you would still like to give, you can make an optional donation through M-Pesa.',
-        'kickers' => ['sahajanand' => 'A place to belong.', 'galana' => 'Where the land opens up.', 'feeding' => 'Care you can see.'],
-        'descriptions' => [
-            'sahajanand' => 'Meet the people behind a school built on care and connection, where every child learns in their own way.',
-            'galana' => 'Trade the everyday for wide-open fields and modern farming, and ask to stay the night on the farm.',
-            'feeding' => 'See a community kitchen in full swing at Kibarani, and what care looks like, one plate at a time.',
-        ],
-        'cta_eyebrow' => 'WHENEVER YOU’RE READY',
-        'cta_title' => 'Come as<br>you are<span aria-hidden="true">↗</span>',
-        'cta_button' => 'Choose your destination',
-        'schools_title' => 'Schools we’ve stood beside',
-        'dialog_title' => 'Plan your visit.',
-        'dialog_subtitle' => 'Choose a day, bring your people.',
-    ],
 ];
