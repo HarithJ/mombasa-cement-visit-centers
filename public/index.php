@@ -59,12 +59,11 @@ foreach ($destinations as $id => &$destination) {
     $destination['imageAlts'] = array_map(fn($path) => $photoDescriptions[$id][basename($path)] ?? $destination['name'], $destination['images']);
 }
 unset($destination);
-$designs = ['original' => 'Original', 'night' => 'Night', 'mosaic' => 'Mosaic', 'sunset' => 'Sunset'];
+$designs = ['original' => 'Original', 'mosaic' => 'Mosaic', 'sunset' => 'Sunset'];
 $design = is_string($_GET['design'] ?? null) ? $_GET['design'] : (is_string($_COOKIE['design'] ?? null) ? $_COOKIE['design'] : 'original');
 if (!isset($designs[$design])) $design = 'original';
 if (isset($_GET['design'])) setcookie('design', $design, ['expires' => time() + 60 * 60 * 24 * 365, 'path' => '/', 'samesite' => 'Lax']);
 $designFonts = [
-    'night' => 'family=Space+Grotesk:wght@400..700',
     'sunset' => 'family=Outfit:wght@300..800',
     'mosaic' => 'family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800',
 ];
