@@ -167,3 +167,6 @@
 @media(prefers-reduced-motion:reduce){
   .mo-col-track,.mo-marquee>div,.mo-badge svg,.mo-hero .hero-spark,.mo-hero h1,.mo-promise,.mo-jumps{animation:none}
 }
+
+/* Keep the stacked panels and their shadows inside the destinations section. */
+.mo-stack{overflow:clip}
