@@ -155,27 +155,29 @@
    carrying a full-screen classroom and a dark card. */
 .ss-schools{position:relative;isolation:isolate;z-index:2;overflow:hidden;min-height:100svh;margin-top:-56px;border-radius:56px 56px 0 0;display:flex;flex-direction:column;justify-content:center;background:#f3e6d6;box-shadow:0 -30px 70px -20px #00000080}
 .ss-schools-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%;z-index:-2}
-.ss-schools-tint{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#2b1330b8 0%,#2b133040 48%,transparent 75%),linear-gradient(0deg,#2b133070,transparent 30%)}
-.ss-schools-inner{padding-block:110px 90px}
+.ss-schools-tint{position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse 70% 65% at 50% 50%,#2b1330c8,#2b1330a0 60%,#2b133070),linear-gradient(0deg,#2b1330a0,transparent 35%)}
+.ss-schools-inner{padding-block:120px 100px;display:flex;flex-direction:column;align-items:center;text-align:center;color:#fff}
 .ss-chapter-pill{display:inline-flex;align-items:center;gap:12px;padding:8px 16px 8px 8px;border-radius:100px;background:#fff3eaee;color:var(--ink);font-size:13px;font-weight:600;box-shadow:0 10px 30px -12px #0006}
 .ss-chapter-pill span{padding:5px 12px;border-radius:100px;background:var(--grad);color:#fff;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
-.ss-schools-card{width:min(560px,100%);margin-top:22px;padding:40px;border-radius:32px;background:#2b1330e6;color:#fff;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 50px 90px -40px #000c}
-.ss-schools-card h2{font-size:clamp(40px,4vw,62px);line-height:.95;letter-spacing:-.04em}
-.ss-schools-stat{margin-top:18px;font-size:17px;line-height:1.6;color:#f3dfe8}
-.ss-schools-stat strong{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:22px;font-weight:800}
-.ss-schools-mission{font-family:var(--display);font-size:clamp(24px,2.2vw,32px);font-weight:600;line-height:1.25;letter-spacing:-.02em;margin-top:28px}
-.ss-schools-mission span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-.ss-schools-copy{font-size:16px;line-height:1.7;color:#e8d3de;margin-top:12px}
-.ss-schools-ask{margin-top:30px;padding-top:24px;border-top:1px solid #ffffff26}
-.ss-schools-ask p{font-size:15px;font-weight:500;margin-bottom:16px}
+.ss-schools-card{max-width:820px;margin-top:30px;display:flex;flex-direction:column;align-items:center;text-shadow:0 2px 24px #2b133080}
+.ss-schools-card h2{font-size:clamp(52px,6.4vw,104px);line-height:.92;letter-spacing:-.045em}
+.ss-schools-stat{margin-top:22px;font-size:19px;line-height:1.6;color:#fbe9f0}
+.ss-schools-stat strong{font-size:24px;font-weight:800;color:var(--gold)}
+.ss-schools-mission{font-family:var(--display);font-size:clamp(26px,2.6vw,38px);font-weight:600;line-height:1.25;letter-spacing:-.02em;margin-top:34px;max-width:680px}
+.ss-schools-mission span{color:var(--gold)}
+.ss-schools-copy{font-size:17px;line-height:1.7;color:#f3dfe8;margin-top:14px;max-width:520px}
+.ss-schools-ask{margin-top:40px;display:flex;flex-direction:column;align-items:center}
+.ss-schools-ask p{font-size:16px;font-weight:500;margin-bottom:18px}
 .ss-schools-note{position:absolute;left:0;right:0;bottom:20px;text-align:right;font-size:11px;letter-spacing:.08em;color:#fff;opacity:.75}
 [data-design=sunset] #school-projects+#donations{border-top:0}
 @media(max-width:700px){
-  .ss-schools{margin-top:-32px;border-radius:32px 32px 0 0;justify-content:flex-end}
+  .ss-schools{margin-top:-32px;border-radius:32px 32px 0 0}
   .ss-schools-photo{object-position:65% center}
-  .ss-schools-tint{background:linear-gradient(0deg,#2b1330d0 0%,#2b133060 55%,transparent 85%)}
+  .ss-schools-tint{background:#2b1330b8}
   .ss-schools-inner{padding-block:90px 56px}
-  .ss-schools-card{padding:26px;border-radius:26px}
-  .ss-schools-card .ss-button{width:100%;justify-content:space-between}
+  .ss-schools-card h2{font-size:44px}
+  .ss-schools-stat{font-size:16px}
+  .ss-schools-copy{font-size:15px}
   .ss-schools-note{bottom:14px}
 }
+.ss-schools-card h2,.ss-schools-mission,.ss-schools-copy{text-wrap:balance}
