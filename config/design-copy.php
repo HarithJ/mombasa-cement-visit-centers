@@ -4,6 +4,8 @@ declare(strict_types=1);
 // Any key a design leaves out falls back to the Original wording in the page templates.
 return [
     'mosaic' => [
+        'names' => ['feeding' => 'Kibarani Feeding Centre'],
+        'donations_intro' => 'Your visit to Sahajanand Special School, Galana Farm or Kibarani Feeding Centre is already enough of a contribution. If you would still like to give, you can make an optional donation through M-Pesa.',
         'kickers' => ['sahajanand' => 'Big hearts, bright minds.', 'galana' => 'Room to roam.', 'feeding' => 'Lunch, together.'],
         'descriptions' => [
             'sahajanand' => 'Meet the students and teachers of a school where every kind of learner belongs.',
@@ -19,6 +21,8 @@ return [
         'dialog_subtitle' => 'Tell us who’s coming and when.',
     ],
     'sunset' => [
+        'names' => ['feeding' => 'Kibarani Feeding Centre'],
+        'donations_intro' => 'Your visit to Sahajanand Special School, Galana Farm or Kibarani Feeding Centre is already enough of a contribution. If you would still like to give, you can make an optional donation through M-Pesa.',
         'kickers' => ['sahajanand' => 'A place to belong.', 'galana' => 'Where the land opens up.', 'feeding' => 'Care you can see.'],
         'descriptions' => [
             'sahajanand' => 'Meet the people behind a school built on care and connection, where every child learns in their own way.',

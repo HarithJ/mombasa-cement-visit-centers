@@ -73,6 +73,7 @@ $designCopy = (require __DIR__.'/../config/design-copy.php')[$design] ?? [];
 function designText(string $key, string $default): string { global $designCopy; return $designCopy[$key] ?? $default; }
 $placeKickers = ($designCopy['kickers'] ?? []) + $placeKickers;
 foreach ($designCopy['descriptions'] ?? [] as $id => $text) $destinations[$id]['description'] = $text;
+foreach ($designCopy['names'] ?? [] as $id => $text) $destinations[$id]['name'] = $text;
 // Renders a destination photo gallery with the markup app.js expects (cycling layers, gallery button, lightbox).
 function galleryPhoto(array $destination, string $sizes, bool $priority = false): string {
     $placeholder = $destination['placeholder'];
