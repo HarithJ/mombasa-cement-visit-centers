@@ -1,0 +1,171 @@
+/* Horizon: crisp, cinematic and light. A split hero with a story-style destination player, then a
+   journey that travels sideways through the destinations as you scroll. Loaded only for this design. */
+[data-design=horizon]{--paper:#f4f5f8;--white:#fff;--ink:#0a1530;--muted:#5b6478;--line:#dde1ea;--soft:#eceff5;--green:#0a1530;--green-dark:#0a1530;--orange:#2f4bff;--blue:#2f4bff;--display:Syne,Manrope,Arial,sans-serif}
+[data-design=horizon] body{background:var(--paper);color:var(--ink)}
+[data-design=horizon] h1,[data-design=horizon] h2,[data-design=horizon] h3{font-family:var(--display);font-weight:800;letter-spacing:-.035em}
+[data-design=horizon] .eyebrow{letter-spacing:.16em;color:var(--blue)}
+
+/* Header */
+[data-design=horizon] .header{background:var(--paper);border-bottom:1px solid var(--line)}
+[data-design=horizon] .header .header-inner{min-height:76px}
+[data-design=horizon] .header .group-logo{width:40px;height:56px}
+[data-design=horizon] .explorer-nav{font-size:14px;font-weight:600;gap:32px}
+[data-design=horizon] .explorer-nav a:hover{color:var(--blue)}
+[data-design=horizon] .explorer-nav .nav-plan{border:0;border-radius:4px;background:var(--ink);color:#fff;padding:0 20px}
+[data-design=horizon] .explorer-nav .nav-plan:hover{background:var(--blue);color:#fff}
+
+/* Buttons */
+.hz-button{display:inline-flex;align-items:center;justify-content:space-between;gap:28px;padding:18px 24px;border-radius:4px;background:var(--ink);color:#fff;font-size:14px;font-weight:700;transition:background .2s,color .2s,transform .2s}
+.hz-button:hover{background:var(--blue);transform:translateY(-2px)}
+.hz-button .icon{width:18px;height:18px}
+.hz-button-light{background:#fff;color:var(--ink)}
+.hz-button-light:hover{background:var(--blue);color:#fff}
+
+/* Hero: title column and story player */
+.hz-hero{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);min-height:calc(100svh - 120px);max-height:940px;padding:16px 16px 0}
+.hz-title{grid-column:1;grid-row:1;width:auto;margin:0;padding:40px 56px 40px 40px;display:flex;flex-direction:column;justify-content:space-between;gap:40px}
+.hz-title h1{font-size:clamp(56px,5.8vw,108px);line-height:.9;letter-spacing:-.04em;margin:0;animation:hz-in .9s cubic-bezier(.2,.8,.2,1) both}
+.hz-title .hero-spark{display:inline-block;color:var(--blue);font-size:.4em;vertical-align:top;margin:.08em 0 0 .06em}
+.hz-kicker{font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--muted);margin-bottom:18px}
+.hz-promise>p:not(.hz-kicker){font-size:clamp(22px,2vw,30px);font-weight:600;line-height:1.3;letter-spacing:-.02em;margin-bottom:28px}
+.hz-story{grid-column:2;grid-row:1;position:relative;isolation:isolate;overflow:hidden;border-radius:6px;background:var(--ink);min-height:600px;color:#fff}
+.hz-slide{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
+.hz-slide.is-active{opacity:1;z-index:1}
+.hz-slide>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hz-slide.is-active>img{animation:hz-drift 7s ease-out both}
+.hz-slide:after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#0a1530eb 0%,#0a153055 45%,transparent 70%),linear-gradient(180deg,#0a153080,transparent 25%)}
+.hz-slide-copy{position:absolute;left:0;right:0;bottom:0;z-index:2;width:auto;margin:0;padding:44px}
+.hz-slide-meta{display:flex;align-items:center;gap:12px;font-size:11px;font-weight:700;letter-spacing:.16em}
+.hz-slide-meta span{padding:6px 10px;border:1px solid #ffffff60;border-radius:3px}
+.hz-slide-name{font-family:var(--display);font-weight:800;font-size:clamp(36px,4vw,62px);line-height:.95;letter-spacing:-.035em;margin:16px 0 14px}
+.hz-slide-tag{display:flex;align-items:center;gap:10px;font-size:15px;color:#dfe5f3;margin-bottom:28px}
+.hz-slide-tag .icon{width:18px;height:18px}
+.hz-bars{position:absolute;top:18px;left:24px;right:24px;z-index:3;display:flex;gap:8px}
+.hz-bar{flex:1;height:24px;padding:0;background:none}
+.hz-bar span{display:block;height:3px;border-radius:3px;background:linear-gradient(#fff,#fff) no-repeat 0 0/0% 100%,#ffffff4d}
+.hz-bar.is-done span{background-size:100% 100%}
+.hz-bar.is-active span{animation:hz-fill 6.5s linear forwards}
+.hz-story:hover .hz-bar span,.hz-story:focus-within .hz-bar span,.hz-story.is-paused .hz-bar span{animation-play-state:paused}
+.hz-bar:focus-visible{outline-color:#fff}
+.hz-step{position:absolute;top:54px;z-index:3;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#ffffff1f;border:1px solid #ffffff40;color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:background .2s}
+.hz-step:hover{background:var(--blue)}
+.hz-step-prev{right:78px}.hz-step-prev .icon{transform:rotate(180deg)}
+.hz-step-next{right:20px}
+.hz-step:focus-visible{outline-color:#fff}
+
+/* Journey: sideways scroll through the destinations */
+.hz-journey{padding-top:96px}
+.hz-track{display:flex;align-items:stretch;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 40px 28px;scrollbar-width:thin}
+.hz-track>*{scroll-snap-align:start;flex:0 0 auto}
+.hz-intro{width:min(520px,80vw);display:flex;flex-direction:column;justify-content:center;padding-right:24px}
+.hz-intro h2{font-size:clamp(40px,3.9vw,60px);line-height:.98;letter-spacing:-.035em;margin:18px 0 22px}
+.hz-intro h2 span{color:var(--blue)}
+.hz-intro>p:not(.eyebrow){font-size:18px;line-height:1.6;color:var(--muted)}
+.hz-hint{display:flex;align-items:center;gap:12px;margin-top:34px;font-size:11px!important;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)!important}
+.hz-hint span{width:56px;height:2px;background:var(--blue);animation:hz-hint 1.6s ease-in-out infinite;transform-origin:left}
+.hz-card{width:min(1120px,88vw);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);background:var(--white);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.hz-card-photo{min-width:0}
+[data-design=horizon] .hz-card .destination-photo{width:100%;height:100%;min-height:440px;border-radius:0;margin:0;box-shadow:none}
+[data-design=horizon] .hz-card .photo-bottom>span{background:#0a1530cc;padding:9px 13px;border-radius:3px;backdrop-filter:blur(8px);font-size:12px;max-width:340px}
+[data-design=horizon] .photo-toggle{background:#fff;color:var(--ink);border:0}
+[data-design=horizon] .photo-toggle:hover{background:var(--blue);color:#fff}
+.hz-card-info{padding:48px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.hz-card-count{font-family:var(--display);font-weight:700;font-size:20px;color:var(--muted);margin-bottom:26px}
+.hz-card-count span{font-size:64px;font-weight:800;letter-spacing:-.05em;color:var(--ink);line-height:.8}
+.hz-card-kicker{font-size:18px;font-weight:600;color:var(--muted);margin:14px 0 8px}
+.hz-card h2{font-size:clamp(30px,2.7vw,44px);line-height:1;letter-spacing:-.03em}
+.hz-card-description{font-size:16px;line-height:1.7;color:#3b4459;max-width:420px;margin:20px 0 32px}
+.hz-end{width:min(340px,80vw);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:12px;padding-inline:20px 40px;color:var(--muted);font-size:12px}
+.hz-end-line{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:26px;line-height:1.2;letter-spacing:-.02em;color:var(--ink)}
+.hz-end-line .icon{flex-shrink:0;color:var(--blue)}
+[data-design=horizon] .hz-end .motion-toggle{color:var(--blue);padding:0}
+[data-design=horizon] .hz-end .preview-label{display:flex;align-items:center;gap:8px}
+.hz-progress{display:none}
+/* Pinned mode, set by design-horizon.js on roomy screens: vertical scroll moves the track sideways. */
+.hz-pin.is-pinned .hz-sticky{position:sticky;top:0;height:100vh;overflow:hidden;overflow:clip;display:flex;flex-direction:column;justify-content:center}
+.hz-pin.is-pinned .hz-track{overflow:visible;scroll-snap-type:none;width:max-content;padding:0 6vw;will-change:transform}
+.hz-pin.is-pinned .hz-card{height:min(74vh,680px)}
+.hz-pin.is-pinned .hz-progress{display:block;margin:34px 6vw 0;height:2px;background:var(--line)}
+.hz-pin.is-pinned .hz-progress span{display:block;height:100%;background:var(--blue);transform-origin:left;transform:scaleX(0)}
+
+/* Shared sections */
+[data-design=horizon] .community-section{border-top:1px solid var(--line)}
+[data-design=horizon] .community-heading h2{font-size:clamp(38px,4.4vw,72px);line-height:.98;letter-spacing:-.035em}
+[data-design=horizon] .school-support-details .school-mission{font-family:var(--display);font-weight:700;letter-spacing:-.03em;color:var(--ink)}
+[data-design=horizon] .school-mission-emphasis{color:var(--blue)}
+[data-design=horizon] .school-mission-emphasis::after{display:none}
+[data-design=horizon] #school-projects .school-feature-photo{border-radius:6px}
+[data-design=horizon] #school-projects>.school-request-action,[data-design=horizon] .community-action{background:var(--ink);border-color:var(--ink);color:#fff;border-radius:4px}
+[data-design=horizon] #school-projects>.school-request-action:hover,[data-design=horizon] .community-action:hover{background:var(--blue);border-color:var(--blue)}
+[data-design=horizon] .mpesa-demo input{border-color:#c9cfdb;border-radius:4px}
+[data-design=horizon] .mpesa-demo-presets button{border-color:#c9cfdb;border-radius:4px}
+[data-design=horizon] .mpesa-demo-presets button:hover{background:var(--soft)}
+[data-design=horizon] .mpesa-demo figure img{background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px}
+[data-design=horizon] .final-cta{background:var(--blue);color:#fff;border:0}
+[data-design=horizon] .final-cta-inner{padding-block:90px}
+[data-design=horizon] .final-cta .eyebrow{color:#cfd7ff;font-size:11px}
+[data-design=horizon] .final-cta h2{font-size:clamp(52px,7vw,118px);line-height:.92;letter-spacing:-.04em}
+[data-design=horizon] .final-cta .dark-button{background:#fff;color:var(--ink);border-radius:4px;padding:20px 26px;font-size:14px;font-weight:700}
+[data-design=horizon] .final-cta .dark-button:hover{background:var(--ink);color:#fff}
+[data-design=horizon] .footer-brand strong{font-family:var(--display);letter-spacing:-.03em}
+
+/* Booking */
+[data-design=horizon] #booking-dialog{border-radius:8px;background:#fff}
+[data-design=horizon] .dialog-toolbar{background:var(--ink);color:#fff}
+[data-design=horizon] .itinerary-label span{color:#aab3c8}
+[data-design=horizon] .dialog-toolbar .close-button{background:#fff;color:var(--ink)}
+[data-design=horizon] .booking-aside{background:var(--ink)}
+[data-design=horizon] .booking-aside:after{background:linear-gradient(180deg,#0a153010,#0a1530e6)}
+[data-design=horizon] .aside-overlay h2{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.02;letter-spacing:-.03em}
+[data-design=horizon] .aside-overlay>.eyebrow{color:#aab8ff}
+[data-design=horizon] .booking-main{background:#fff}
+[data-design=horizon] .booking-main h2,[data-design=horizon] #confirmation-view h2{font-size:44px;line-height:1;letter-spacing:-.035em}
+[data-design=horizon] .dialog-eyebrow,[data-design=horizon] #confirmation-view>.eyebrow{color:var(--blue)}
+[data-design=horizon] input,[data-design=horizon] select{border:1px solid #c9cfdb;border-radius:4px;background-color:#fff}
+[data-design=horizon] input:focus-visible,[data-design=horizon] select:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+[data-design=horizon] .checkbox-label,[data-design=horizon] .overnight-fields{background:var(--paper);border:1px solid var(--line);border-radius:6px}
+[data-design=horizon] .checkbox-label input{accent-color:var(--blue)}
+[data-design=horizon] .prototype-notice,[data-design=horizon] .confirmation-preview{background:#eef1ff;color:var(--ink);border-radius:4px}
+[data-design=horizon] .submit-button,[data-design=horizon] .confirmation-close{background:var(--blue);color:#fff;border-radius:4px}
+[data-design=horizon] .submit-button:hover,[data-design=horizon] .confirmation-close:hover{background:var(--ink)}
+[data-design=horizon] .confirmation-icon{background:var(--blue);color:#fff;border-radius:4px}
+[data-design=horizon] #photo-lightbox{border-radius:8px}
+[data-design=horizon] .gallery-thumbnails button[aria-pressed=true]{border-color:var(--blue)}
+
+@keyframes hz-fill{to{background-size:100% 100%}}
+@keyframes hz-drift{from{transform:scale(1.08)}to{transform:scale(1)}}
+@keyframes hz-in{from{opacity:0;transform:translateY(24px)}}
+@keyframes hz-hint{0%{transform:scaleX(.2)}50%{transform:scaleX(1)}100%{transform:scaleX(.2)}}
+
+@media(max-width:1100px){
+  .hz-title{padding:32px 32px 32px 24px}
+  .hz-card-info{padding:34px}
+}
+@media(max-width:900px){
+  .hz-hero{display:flex;flex-direction:column;min-height:0;max-height:none;padding:10px 10px 0}
+  .hz-story{min-height:0;height:72svh;max-height:640px}
+  .hz-title{padding:34px 10px 10px;gap:28px}
+  .hz-title h1{font-size:12.5vw}
+  .hz-slide-name{font-size:30px}
+  .hz-slide-copy{padding:28px 22px}
+  .hz-step{display:none}
+  .hz-journey{padding-top:64px}
+  .hz-track{padding-inline:20px;gap:14px}
+  .hz-intro{width:82vw}
+  .hz-card{width:84vw;display:flex;flex-direction:column}
+  [data-design=horizon] .hz-card .destination-photo{height:auto;min-height:0;aspect-ratio:1.05}
+  [data-design=horizon] .hz-card .photo-bottom>span{display:none}
+  [data-design=horizon] .hz-card .photo-bottom{justify-content:flex-end}
+  .hz-card-info{padding:26px 22px 30px}
+  .hz-card-count span{font-size:56px}
+  .hz-card h2{font-size:26px}
+  .hz-intro h2{font-size:38px}
+  .hz-card .hz-button{width:100%}
+  [data-design=horizon] .final-cta-inner{padding-block:56px}
+  [data-design=horizon] .booking-main h2,[data-design=horizon] #confirmation-view h2{font-size:32px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hz-bar.is-active span{animation:none;background-size:100% 100%}
+  .hz-slide.is-active>img,.hz-title h1,.hz-hint span{animation:none}
+  .hz-slide{transition:none}
+}
