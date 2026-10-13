@@ -20,9 +20,9 @@ $jumpLabels = ['sahajanand' => 'The school', 'galana' => 'The farm', 'feeding' =
     </div>
     <div class="mo-shade" aria-hidden="true"></div>
     <div class="mo-hero-content wrap">
-        <p class="mo-tag">GO OUT. GET CURIOUS. <span>PLACES / PEOPLE / PURPOSE</span></p>
+        <p class="mo-tag">GET OUT THERE <span>LEARN / GROW / SHARE</span></p>
         <h1 id="hero-title">Visit<br><span>Nyumba</span><span class="hero-spark" aria-hidden="true">✳</span></h1>
-        <p class="mo-promise">A little adventure. A whole new perspective.</p>
+        <p class="mo-promise">Real places. Real people. A day you’ll keep talking about.</p>
         <nav class="mo-jumps" aria-label="Where to?">
             <?php $number = 0; foreach ($jumpLabels as $id => $label): $number++; ?><a class="mo-jump-<?= e($id) ?>" href="#place-<?= e($id) ?>"><span>0<?= $number ?></span> <?= e($label) ?> <?= icon('diagonal') ?></a><?php endforeach; ?>
         </nav>
@@ -32,12 +32,12 @@ $jumpLabels = ['sahajanand' => 'The school', 'galana' => 'The farm', 'feeding' =
         <?= icon('arrow') ?>
     </a>
 </section>
-<div class="mo-marquee" aria-hidden="true"><div><?php for ($i = 0; $i < 4; $i++): ?><span>Places</span><b>✳</b><span>People</span><b>✳</b><span>Purpose</span><b>✳</b><?php endfor; ?></div></div>
+<div class="mo-marquee" aria-hidden="true"><div><?php for ($i = 0; $i < 4; $i++): ?><span>Learn</span><b>✳</b><span>Grow</span><b>✳</b><span>Share</span><b>✳</b><?php endfor; ?></div></div>
 <section class="mo-stack" id="destinations" aria-label="Choose a destination">
     <div class="wrap mo-stack-head">
-        <p class="eyebrow">PICK YOUR NEXT EXPERIENCE</p>
-        <h2>Good days start<br>with <span>curiosity.</span></h2>
-        <p>Three ways to get closer to the places, people and purpose of Nyumba.</p>
+        <p class="eyebrow">WHERE TO NEXT?</p>
+        <h2>Three days out.<br>Zero <span>ordinary.</span></h2>
+        <p>Pick the one that pulls you in. Or make it all three.</p>
     </div>
     <?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?>
     <article class="mo-panel mo-panel-<?= e($id) ?>" id="place-<?= e($id) ?>" data-destination="<?= e($id) ?>">
@@ -48,11 +48,11 @@ $jumpLabels = ['sahajanand' => 'The school', 'galana' => 'The farm', 'feeding' =
                 <p class="mo-kicker"><?= e($placeKickers[$id]) ?></p>
                 <h2><?= e($destination['name']) ?></h2>
                 <p class="mo-description"><?= e($destination['description']) ?></p>
-                <a class="mo-book" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <span class="mo-book-arrow"><?= icon('diagonal') ?></span></a>
+                <a class="mo-book" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Count me in <span class="mo-book-arrow"><?= icon('diagonal') ?></span></a>
             </div>
             <div class="mo-panel-photo"><?= galleryPhoto($destination, '(max-width: 900px) calc(100vw - 40px), 50vw', $number === 1) ?></div>
         </div>
     </article>
     <?php endforeach; ?>
-    <div class="wrap hero-footnote"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
+    <div class="wrap hero-footnote"><span><?= icon('clock') ?> Three places. Which one’s first?</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
 </section>

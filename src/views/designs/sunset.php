@@ -8,11 +8,11 @@ $total = count($destinations);
     <div class="ss-hero-tint" aria-hidden="true"></div>
     <div class="ss-sun" aria-hidden="true"></div>
     <div class="ss-hero-content wrap">
-        <p class="ss-pill">GO OUT. GET CURIOUS. <span>PLACES / PEOPLE / PURPOSE</span></p>
+        <p class="ss-pill">A DAY THAT STAYS WITH YOU <span>PLACES / PEOPLE / PURPOSE</span></p>
         <h1 id="hero-title">Visit<br>Nyumba<span class="hero-spark" aria-hidden="true">✳</span></h1>
         <div class="ss-promise">
-            <p>A little adventure.<br>A whole new perspective.</p>
-            <a class="ss-button" href="#destinations">Explore the places <?= icon('arrow') ?></a>
+            <p>Open fields, busy classrooms, shared meals.<br>Come and see what Nyumba is made of.</p>
+            <a class="ss-button" href="#destinations">Begin the journey <?= icon('arrow') ?></a>
         </div>
     </div>
     <p class="ss-hero-foot wrap"><span><?= icon('leaf') ?> Out in the fields · Galana Farm</span><span aria-hidden="true">Scroll ↓</span></p>
@@ -25,9 +25,9 @@ $total = count($destinations);
         <ol class="ss-dots"><?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?><li data-dot="<?= e($id) ?>"<?= $number === 1 ? ' class="is-active"' : '' ?>><span>0<?= $number ?></span></li><?php endforeach; ?></ol>
     </div>
     <div class="wrap ss-intro">
-        <p class="eyebrow">PICK YOUR NEXT EXPERIENCE</p>
-        <h2>Good days start<br>with <span>curiosity.</span></h2>
-        <p>Three ways to get closer to the places, people and purpose of Nyumba.</p>
+        <p class="eyebrow">THE JOURNEY</p>
+        <h2>Three places.<br>One <span>warm welcome.</span></h2>
+        <p>Keep scrolling and let each place introduce itself.</p>
     </div>
     <?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?>
     <div class="ss-chapter wrap">
@@ -37,9 +37,9 @@ $total = count($destinations);
             <h2><?= e($destination['name']) ?></h2>
             <p class="ss-card-description"><?= e($destination['description']) ?></p>
             <?= galleryPhoto($destination, '(max-width: 700px) calc(100vw - 72px), 480px', false) ?>
-            <a class="ss-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>
+            <a class="ss-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Plan my visit <?= icon('diagonal') ?></a>
         </article>
     </div>
     <?php endforeach; ?>
-    <div class="wrap hero-footnote ss-footnote"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
+    <div class="wrap hero-footnote ss-footnote"><span><?= icon('clock') ?> Every visit starts with a hello.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
 </section>

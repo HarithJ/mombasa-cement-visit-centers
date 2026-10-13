@@ -1,6 +1,6 @@
 <?php $schoolProjects = require (getenv('SCHOOL_PROJECTS_CONFIG') ?: __DIR__.'/../../config/school-projects.php'); ?>
 <section class="community-section wrap" id="school-projects" aria-labelledby="school-projects-title">
-    <div class="community-heading"><p class="eyebrow">BUILDING FOR EDUCATION</p><h2 id="school-projects-title">Schools we have helped</h2><p><strong>340+ classrooms built and still going</strong>. Safer schools. Brighter futures.</p></div>
+    <div class="community-heading"><p class="eyebrow">BUILDING FOR EDUCATION</p><h2 id="school-projects-title"><?= designText('schools_title', 'Schools we have helped') ?></h2><p><strong>340+ classrooms built and still going</strong>. Safer schools. Brighter futures.</p></div>
     <?php if (!$schoolProjects): ?>
     <?php $schoolImages = array_map(static fn($slug) => '/assets/photos/school-placeholders/'.$slug.'.png', ['classroom-block','school-wall','classroom-interior']); ?>
     <div class="destination-photo school-feature-photo" data-gallery-name="School projects" data-images="<?=e(json_encode($schoolImages))?>" data-alts="<?=e(json_encode(['Illustrative classroom block','Illustrative school wall and gate','Illustrative classroom interior']))?>" tabindex="0" aria-label="School project photo gallery">

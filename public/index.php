@@ -69,6 +69,11 @@ $designFonts = [
     'mosaic' => 'family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800',
 ];
 $placeKickers = ['sahajanand' => 'A place to connect.', 'galana' => 'Room to roam.', 'feeding' => 'Care, in action.'];
+$designCopy = (require __DIR__.'/../config/design-copy.php')[$design] ?? [];
+// Returns this design's wording for a key (trusted config HTML), or the Original wording.
+function designText(string $key, string $default): string { global $designCopy; return $designCopy[$key] ?? $default; }
+$placeKickers = ($designCopy['kickers'] ?? []) + $placeKickers;
+foreach ($designCopy['descriptions'] ?? [] as $id => $text) $destinations[$id]['description'] = $text;
 // Renders a destination photo gallery with the markup app.js expects (cycling layers, gallery button, lightbox).
 function galleryPhoto(array $destination, string $sizes, bool $priority = false): string {
     $placeholder = $destination['placeholder'];
@@ -133,12 +138,12 @@ function galleryPhoto(array $destination, string $sizes, bool $priority = false)
         <div class="explorer-hero">
             <img class="explorer-landscape" src="assets/photos/galana/01-farm.webp" alt="Long rows of green crops stretching to the horizon at Galana Farm" width="1600" height="1065" fetchpriority="high">
             <div class="explorer-shade"></div>
-            <div class="hero-topline wrap"><span>GO OUT. GET CURIOUS.</span><span>PLACES / PEOPLE / PURPOSE</span></div>
-            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Nyumba<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><p>A little adventure.<br>A whole new perspective.</p><a class="explorer-button" href="#destinations">Explore the places <?= icon('diagonal') ?></a></div></div>
+            <div class="hero-topline wrap"><span><?= designText('hero_topline_left', 'GO OUT. GET CURIOUS.') ?></span><span><?= designText('hero_topline_right', 'PLACES / PEOPLE / PURPOSE') ?></span></div>
+            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Nyumba<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><p><?= designText('hero_promise', 'A little adventure.<br>A whole new perspective.') ?></p><a class="explorer-button" href="#destinations"><?= designText('hero_cta', 'Explore the places') ?> <?= icon('diagonal') ?></a></div></div>
             <div class="hero-bottomline wrap"><span><?= icon('leaf') ?> Out in the fields · Galana Farm</span><span>SCROLL TO FIND YOUR KIND OF DAY ↓</span></div>
         </div>
-        <div class="destination-jumps"><div class="wrap"><span>WHERE TO?</span><a href="#place-sahajanand">01 <strong>The school</strong><?= icon('diagonal') ?></a><a href="#place-galana">02 <strong>The farm</strong><?= icon('diagonal') ?></a><a href="#place-feeding">03 <strong>The feeding centre</strong><?= icon('diagonal') ?></a></div></div>
-        <div class="discovery-heading wrap"><p class="eyebrow">PICK YOUR NEXT EXPERIENCE</p><h2>Good days start<br>with <span>curiosity.</span></h2><p>Three ways to get closer to the places,<br>people and purpose of Nyumba.</p></div>
+        <div class="destination-jumps"><div class="wrap"><span><?= designText('jumps_label', 'WHERE TO?') ?></span><a href="#place-sahajanand">01 <strong>The school</strong><?= icon('diagonal') ?></a><a href="#place-galana">02 <strong>The farm</strong><?= icon('diagonal') ?></a><a href="#place-feeding">03 <strong>The feeding centre</strong><?= icon('diagonal') ?></a></div></div>
+        <div class="discovery-heading wrap"><p class="eyebrow"><?= designText('discovery_eyebrow', 'PICK YOUR NEXT EXPERIENCE') ?></p><h2><?= designText('discovery_title', 'Good days start<br>with <span>curiosity.</span>') ?></h2><p><?= designText('discovery_intro', 'Three ways to get closer to the places,<br>people and purpose of Nyumba.') ?></p></div>
         <div class="destinations wrap" id="destinations" aria-label="Choose a destination">
             <?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?>
             <article class="destination" id="place-<?= e($id) ?>" data-destination="<?= e($id) ?>">
@@ -158,17 +163,17 @@ function galleryPhoto(array $destination, string $sizes, bool $priority = false)
                     <p class="eyebrow category"><span>0<?= $number ?> /</span> <?= e($destination['category']) ?></p>
                     <p class="place-kicker"><?= e($placeKickers[$id]) ?></p><h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
-                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>
+                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>"><?= designText('book', 'Let’s plan a visit') ?> <?= icon('diagonal') ?></a>
                 </div>
             </article>
             <?php endforeach; ?>
         </div>
-        <div class="hero-footnote wrap"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
+        <div class="hero-footnote wrap"><span><?= icon('clock') ?> <?= designText('footnote', 'Three destinations. One curious you.') ?></span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
     </section>
 <?php endif; ?>
     <?php require __DIR__.'/../src/views/school-projects.php'; ?>
     <?php require __DIR__.'/../src/views/donations.php'; ?>
-    <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
+    <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow"><?= designText('cta_eyebrow', 'MAKE ROOM FOR SOMETHING DIFFERENT') ?></p><h2 id="cta-title"><?= designText('cta_title', 'See you<br>out there<span aria-hidden="true">↗</span>') ?></h2></div><a class="button dark-button" href="#destinations"><?= designText('cta_button', 'Explore the destinations') ?> <?= icon('diagonal') ?></a></div></section>
 </main>
 <footer class="footer wrap">
     <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Places to visit</a><a href="https://www.nyumba.com/nyumba-foundation/" target="_blank" rel="noopener noreferrer">Nyumba Foundation <?= icon('diagonal') ?></a></div></div>
@@ -180,7 +185,7 @@ function galleryPhoto(array $destination, string $sizes, bool $priority = false)
         <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">THE DESTINATION</p><h2 id="aside-destination"><?= e($destinations[$confirmation['destination'] ?? $input['location'] ?? 'sahajanand']['name'] ?? $destinations['sahajanand']['name']) ?></h2><p>Something different<br>to look forward to.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
         <div class="booking-main">
             <div id="form-view" <?= $confirmation ? 'hidden' : '' ?>>
-                <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">Make it a date.</h2><p class="dialog-subtitle">Your people. Your place. Your next day out.</p>
+                <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title"><?= designText('dialog_title', 'Make it a date.') ?></h2><p class="dialog-subtitle"><?= designText('dialog_subtitle', 'Your people. Your place. Your next day out.') ?></p>
                 <div class="prototype-notice"><span class="status-dot"></span><span><strong>Visit bookings</strong> · Your visit is registered after submission.</span></div>
                 <form id="booking-form" method="post" action="/" novalidate>
                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>"><input type="hidden" name="submissionToken" value="<?= e($token) ?>">
