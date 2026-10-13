@@ -1,5 +1,5 @@
 <?php $schoolProjects = require (getenv('SCHOOL_PROJECTS_CONFIG') ?: __DIR__.'/../../config/school-projects.php'); ?>
-<?php if (($design ?? '') === 'sunset' && !$schoolProjects): require __DIR__.'/designs/sunset-schools.php'; else: ?>
+<?php if (in_array($design ?? '', ['sunset', 'mosaic'], true) && !$schoolProjects): require __DIR__.'/designs/'.$design.'-schools.php'; else: ?>
 <section class="community-section wrap" id="school-projects" aria-labelledby="school-projects-title">
     <div class="community-heading"><p class="eyebrow">BUILDING FOR EDUCATION</p><h2 id="school-projects-title"><?= designText('schools_title', 'Schools we have helped') ?></h2><p><strong>340+ classrooms built and still going</strong>. Safer schools. Brighter futures.</p></div>
     <?php if (!$schoolProjects): ?>

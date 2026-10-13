@@ -17,6 +17,7 @@ try {
         elseif ($errors) http_response_code(422);
         else {SchoolRequest::save($db,$values,hash('sha256',$token));header('Location: /school-request?received=1',true,303);exit;}
     } else {
+        if (is_string($_GET['support'] ?? null) && isset(SchoolRequest::TYPES[$_GET['support']])) $values['support']=$_GET['support'];
         $q=$db->prepare('SELECT reference FROM school_requests WHERE submission_token=?');$q->execute([hash('sha256',$token)]);$saved=$q->fetch();
     }
 } catch (Throwable $error) {http_response_code(503);$errors['_form']='We could not save or load your request. Please try again. No new confirmation has been issued.';}

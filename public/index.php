@@ -114,6 +114,8 @@ function galleryPhoto(array $destination, string $sizes, bool $priority = false)
     <script src="assets/app.js" defer></script>
 <?php if ($design === 'sunset'): ?>
     <script src="assets/design-sunset.js" defer></script>
+<?php elseif ($design === 'mosaic'): ?>
+    <script src="assets/design-mosaic.js" defer></script>
 <?php endif; ?>
 </head>
 <body>
