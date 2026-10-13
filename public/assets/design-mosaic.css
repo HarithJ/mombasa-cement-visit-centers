@@ -79,7 +79,6 @@
 [data-design=mosaic] .mo-panel-photo .photo-bottom{left:22px;right:22px;bottom:22px}
 [data-design=mosaic] .mo-panel-photo .photo-bottom>span{background:var(--paper);color:var(--ink);border-radius:100px;padding:10px 16px;font-size:12px;max-width:320px}
 [data-design=mosaic] .photo-toggle{background:var(--paper);color:var(--ink);border:0}
-[data-design=mosaic] .mo-stack>.hero-footnote{position:relative;z-index:2;background:var(--paper);margin:0 auto;padding-block:28px;border-bottom:0;width:100%;padding-inline:max(56px,calc((100% - 1280px)/2))}
 [data-design=mosaic] .motion-toggle{color:var(--ink)}
 
 /* Shared sections */
@@ -159,7 +158,6 @@
   .mo-book{width:100%;justify-content:space-between}
   [data-design=mosaic] .mo-panel-photo .destination-photo{height:auto;aspect-ratio:.9;border-radius:24px}
   [data-design=mosaic] .mo-panel-photo .photo-bottom>span{font-size:11px;max-width:220px}
-  [data-design=mosaic] .mo-stack>.hero-footnote{padding-inline:20px}
   [data-design=mosaic] .final-cta{padding:0 10px}
   [data-design=mosaic] .final-cta-inner{padding:56px 24px;border-radius:28px}
   [data-design=mosaic] .booking-main h2,[data-design=mosaic] #confirmation-view h2{font-size:42px}
@@ -170,3 +168,6 @@
 
 /* Keep the stacked panels and their shadows inside the destinations section. */
 .mo-stack{overflow:clip}
+.mo-motion-toggle{position:absolute;left:50%;bottom:24px;z-index:3;transform:translateX(-50%);padding:10px 18px!important;border-radius:100px;background:var(--ink)!important;color:var(--paper)!important;text-decoration:none!important;opacity:0;pointer-events:none}
+.mo-motion-toggle:focus-visible{opacity:1;pointer-events:auto}
+.mo-stack{position:relative;padding-bottom:60px}

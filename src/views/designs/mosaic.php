@@ -54,5 +54,6 @@ $jumpLabels = ['sahajanand' => 'The school', 'galana' => 'The farm', 'feeding' =
         </div>
     </article>
     <?php endforeach; ?>
-    <div class="wrap hero-footnote"><span><?= icon('clock') ?> Three places. Which one’s first?</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
+    <?php // Kept for keyboard and screen-reader users: hidden until focused, and app.js needs it. ?>
+    <button class="motion-toggle mo-motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button>
 </section>
