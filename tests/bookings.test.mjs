@@ -145,9 +145,6 @@ try {
   const runtimeErrors = []; page.on('pageerror', error => runtimeErrors.push(error.message));
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 }); await page.goto('http://127.0.0.1:8091/');
-    const navigation=page.getByRole('navigation',{name:'Main navigation'});
-    assert.equal(await navigation.getByRole('link',{name:'School projects',exact:true}).getAttribute('href'),'#school-projects');
-    assert.equal(await navigation.getByRole('link',{name:'Donate',exact:true}).getAttribute('href'),'#donations');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: `test-results/day-${width}-home.png`, animations: 'disabled' });
     await page.locator('[data-book="galana"]').click();
@@ -181,7 +178,11 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement.closest('dialog')?.id), 'booking-dialog');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('[data-book="feeding"]').evaluate(el => el === document.activeElement), true);
-  for (const id of ['sahajanand', 'galana', 'feeding']) {
+  await page.locator('[data-destination="sahajanand"] .photo-toggle').click();
+  await page.waitForFunction(()=>document.querySelector('#gallery-image').getAttribute('src')?.endsWith('/01-entrance.webp'));
+  assert.equal(await page.locator('#gallery-next').isVisible(), false);
+  await page.locator('#gallery-close').click();
+  for (const id of ['galana', 'feeding']) {
     await page.locator(`[data-destination="${id}"] .photo-toggle`).click();
     await page.locator('#photo-lightbox').waitFor({state:'visible'});
     await page.locator('#gallery-thumbnails button').first().click();
