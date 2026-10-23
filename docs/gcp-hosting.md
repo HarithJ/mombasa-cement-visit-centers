@@ -35,6 +35,26 @@ Only TCP 80/443 are publicly allowed. The VM has no service account. Secure Boot
 
 ## Domain and deployment
 
+### 2026-10-23 homepage redesign release
+
+Deployed `homepage-redesign` commit `9348c32` as
+`/srv/visit-nyumba/releases/homepage-redesign-9348c32` (git archive of `public`,
+`src`, `config`, `migrations` and `bin`), replacing `homepage-redesign-3b5496f`,
+which remains for rollback. Before switching, the database was backed up to
+`/var/backups/visit-nyumba/pre-deploy-9348c32-20261023T084152Z.sqlite`
+(integrity `ok`; it holds the one school request deleted below).
+
+Migration `015-drop-school-requests-and-donations.sql` dropped the school
+request and M-Pesa tables; there were no donation records. Bookings were
+unchanged (9) and `quick_check` returned `ok`. The school-request, donation and
+M-Pesa routes now return 404; no cron job or timer referenced their removed
+scripts. PHP-FPM was reloaded.
+
+Post-deploy checks: homepage 200 with booking form/CSRF field, all three local
+CSS/JavaScript assets 200, `/admin` redirects to login, Nginx and PHP-FPM
+active with no error-level journal entries, and the email and SMS workers'
+next scheduled runs succeeded. No test bookings were submitted.
+
 ### 2026-10-22 kernel reboot
 
 Rebooted production at approximately 08:03 EAT to activate kernel
