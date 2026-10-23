@@ -35,6 +35,47 @@ Only TCP 80/443 are publicly allowed. The VM has no service account. Secure Boot
 
 ## Domain and deployment
 
+### 2026-10-22 kernel reboot
+
+Rebooted production at approximately 08:03 EAT to activate kernel
+`7.0.0-1014-gcp` (previously `7.0.0-1011-gcp`). Confirmed a new boot ID,
+systemd state `running`, no failed units and no pending reboot marker.
+All services running before maintenance returned, including Nginx, PHP-FPM,
+SSH, cron, time synchronization, Google agents and unattended upgrades.
+The PHP security package remains `8.3.6-0ubuntu0.24.04.13`.
+
+Email and SMS timers resumed; both workers completed their first post-boot
+scheduled run at 08:03:50 EAT with exit status 0 and result `success`.
+Certbot's timer and cron are active; the backup cron file and executable
+remain present. Backup restore and external message delivery were not tested.
+
+Post-boot HTTPS checks passed for the homepage, admin login, school request
+and donation pages, all seven local CSS/JavaScript assets referenced by the
+homepage, session cookie issuance, booking form/CSRF presence and the
+unauthenticated admin redirect. SQLite read-only `quick_check` returned `ok`,
+Nginx configuration validation passed, and the current boot's Nginx/PHP-FPM
+error-level journals were empty. No test bookings or payments were submitted.
+
+### 2026-10-22 PHP security update
+
+Upgraded the nine installed PHP 8.3 runtime/extension packages from Ubuntu
+`8.3.6-0ubuntu0.24.04.12` to `8.3.6-0ubuntu0.24.04.13`. The installed package
+changelog explicitly records fixes for CVE-2026-109618 and CVE-2026-109619;
+see [Ubuntu USN-8948-1](https://ubuntu.com/security/notices/USN-8948-1).
+PHP-FPM was explicitly restarted at 07:34:44 EAT. PHP-FPM and Nginx were active,
+the running FPM executable was not marked deleted, and no FPM journal errors
+were reported after the restart.
+
+Post-update checks passed: HTTPS homepage, admin login, school request and
+donation pages returned 200 with expected content; booking form and CSRF field
+were present; a session cookie was issued; unauthenticated `/admin` redirected
+to login; three stylesheet requests returned 200. SQLite read-only
+`PRAGMA quick_check` returned `ok`, required PHP modules were present, and
+`nginx -t` passed. No real bookings, payments or notifications were created;
+these were smoke checks, not a full transaction or compromise investigation.
+The package manager also reported a pending kernel reboot, which was not
+performed as part of this PHP update.
+
 ### 2026-09-24 update
 
 Admin hash configuration correction: PHP-FPM interprets a literal leading `$` in a pool `env[]` value as an environment lookup, so a directly pasted bcrypt hash becomes empty in workers. The existing hash is stored root-only in `/etc/visit-nyumba-admin.env`, loaded by `/etc/systemd/system/php8.3-fpm.service.d/visit-nyumba-admin.conf`. The pool references it as `env[ADMIN_PASSWORD_HASH] = $ADMIN_PASSWORD_HASH`. The username stays in the pool. After changing the systemd environment file, restart PHP-FPM (a reload is insufficient to reload systemd environment). Never print the environment or the full FPM configuration dump in diagnostics: both may contain secrets.
