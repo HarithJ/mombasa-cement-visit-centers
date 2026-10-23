@@ -39,7 +39,7 @@ $photoDescriptions = require __DIR__.'/../config/photo-descriptions.php';
 $destinations = [
     'sahajanand' => ['name' => 'Sahajanand Special School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Meet the people behind a school built around care, connection and different ways of learning.', 'photos' => ['01-entrance.webp']],
     'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
-    'feeding' => ['name' => 'Kibarani Feeding center', 'category' => 'CARE & COMMUNITY', 'description' => 'Discover the people and daily work behind community feeding at Kibarani. A visit with care at its heart.'],
+    'feeding' => ['name' => 'Kibarani Feeding center', 'category' => 'CARE & COMMUNITY', 'description' => 'Discover the people and daily work behind community feeding at Kibarani. A visit with care at its heart.', 'photos' => ['01-meals.webp', '02-centre-aerial.webp', '03-centre-building.webp', '06-dining-shelter.webp', '08-food-service.webp', '09-meal-collection.webp', '10-meal-queue-aerial.webp', '11-meal-service.webp', '12-meal-tables.webp', '17-serving-station.webp', '20-visitors-collecting-meals.webp']],
 ];
 foreach ($destinations as $id => &$destination) {
     $files = glob(__DIR__.'/assets/photos/'.$id.'/*.{webp,jpg,jpeg,png}', GLOB_BRACE) ?: [];
@@ -114,7 +114,7 @@ unset($destination);
                 </div>
                 <div class="destination-info">
                     <p class="eyebrow category"><span>0<?= $number ?> /</span> <?= e($destination['category']) ?></p>
-                    <p class="place-kicker"><?= ['sahajanand' => 'A place to connect.', 'galana' => 'Room to roam.', 'feeding' => 'Care, in action.'][$id] ?></p><h2><?= e($destination['name']) ?></h2>
+                    <h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
                     <?php if ($featured): ?><p class="destination-badge"><?= icon('moon') ?> Overnight stays on request</p><?php endif; ?>
                     <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>

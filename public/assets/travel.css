@@ -28,7 +28,6 @@ body{background:var(--paper)}.wrap{width:min(1320px,calc(100% - 96px))}h1,h2,h3{
 .destination-featured .destination-info{display:flex;flex-direction:column;justify-content:center;max-width:none;padding:56px 56px 52px}
 .destination-featured .category{color:#b9cbb8}
 .destination-featured .category>span{border-color:#ffffff33;color:#fffbed}
-.destination-featured .place-kicker{color:var(--orange);font-weight:600}
 .destination-featured h2{font-size:clamp(44px,4.6vw,68px);letter-spacing:-2.6px;color:#fffbed}
 .destination-featured .destination-description{max-width:380px;font-size:15px;color:#c9d6c8}
 .destination-badge{display:inline-flex;align-items:center;gap:10px;width:fit-content;margin-top:26px;padding:9px 16px 9px 12px;border:1px solid #ffffff2e;border-radius:40px;background:#ffffff0d;color:#e6eee2;font-size:12px;font-weight:600}

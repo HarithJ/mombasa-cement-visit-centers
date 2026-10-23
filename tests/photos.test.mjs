@@ -27,7 +27,8 @@ try {
   await page.locator('#gallery-close').click();
   for(const destination of ['galana','feeding']) {
    await page.locator(`[data-destination="${destination}"] .photo-toggle`).click();
-   const photos=manifest.filter(r=>r.destination===destination).sort((a,b)=>a.asset.localeCompare(b.asset));
+   const hidden=destination==='feeding'?['04','05','07','13','14','15','16','18','19']:[];
+   const photos=manifest.filter(r=>r.destination===destination&&!hidden.includes(r.asset.slice(0,2))).sort((a,b)=>a.asset.localeCompare(b.asset));
    const thumbs=page.locator('#gallery-thumbnails button');assert.equal(await thumbs.count(),photos.length);
    for(let index=0;index<photos.length;index++) {
     await thumbs.nth(index).click();
