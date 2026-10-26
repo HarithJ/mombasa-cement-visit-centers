@@ -4,9 +4,10 @@ require_once __DIR__.'/PhoneNumber.php';
 final class DayBooking {
     public static function validate(array $input, array $destinations): array {
         $data = [];
-        foreach (['fullName', 'email', 'phone', 'location', 'visitDate', 'timeSlot', 'attendees', 'transportRequested', 'overnight', 'arrivalDate', 'departureDate', 'overnightGuests'] as $key) $data[$key] = is_string($input[$key] ?? null) ? trim($input[$key]) : '';
+        foreach (['fullName', 'organization', 'email', 'phone', 'location', 'visitDate', 'timeSlot', 'attendees', 'transportRequested', 'overnight', 'arrivalDate', 'departureDate', 'overnightGuests'] as $key) $data[$key] = is_string($input[$key] ?? null) ? trim($input[$key]) : '';
         $errors = [];
         if ($data['fullName'] === '' || mb_strlen($data['fullName']) > 120 || preg_match('/[\x00-\x1F\x7F]/u', $data['fullName'])) $errors['fullName'] = 'Enter your full name (up to 120 characters).';
+        if (mb_strlen($data['organization']) > 120 || preg_match('/[\x00-\x1F\x7F]/u', $data['organization'])) $errors['organization'] = 'Enter an organization name up to 120 characters.';
         if ($data['email'] !== '' && (strlen($data['email']) > 254 || !filter_var($data['email'], FILTER_VALIDATE_EMAIL))) $errors['email'] = 'Enter a valid email address (up to 254 characters).';
         $phone = PhoneNumber::normalize($data['phone']);
         if ($phone === null) $errors['phone'] = 'Enter a phone number with 7–15 digits, optionally using +, spaces, parentheses or hyphens.';

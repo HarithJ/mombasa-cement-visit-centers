@@ -32,7 +32,7 @@ final class BookingEmail {
         $intro[] = $visitor ? $visitorNotes[$scenario] : $managerNotes[$scenario];
         $details = ['Booking reference'=>$booking['reference'], 'Destination'=>$team['name'], 'Visit date'=>$date, 'Time'=>$time, 'Attendees'=>(string)$booking['attendees'], 'Transport'=>!empty($booking['transport_requested']) ? 'Requested (subject to availability)' : 'Not requested'];
         if ($booking['overnight']) $details += ['Overnight stay requested'=>EmailTemplate::date($booking['arrival_date']).' to '.EmailTemplate::date($booking['departure_date']), 'Staying guests'=>(string)$booking['overnight_guests']];
-        if (!$visitor) $details += ['Visitor'=>$booking['full_name'], 'Phone'=>$booking['phone'], 'Email'=>$booking['email'] ?: 'Not provided'];
+        if (!$visitor) $details += ['Visitor'=>$booking['full_name'], 'Organization'=>$booking['organization'] ?? '' ?: 'Not provided', 'Phone'=>$booking['phone'], 'Email'=>$booking['email'] ?: 'Not provided'];
         $content = [
             'title'=>$visitor ? "We look forward to welcoming you." : 'A new visit to plan.',
             'eyebrow'=>$visitor ? 'Your visit is registered' : 'New booking',
@@ -44,7 +44,7 @@ final class BookingEmail {
         ];
         if (!$visitor) $content['action'] = ['label'=>'Call the visitor', 'url'=>'tel:'.preg_replace('/[^+0-9]/', '', $booking['phone'])];
         return [
-            'to'=>$visitor ? [$booking['email']] : (ManagerNotifications::overridden() ? ManagerNotifications::emails() : array_values(array_unique([...array_column($team['people'], 'email'), ...ManagerNotifications::emails()]))),
+            'to'=>$visitor ? [$booking['email']] : array_values(array_unique([...array_column($team['people'], 'email'), ...ManagerNotifications::emails()])),
             'subject'=>($visitor ? 'Your visit to '.$team['name'].' is registered' : 'New visit to '.$team['name']).' — '.$booking['reference'],
             'text'=>EmailTemplate::text($content), 'html'=>EmailTemplate::html($content),
         ];

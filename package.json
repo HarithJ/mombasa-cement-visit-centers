@@ -8,6 +8,7 @@
     "test:overnight": "node tests/overnight.test.mjs",
     "test:feedback": "node tests/feedback.test.mjs",
     "test:feedback-worker": "php tests/feedback-worker.test.php",
+    "test:organization": "php tests/organization.test.php && node tests/organization.test.mjs",
     "test:email": "php tests/email.test.php",
     "test:sms": "php tests/sms.test.php && php tests/booking-sms.test.php",
     "test": "node tests/all.test.mjs",

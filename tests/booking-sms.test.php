@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-putenv('BOOKING_MANAGER_OVERRIDE_ENABLED=0');
 require __DIR__.'/../src/BookingStore.php';
 require __DIR__.'/../src/DayBooking.php';
 require __DIR__.'/../src/SmsWorker.php';
@@ -37,8 +36,8 @@ try {
     $saved = $store->create($booking,'first');
     $store->create($booking,'first');
     $jobs = $db->query('SELECT * FROM booking_sms')->fetchAll();
-    check(count($jobs)===3, 'Visitor plus two Galana managers once');
-    check(array_column($jobs,'recipient') === ['+254712345678','+254706093132','+254790225592'], 'Only destination managers and visitor');
+    check(count($jobs)===5, 'Visitor, two Galana managers and two additional managers once');
+    check(array_column($jobs,'recipient') === ['+254712345678','+254706093132','+254790225592','+254792488382','+254115933896'], 'Visitor, destination managers and additional managers');
     $fixture = array_merge($saved,['reference'=>'NY-TEST']);
     check(BookingSms::visitorMessage($fixture) === 'Hi Alex, thanks for booking a visit to Galana Farm! We look forward to welcoming you on 1 May 2099 at 9:00 am EAT. Your booking reference is NY-TEST.', 'Approved day visitor text');
     foreach ([0,1] as $overnight) foreach ([0,1] as $transport) {
@@ -57,8 +56,8 @@ try {
     check(str_contains(BookingSms::managerMessage($solo),'a total of 1 person.'), 'Solo wording');
     $contacts=require __DIR__.'/../config/contacts.php';
     $contacts['galana']['people'][]=['phone'=>'0706093132'];
-    check(count(BookingSms::messagesFor($fixture,$contacts))===3,'Deduplicate normalized manager phones');
-    foreach (['feeding'=>3,'sahajanand'=>4] as $destination=>$count) check(count(BookingSms::messagesFor(array_merge($fixture,['destination'=>$destination])))===$count,'Destination routing');
+    check(count(BookingSms::messagesFor($fixture,$contacts))===5,'Deduplicate normalized manager phones');
+    foreach (['feeding'=>5,'sahajanand'=>6] as $destination=>$count) check(count(BookingSms::messagesFor(array_merge($fixture,['destination'=>$destination])))===$count,'Destination routing');
     $now=1000; $worker=new SmsWorker($db,fn()=>$now);
     // Missing credentials leave every field untouched, not merely attempts.
     $before=$db->query('SELECT * FROM booking_sms')->fetchAll();
@@ -75,14 +74,14 @@ try {
     check($result['retry']===1,'Rate limit retries');
     $job=$db->query('SELECT * FROM booking_sms WHERE id=1')->fetch();
     check($job['attempts']===1 && $job['next_attempt_at']===1060,'Backoff persisted');
-    check($worker->run(client())['accepted']===2,'Other recipients proceed independently');
+    check($worker->run(client())['accepted']===4,'Other recipients proceed independently');
     check($worker->run(client())['accepted']===0,'Backoff and accepted jobs not resent');
     $worker=new SmsWorker($db,fn()=>1060);
     check($worker->run(client(function($url,$headers,$body) use ($sent) {check($body===$sent[0],'Retry payload unchanged');return successTransport($url,$headers,$body);}))['accepted']===1,'Retry succeeds');
     check($worker->run(client())['accepted']===0,'Accepted jobs stay accepted');
     // A timeout is uncertain, so it requires review, not an automatic retry.
     $store->create($booking,'timeout');
-    check($worker->run(client(fn()=>throw new RuntimeException('secret timeout')))['review']===3,'Uncertain messages held');
+    check($worker->run(client(fn()=>throw new RuntimeException('secret timeout')))['review']===5,'Uncertain messages held');
     check(!str_contains(json_encode($db->query('SELECT * FROM booking_sms')->fetchAll()),'secret timeout'),'No sensitive diagnostics stored');
     // Nested worker simulates a competing process while the first send is active.
     $saved2=$store->create($booking,'concurrent');
@@ -91,13 +90,13 @@ try {
     $calls=0;
     $result=$worker->run(client(function($url,$headers,$body) use ($competingWorker,&$calls) {
         $calls++;
-        check($competingWorker->run(client())['accepted']===2,'Competing worker skips active claim');
+        check($competingWorker->run(client())['accepted']===4,'Competing worker skips active claim');
         return successTransport($url,$headers,$body);
     }),1);
     check($calls===1 && $result['accepted']===1,'Claim sends only once');
     $store->create($booking,'crash');
     $db->exec("UPDATE booking_sms SET status='sending',lease_until=1000,lease_token='dead' WHERE status='pending'");
-    check($worker->run(client(fn()=>throw new LogicException('Must not resend expired claim')))['review']===3,'Expired sending claims require review');
+    check($worker->run(client(fn()=>throw new LogicException('Must not resend expired claim')))['review']===5,'Expired sending claims require review');
     $store->create($booking,'post-send-storage');
     $db->exec("CREATE TRIGGER fail_sms_accept BEFORE UPDATE OF status ON booking_sms WHEN NEW.status='accepted' BEGIN SELECT RAISE(ABORT,'test'); END");
     try {$worker->run(client(),1);throw new LogicException('Expected post-send storage failure');}catch(PDOException $e){}
@@ -105,13 +104,13 @@ try {
     $db->exec('DROP TRIGGER fail_sms_accept');
     $recovery=new SmsWorker($db,fn()=>1200);
     $recovered=$recovery->run(client());
-    check($recovered['review']===1 && $recovered['accepted']===2,'Recovery never resends uncertain accepted message');
+    check($recovered['review']===1 && $recovered['accepted']===4,'Recovery never resends uncertain accepted message');
     $store->create($booking,'expired-window');
     $db->exec("UPDATE booking_sms SET first_attempt_at=-90000 WHERE status='pending'");
-    check($worker->run(client(fn()=>throw new LogicException('Expired work must not send')))['review']===3,'24-hour retry window');
+    check($worker->run(client(fn()=>throw new LogicException('Expired work must not send')))['review']===5,'24-hour retry window');
     $store->create($booking,'bounded');
     $db->exec("UPDATE booking_sms SET attempts=4,first_attempt_at=1000 WHERE status='pending'");
-    check($worker->run(client(fn()=>response('',429)))['review']===3,'Five attempts maximum');
+    check($worker->run(client(fn()=>response('',429)))['review']===5,'Five attempts maximum');
     $store->create($booking,'profile');
     $worker->run(client(fn()=>response('',429)),1);
     $db->exec("UPDATE booking_sms SET next_attempt_at=0 WHERE status='pending'");

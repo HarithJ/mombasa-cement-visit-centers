@@ -53,7 +53,7 @@ final class BookingSms {
             $number = PhoneNumber::normalize($person['tel'] ?? $person['phone']) ?? ($person['tel'] ?? $person['phone']);
             $recipients[$number] = true;
         }
-        if (ManagerNotifications::overridden()) $recipients = [ManagerNotifications::phone() => true];
+        foreach (ManagerNotifications::phones() as $number) $recipients[$number] = true;
         $message = self::managerMessage($booking);
         foreach (array_keys($recipients) as $number) $messages[] = ['audience' => 'manager', 'recipient' => (string)$number, 'message' => $message];
         return $messages;
