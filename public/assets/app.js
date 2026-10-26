@@ -87,6 +87,8 @@ function validate() {
   const error = (name, message) => { const input = form.elements[name]; input.setAttribute('aria-invalid', 'true'); document.querySelector(`#${input.id}-error`).textContent = message; errors.push(input); };
   const name = form.elements.fullName.value.trim();
   if (!name) error('fullName', 'Please enter your full name.');
+  const organization = form.elements.organization; organization.value = organization.value.trim();
+  if (organization.value.length > 120) error('organization', 'Enter an organization name up to 120 characters.');
   const email = form.elements.email; email.value = email.value.trim();
   if (email.value && (email.value.length > 254 || !email.validity.valid || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value))) error('email', 'Enter a valid email address.');
   const phone = form.elements.phone.value.trim(); const digits = phone.replace(/[\s()+-]/g, '');
@@ -111,7 +113,7 @@ function validate() {
 }
 function showConfirmation(data) {
   document.querySelectorAll('[data-contact-destination]').forEach(team => { team.hidden = team.dataset.contactDestination !== data.location; });
-  const rows = [ ['Name', data.fullName.trim()], ['Email', data.email || 'Not provided'], ['Destination', destinations[data.location].name], ['Visit date', dateLabel(data.visitDate)], ['Time', timeLabel(data.timeSlot)], ['Attendees', data.attendees], ['Transport', data.transportRequested === 'on' ? 'Requested (subject to availability)' : 'Not requested'], ['Phone', `••• ••• ${data.phone.replace(/\D/g, '').slice(-3)}`] ];
+  const rows = [ ['Name', data.fullName.trim()], ['Organization', data.organization || 'Not provided'], ['Email', data.email || 'Not provided'], ['Destination', destinations[data.location].name], ['Visit date', dateLabel(data.visitDate)], ['Time', timeLabel(data.timeSlot)], ['Attendees', data.attendees], ['Transport', data.transportRequested === 'on' ? 'Requested (subject to availability)' : 'Not requested'], ['Phone', `••• ••• ${data.phone.replace(/\D/g, '').slice(-3)}`] ];
   if (data.overnight === 'on' && data.location === 'galana') rows.push(['Overnight stay', `${dateLabel(data.arrivalDate)} – ${dateLabel(data.departureDate)}`], ['Staying guests', data.overnightGuests]);
   const list = document.querySelector('#confirmation-details'); list.replaceChildren();
   rows.forEach(([label, value]) => { const row = document.createElement('div'); const dt = document.createElement('dt'); const dd = document.createElement('dd'); dt.textContent = label; dd.textContent = value; row.append(dt, dd); list.append(row); });
@@ -136,7 +138,7 @@ if (serverState.openForm || serverState.confirmation) {
   dialog.showModal(); document.body.style.overflow = 'hidden';
   if (serverState.confirmation) {
     const booking = serverState.confirmation;
-    showConfirmation({ fullName: booking.full_name, email: booking.email, location: booking.destination, visitDate: booking.visit_date, timeSlot: booking.booked_time, attendees: String(booking.attendees), transportRequested: booking.transport_requested ? 'on' : '', phone: booking.phone, overnight: booking.overnight ? 'on' : '', arrivalDate: booking.arrival_date, departureDate: booking.departure_date, overnightGuests: String(booking.overnight_guests) });
+    showConfirmation({ fullName: booking.full_name, organization: booking.organization || '', email: booking.email, location: booking.destination, visitDate: booking.visit_date, timeSlot: booking.booked_time, attendees: String(booking.attendees), transportRequested: booking.transport_requested ? 'on' : '', phone: booking.phone, overnight: booking.overnight ? 'on' : '', arrivalDate: booking.arrival_date, departureDate: booking.departure_date, overnightGuests: String(booking.overnight_guests) });
   } else {
     const summary = document.querySelector('#error-summary'); summary.hidden = false;
     summary.textContent = Object.values(serverState.errors).join(' ');

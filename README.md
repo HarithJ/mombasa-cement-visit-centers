@@ -59,11 +59,9 @@ Visitors can optionally request company-arranged transport with the unchecked bo
 
 Optional Africa’s Talking booking SMS confirms visits to the visitor and alerts destination managers through a durable queue and scheduled worker. Sending is disabled by default. See [configuration, recovery, and mocked tests](docs/africas-talking.md).
 
-### Temporary manager notification routing
+### Booking notification routing
 
-Manager booking emails currently go to `harithjaved@gmail.com`, `kp@nyumba.com`, and `apoorvchit@gmail.com`;
-manager SMS goes to `+254788738085`. Visitor confirmations, feedback emails, and public location
-contacts are unchanged. Set `BOOKING_MANAGER_OVERRIDE_ENABLED=0` in the
-web application to restore the configured location managers for new bookings. All three additional email recipients remain included.
-Existing queued messages retain their original recipients.
+Booking emails go to the destination's contacts in `config/contacts.php`, plus `harithjaved@gmail.com`
+and `apoorvchit@gmail.com` for every destination. Booking SMS alerts go to the
+destination's contact numbers plus `+254792488382` and `+254115933896` for every destination. Visitor confirmations and feedback emails are unchanged.
 The existing email/SMS enablement flags still apply.
