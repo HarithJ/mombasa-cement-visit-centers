@@ -1,9 +1,6 @@
 <?php
 declare(strict_types=1);
 if (preg_match('#^/admin(?:/|$)#', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '')) { require __DIR__.'/../src/admin-web.php'; exit; }
-if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/school-request') { require __DIR__.'/../src/school-web.php'; exit; }
-if (preg_match('#^/mpesa/(confirmation|(?:result|timeout)/[a-f0-9]{64})$#D', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '')) { require __DIR__.'/../src/mpesa-web.php'; exit; }
-if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/donate') { require __DIR__.'/../src/donate-web.php'; exit; }
 $uiVersion = 'v3';
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/feedback') { require __DIR__.'/../src/feedback-web.php'; exit; }
 require __DIR__.'/../src/web.php';
@@ -21,7 +18,6 @@ function photoSrcset(array $variants): string {
     foreach ($variants as $width => $path) $sources[] = $path.' '.$width.'w';
     return implode(', ', $sources);
 }
-$photoSizes = '(max-width: 700px) calc(100vw - 40px), 60vw';
 function icon(string $name, string $class = ''): string {
     $paths = [
         'arrow' => '<path d="M4 12h15M13 5l7 7-7 7"/>',
@@ -41,13 +37,16 @@ $mapLinks = require __DIR__.'/../config/locations.php';
 $routeIllustrations = require __DIR__.'/../config/route-illustrations.php';
 $photoDescriptions = require __DIR__.'/../config/photo-descriptions.php';
 $destinations = [
-    'sahajanand' => ['name' => 'Sahajanand Special School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Meet the people behind a school built around care, connection and different ways of learning.', 'icon' => 'people', 'tag' => 'Discover how learning happens at this special school'],
-    'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.', 'icon' => 'leaf', 'tag' => 'Experience modern agriculture and farm tourism'],
-    'feeding' => ['name' => 'Kibarani Feeding center', 'category' => 'CARE & COMMUNITY', 'description' => 'Discover the people and daily work behind community feeding at Kibarani. A visit with care at its heart.', 'icon' => 'sun', 'tag' => 'See large-scale daily feeding for the community'],
+    'sahajanand' => ['name' => 'Sahajanand Special School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Meet the people behind a school built around care, connection and different ways of learning.', 'photos' => ['01-entrance.webp']],
+    'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
+    'feeding' => ['name' => 'Kibarani Feeding center', 'category' => 'CARE & COMMUNITY', 'description' => 'Discover the people and daily work behind community feeding at Kibarani. A visit with care at its heart.', 'photos' => ['01-meals.webp', '02-centre-aerial.webp', '03-centre-building.webp', '06-dining-shelter.webp', '08-food-service.webp', '09-meal-collection.webp', '10-meal-queue-aerial.webp', '11-meal-service.webp', '12-meal-tables.webp', '17-serving-station.webp', '20-visitors-collecting-meals.webp']],
 ];
 foreach ($destinations as $id => &$destination) {
     $files = glob(__DIR__.'/assets/photos/'.$id.'/*.{webp,jpg,jpeg,png}', GLOB_BRACE) ?: [];
     sort($files);
+    // A destination can list the photographs to show; listing one shows it still, without a gallery.
+    if (isset($destination['photos'])) $files = array_values(array_filter($files, fn($path) => in_array(basename($path), $destination['photos'], true)));
+    $destination['still'] = count($files) === 1;
     $destination['images'] = array_map(fn($path) => 'assets/photos/'.$id.'/'.basename($path), $files);
     $destination['placeholder'] = !$files;
     if (!$files) $destination['images'] = ['assets/galana-placeholder.svg', 'assets/galana-placeholder.svg'];
@@ -72,7 +71,6 @@ unset($destination);
     <link rel="icon" href="assets/nyumba-group.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/travel.css">
-    <link rel="stylesheet" href="assets/community.css">
     <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
@@ -87,48 +85,44 @@ unset($destination);
 
 
         </div>
-        <nav class="explorer-nav" aria-label="Main navigation"><a href="#destinations">The destinations</a><a href="#school-projects">School projects</a><a href="#donations">Donate</a><a href="#destinations" class="nav-plan">Let’s go <?= icon('diagonal') ?></a></nav>
     </div>
 </header>
 <main>
     <section class="visit-hero" aria-labelledby="hero-title">
         <div class="explorer-hero">
-            <img class="explorer-landscape" src="assets/photos/galana/01-farm.webp" alt="Long rows of green crops stretching to the horizon at Galana Farm" width="1600" height="1065" fetchpriority="high">
+            <img class="explorer-landscape" src="assets/photos/galana/02-circular-fields-aerial.webp" srcset="assets/photos/galana/responsive/02-circular-fields-aerial-720.webp 720w, assets/photos/galana/responsive/02-circular-fields-aerial-1024.webp 1024w, assets/photos/galana/02-circular-fields-aerial.webp 1600w" sizes="100vw" alt="Aerial view of a large green irrigated field under a cloudy sky at Galana Farm" width="1600" height="900" fetchpriority="high">
             <div class="explorer-shade"></div>
-            <div class="hero-topline wrap"><span>GO OUT. GET CURIOUS.</span><span>PLACES / PEOPLE / PURPOSE</span></div>
             <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Nyumba<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><p>A little adventure.<br>A whole new perspective.</p><a class="explorer-button" href="#destinations">Explore the places <?= icon('diagonal') ?></a></div></div>
-            <div class="hero-bottomline wrap"><span><?= icon('leaf') ?> Out in the fields · Galana Farm</span><span>SCROLL TO FIND YOUR KIND OF DAY ↓</span></div>
         </div>
-        <div class="destination-jumps"><div class="wrap"><span>WHERE TO?</span><a href="#place-sahajanand">01 <strong>The school</strong><?= icon('diagonal') ?></a><a href="#place-galana">02 <strong>The farm</strong><?= icon('diagonal') ?></a><a href="#place-feeding">03 <strong>The feeding centre</strong><?= icon('diagonal') ?></a></div></div>
-        <div class="discovery-heading wrap"><p class="eyebrow">PICK YOUR NEXT EXPERIENCE</p><h2>Good days start<br>with <span>curiosity.</span></h2><p>Three ways to get closer to the places,<br>people and purpose of Nyumba.</p></div>
+        <div class="discovery-heading wrap"><p class="eyebrow">PICK YOUR NEXT EXPERIENCE</p><h2>Good days start<br>with <span>curiosity.</span></h2></div>
         <div class="destinations wrap" id="destinations" aria-label="Choose a destination">
-            <?php $number = 0; foreach ($destinations as $id => $destination): $number++; ?>
-            <article class="destination" id="place-<?= e($id) ?>" data-destination="<?= e($id) ?>">
+            <?php $number = 0; foreach (['galana', 'sahajanand', 'feeding'] as $id): $destination = $destinations[$id]; $number++; $featured = $number === 1; $photoSizes = $featured ? '(max-width: 1000px) calc(100vw - 40px), 62vw' : '(max-width: 760px) calc(100vw - 40px), 46vw'; ?>
+            <article class="destination <?= $featured ? 'destination-featured' : 'destination-card' ?>" id="place-<?= e($id) ?>" data-destination="<?= e($id) ?>">
                 <div class="photo-stack">
-                <div class="destination-photo <?= $destination['placeholder'] ? 'placeholder' : '' ?>" data-images="<?= e(json_encode($destination['images'], JSON_THROW_ON_ERROR)) ?>" data-variants="<?= e(json_encode($destination['variants'], JSON_THROW_ON_ERROR)) ?>" data-alts="<?= e(json_encode($destination['imageAlts'] ?? [], JSON_THROW_ON_ERROR)) ?>" tabindex="0" aria-label="<?= e($destination['name']) ?> image gallery. Photos change automatically; use the photo button for the next view.">
+                <div class="destination-photo <?= $destination['placeholder'] ? 'placeholder' : '' ?>"<?php if ($destination['still']): ?> data-still<?php endif; ?> data-images="<?= e(json_encode($destination['images'], JSON_THROW_ON_ERROR)) ?>" data-variants="<?= e(json_encode($destination['variants'], JSON_THROW_ON_ERROR)) ?>" data-alts="<?= e(json_encode($destination['imageAlts'] ?? [], JSON_THROW_ON_ERROR)) ?>" tabindex="0" aria-label="<?= e($destination['name']) ?> image gallery. Photos change automatically; use the photo button for the next view.">
                     <img class="photo-primary" src="<?= e($destination['variants'][0][720] ?? $destination['images'][0]) ?>" srcset="<?= e(photoSrcset($destination['variants'][0])) ?>" sizes="<?= e($photoSizes) ?>" decoding="async" alt="<?= $destination['placeholder'] ? 'Illustrated landscape placeholder; destination photography not yet supplied' : e($destination['imageAlts'][0] ?? $destination['name']) ?>" width="800" height="900" fetchpriority="<?= $number === 1 ? 'high' : 'auto' ?>">
+                    <?php if (!$destination['still']): ?>
                     <img class="photo-secondary" decoding="async" alt="<?= $destination['placeholder'] ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : e($destination['imageAlts'][1] ?? $destination['name']) ?>" width="800" height="900">
                     <noscript>
                         <img class="photo-secondary" src="<?= e($destination['variants'][1][720] ?? $destination['images'][1]) ?>" srcset="<?= e(photoSrcset($destination['variants'][1])) ?>" sizes="<?= e($photoSizes) ?>" alt="<?= $destination['placeholder'] ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : e($destination['imageAlts'][1] ?? $destination['name']) ?>" width="800" height="900">
                     </noscript>
 
                     <?php if ($destination['placeholder']): ?><span class="placeholder-label">Illustration · Photo coming soon</span><?php endif; ?>
-                    <div class="photo-bottom"><span><?= icon($destination['icon']) ?> <?= e($destination['tag']) ?></span><button class="photo-toggle" type="button" aria-label="Show alternate view of <?= e($destination['name']) ?>" aria-pressed="false"><?= icon('photo') ?><?php if (!$destination['placeholder']): ?><svg class="photo-progress" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" pathLength="100" /></svg><?php endif; ?></button></div>
+                    <?php endif; ?>
+                    <div class="photo-bottom"><button class="photo-toggle" type="button" aria-label="Show alternate view of <?= e($destination['name']) ?>" aria-pressed="false"><?= icon('photo') ?><?php if (!$destination['placeholder'] && !$destination['still']): ?><svg class="photo-progress" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" pathLength="100" /></svg><?php endif; ?></button></div>
                 </div>
                 </div>
                 <div class="destination-info">
                     <p class="eyebrow category"><span>0<?= $number ?> /</span> <?= e($destination['category']) ?></p>
-                    <p class="place-kicker"><?= ['sahajanand' => 'A place to connect.', 'galana' => 'Room to roam.', 'feeding' => 'Care, in action.'][$id] ?></p><h2><?= e($destination['name']) ?></h2>
+                    <h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
+                    <?php if ($featured): ?><p class="destination-badge"><?= icon('moon') ?> Overnight stays on request</p><?php endif; ?>
                     <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>
                 </div>
             </article>
             <?php endforeach; ?>
         </div>
-        <div class="hero-footnote wrap"><span><?= icon('clock') ?> Three destinations. One curious you.</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause photo motion</button><span class="preview-label"><span class="status-dot"></span> Visit times · Africa/Nairobi</span></div>
     </section>
-    <?php require __DIR__.'/../src/views/school-projects.php'; ?>
-    <?php require __DIR__.'/../src/views/donations.php'; ?>
     <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
 </main>
 <footer class="footer wrap">

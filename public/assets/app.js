@@ -189,6 +189,7 @@ const openPhotoGallery = (photo, images, variants, alts, name) => {
   document.querySelector('#gallery-count').textContent = 'Loading photograph…';
   document.querySelector('#gallery-title').textContent = name;
   galleryThumbnails.replaceChildren();
+  photoLightbox.classList.toggle('single', images.length === 1);
   images.forEach((source, index) => {
     const thumbnail = document.createElement('button');
     thumbnail.type = 'button';
@@ -251,12 +252,30 @@ const advancePhotos = async (selection, automatic = false) => {
   }
 };
 document.querySelectorAll('.destination-photo').forEach(photo => {
-  const images = JSON.parse(photo.dataset.images);
+  const still = photo.hasAttribute('data-still');
+  const images = JSON.parse(photo.dataset.images).slice(0, still ? 1 : undefined);
   const variants = JSON.parse(photo.dataset.variants || '[]');
   const alts = JSON.parse(photo.dataset.alts);
-  const layers = [photo.querySelector('.photo-primary'), photo.querySelector('.photo-secondary')];
   const button = photo.querySelector('.photo-toggle');
   const name = photo.dataset.galleryName || destinations[photo.closest('[data-destination]').dataset.destination].name;
+  button.setAttribute('aria-label', `${still ? 'Enlarge' : 'Open'} ${name} ${still ? 'photograph' : 'photo gallery'}`);
+  button.setAttribute('aria-haspopup', 'dialog');
+  button.removeAttribute('aria-pressed');
+  button.addEventListener('click', () => openPhotoGallery(photo, images, variants, alts, name));
+  photo.setAttribute('aria-haspopup', 'dialog');
+  photo.setAttribute('aria-label', `${name} ${still ? 'photograph. Click or press Enter to enlarge it.' : 'photographs. Click or press Enter to open the gallery.'}`);
+  photo.addEventListener('click', event => {
+    if (!event.target.closest('button')) openPhotoGallery(photo, images, variants, alts, name);
+  });
+  photo.addEventListener('keydown', event => {
+    if (event.target === photo && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      openPhotoGallery(photo, images, variants, alts, name);
+    }
+  });
+  // A single photograph stays put: no slideshow, only its gentle zoom (in CSS).
+  if (still) return;
+  const layers = [photo.querySelector('.photo-primary'), photo.querySelector('.photo-secondary')];
   let index = 0, layer = 0;
   const zoomAnimations = [null, null];
   const startZoom = () => {
@@ -326,21 +345,6 @@ document.querySelectorAll('.destination-photo').forEach(photo => {
   };
   const gallery = { prepareNext, fillRing, startZoom, pauseZoom, stopRing: () => progressAnimation?.cancel() };
   galleries.push(gallery);
-  button.setAttribute('aria-label', `Open ${name} photo gallery`);
-  button.setAttribute('aria-haspopup', 'dialog');
-  button.removeAttribute('aria-pressed');
-  button.addEventListener('click', () => openPhotoGallery(photo, images, variants, alts, name));
-  photo.setAttribute('aria-haspopup', 'dialog');
-  photo.setAttribute('aria-label', `${name} photographs. Click or press Enter to open the gallery.`);
-  photo.addEventListener('click', event => {
-    if (!event.target.closest('button')) openPhotoGallery(photo, images, variants, alts, name);
-  });
-  photo.addEventListener('keydown', event => {
-    if (event.target === photo && (event.key === 'Enter' || event.key === ' ')) {
-      event.preventDefault();
-      openPhotoGallery(photo, images, variants, alts, name);
-    }
-  });
   preloadNext();
 });
 document.addEventListener('visibilitychange', startPhotoCycle);
@@ -348,17 +352,6 @@ reducedPhotoMotion.addEventListener('change', startPhotoCycle);
 new MutationObserver(startPhotoCycle).observe(dialog, { attributes: true, attributeFilter: ['open'] });
 visiblePhotosReady.then(startPhotoCycle);
 if ('IntersectionObserver' in window) { document.body.classList.add('js-ready'); const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }), { threshold: .08 }); document.querySelectorAll('.reveal').forEach(section => observer.observe(section)); }
-
-const motionToggle = document.querySelector('#motion-toggle');
-motionToggle.addEventListener('click', () => {
-  photosPaused = !photosPaused;
-  motionToggle.setAttribute('aria-pressed', String(photosPaused));
-  motionToggle.textContent = photosPaused ? 'Resume photo motion' : 'Pause photo motion';
-  startPhotoCycle();
-});
-const syncMotionToggle = () => { motionToggle.hidden = reducedPhotoMotion.matches; };
-reducedPhotoMotion.addEventListener('change', syncMotionToggle);
-syncMotionToggle();
 
 // Route illustrations are local assets; Google opens only through the directions link.
 const inlineMap = document.querySelector('#inline-map');

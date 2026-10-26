@@ -18,9 +18,17 @@ try {
   const page=await browser.newPage({reducedMotion:'reduce',viewport:{width:390,height:844}});page.setDefaultTimeout(6000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.url().includes('/assets/photos/')&&r.status()>=400)errors.push(r.url());});
   await page.goto('http://127.0.0.1:8099'+route);
-  for(const destination of ['sahajanand','galana','feeding']) {
+  const school=page.locator('[data-destination="sahajanand"] .destination-photo');
+  assert.equal(await school.locator('img').count(),1);assert.equal(await school.locator('.photo-progress').count(),0);
+  assert.match(await school.locator('img').getAttribute('src'),/01-entrance/);
+  await school.locator('.photo-toggle').click();
+  await page.waitForFunction(()=>document.querySelector('#gallery-image').getAttribute('src')?.endsWith('/01-entrance.webp'));
+  assert.equal(await page.locator('#gallery-thumbnails button').count(),1);assert.equal(await page.locator('#gallery-next').isVisible(),false);
+  await page.locator('#gallery-close').click();
+  for(const destination of ['galana','feeding']) {
    await page.locator(`[data-destination="${destination}"] .photo-toggle`).click();
-   const photos=manifest.filter(r=>r.destination===destination).sort((a,b)=>a.asset.localeCompare(b.asset));
+   const hidden=destination==='feeding'?['04','05','07','13','14','15','16','18','19']:[];
+   const photos=manifest.filter(r=>r.destination===destination&&!hidden.includes(r.asset.slice(0,2))).sort((a,b)=>a.asset.localeCompare(b.asset));
    const thumbs=page.locator('#gallery-thumbnails button');assert.equal(await thumbs.count(),photos.length);
    for(let index=0;index<photos.length;index++) {
     await thumbs.nth(index).click();
@@ -32,6 +40,6 @@ try {
    await page.locator('#gallery-close').click();
   }
   assert.deepEqual(errors,[]);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-  console.log(`PASS ${route}: every gallery image, thumbnail count, wraparound and mobile layout`);await page.close();
+  console.log(`PASS ${route}: school entrance shown still, every gallery image, thumbnail count, wraparound and mobile layout`);await page.close();
  }
 } finally {await browser?.close();server.kill();}

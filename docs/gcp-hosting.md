@@ -35,6 +35,67 @@ Only TCP 80/443 are publicly allowed. The VM has no service account. Secure Boot
 
 ## Domain and deployment
 
+### 2026-10-23 homepage redesign release
+
+Deployed `homepage-redesign` commit `9348c32` as
+`/srv/visit-nyumba/releases/homepage-redesign-9348c32` (git archive of `public`,
+`src`, `config`, `migrations` and `bin`), replacing `homepage-redesign-3b5496f`,
+which remains for rollback. Before switching, the database was backed up to
+`/var/backups/visit-nyumba/pre-deploy-9348c32-20261023T084152Z.sqlite`
+(integrity `ok`; it holds the one school request deleted below).
+
+Migration `015-drop-school-requests-and-donations.sql` dropped the school
+request and M-Pesa tables; there were no donation records. Bookings were
+unchanged (9) and `quick_check` returned `ok`. The school-request, donation and
+M-Pesa routes now return 404; no cron job or timer referenced their removed
+scripts. PHP-FPM was reloaded.
+
+Post-deploy checks: homepage 200 with booking form/CSRF field, all three local
+CSS/JavaScript assets 200, `/admin` redirects to login, Nginx and PHP-FPM
+active with no error-level journal entries, and the email and SMS workers'
+next scheduled runs succeeded. No test bookings were submitted.
+
+### 2026-10-22 kernel reboot
+
+Rebooted production at approximately 08:03 EAT to activate kernel
+`7.0.0-1014-gcp` (previously `7.0.0-1011-gcp`). Confirmed a new boot ID,
+systemd state `running`, no failed units and no pending reboot marker.
+All services running before maintenance returned, including Nginx, PHP-FPM,
+SSH, cron, time synchronization, Google agents and unattended upgrades.
+The PHP security package remains `8.3.6-0ubuntu0.24.04.13`.
+
+Email and SMS timers resumed; both workers completed their first post-boot
+scheduled run at 08:03:50 EAT with exit status 0 and result `success`.
+Certbot's timer and cron are active; the backup cron file and executable
+remain present. Backup restore and external message delivery were not tested.
+
+Post-boot HTTPS checks passed for the homepage, admin login, school request
+and donation pages, all seven local CSS/JavaScript assets referenced by the
+homepage, session cookie issuance, booking form/CSRF presence and the
+unauthenticated admin redirect. SQLite read-only `quick_check` returned `ok`,
+Nginx configuration validation passed, and the current boot's Nginx/PHP-FPM
+error-level journals were empty. No test bookings or payments were submitted.
+
+### 2026-10-22 PHP security update
+
+Upgraded the nine installed PHP 8.3 runtime/extension packages from Ubuntu
+`8.3.6-0ubuntu0.24.04.12` to `8.3.6-0ubuntu0.24.04.13`. The installed package
+changelog explicitly records fixes for CVE-2026-109618 and CVE-2026-109619;
+see [Ubuntu USN-8948-1](https://ubuntu.com/security/notices/USN-8948-1).
+PHP-FPM was explicitly restarted at 07:34:44 EAT. PHP-FPM and Nginx were active,
+the running FPM executable was not marked deleted, and no FPM journal errors
+were reported after the restart.
+
+Post-update checks passed: HTTPS homepage, admin login, school request and
+donation pages returned 200 with expected content; booking form and CSRF field
+were present; a session cookie was issued; unauthenticated `/admin` redirected
+to login; three stylesheet requests returned 200. SQLite read-only
+`PRAGMA quick_check` returned `ok`, required PHP modules were present, and
+`nginx -t` passed. No real bookings, payments or notifications were created;
+these were smoke checks, not a full transaction or compromise investigation.
+The package manager also reported a pending kernel reboot, which was not
+performed as part of this PHP update.
+
 ### 2026-09-24 update
 
 Admin hash configuration correction: PHP-FPM interprets a literal leading `$` in a pool `env[]` value as an environment lookup, so a directly pasted bcrypt hash becomes empty in workers. The existing hash is stored root-only in `/etc/visit-nyumba-admin.env`, loaded by `/etc/systemd/system/php8.3-fpm.service.d/visit-nyumba-admin.conf`. The pool references it as `env[ADMIN_PASSWORD_HASH] = $ADMIN_PASSWORD_HASH`. The username stays in the pool. After changing the systemd environment file, restart PHP-FPM (a reload is insufficient to reload systemd environment). Never print the environment or the full FPM configuration dump in diagnostics: both may contain secrets.
