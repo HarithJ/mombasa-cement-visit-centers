@@ -13,7 +13,10 @@ foreach (['feeding','sahajanand','galana'] as $destination) foreach ([0,1] as $o
         check(str_contains($payload['text'],'<Alex & Test>'), 'Plain text preserves names');
         check(str_contains($payload['html'],'NYUMBA') && str_contains($payload['html'],'role="presentation"'), 'Branded email layout');
         foreach (['NY-TEST','1 May 2099','9:00 am EAT'] as $detail) check(str_contains($payload['html'],$detail) && str_contains($payload['text'],$detail),'Details in both alternatives');
-        check(str_contains($payload['text'],'Staying guests: 2')===(bool)$overnight,'Overnight details only when requested');
+        check(str_contains($payload['text'],'Overnight stay: Requested (subject to availability)')===(bool)$overnight,'Overnight request only when requested');
+        check(!str_contains($payload['text'],'3 May 2099') && !str_contains($payload['text'],'Staying guests') && !str_contains($payload['text'],'2 guests'),'No overnight dates or staying-guest count');
+        check(str_contains($payload['text'],'overnight stay')===(bool)$overnight,'Day messages do not mention an overnight stay');
+        if ($overnight) check(str_contains($payload['text'],'availability'),'Accommodation remains subject to availability');
         check(str_contains($payload['text'],'Transport: Requested (subject to availability)')===(bool)$transport,'Transport request clear');
         check(!str_contains($payload['html'],'<script') && !str_contains($payload['html'],'<img'), 'Email needs no JavaScript or external images');
         if ($visitor) {
@@ -35,4 +38,7 @@ $feedback=FeedbackEmail::payload($booking,$link);
 check(str_contains($feedback['html'],'href="https://example.com/feedback?token=sample&amp;source=email"'),'Feedback CTA preserves private link');
 check(str_contains($feedback['text'],$link) && str_contains($feedback['text'],"If you didn't attend"),'Text version includes action and non-attendance');
 check(str_contains($feedback['html'],'&lt;Alex &amp; Test&gt;'),'Feedback greeting escaped');
+check(str_contains($feedback['text'],'Visit date: 1 May 2099') && !str_contains($feedback['text'],'Overnight stay'),'Day feedback shows only the visit date');
+$overnightFeedback=FeedbackEmail::payload(array_merge($booking,['overnight'=>1,'arrival_date'=>'2099-05-01','departure_date'=>'2099-05-03','overnight_guests'=>2]),$link);
+check(str_contains($overnightFeedback['text'],'1 May 2099 · Overnight stay') && !str_contains($overnightFeedback['text'],'3 May 2099'),'Overnight feedback shows the visit date and a note, no stay range');
 echo "PASS email design: all scenarios, conversational copy, escaped HTML, text alternatives, routing, contact links and feedback CTA\n";

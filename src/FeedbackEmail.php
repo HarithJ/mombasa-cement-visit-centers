@@ -5,7 +5,7 @@ final class FeedbackEmail {
     public static function payload(array $booking, string $link): array {
         $contacts = require __DIR__.'/../config/contacts.php';
         $destination = $contacts[$booking['destination']]['name'];
-        $dates = $booking['overnight'] ? EmailTemplate::date($booking['arrival_date']).' to '.EmailTemplate::date($booking['departure_date']) : EmailTemplate::date($booking['visit_date']);
+        $dates = EmailTemplate::date($booking['visit_date']).($booking['overnight'] ? ' · Overnight stay' : '');
         $content = [
             'eyebrow'=>'A little feedback goes a long way', 'title'=>'How did your visit go?',
             'preheader'=>"We'd love to hear about your visit to ".$destination.'.',

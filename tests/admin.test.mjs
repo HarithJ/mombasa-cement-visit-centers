@@ -42,9 +42,9 @@ try {
  assert.equal(await page.getByRole('heading',{name:'Bookings',exact:true}).count(),1);
  await page.getByRole('link',{name:'Today',exact:true}).click();
  assert.match(await page.locator('main').innerText(),/No bookings found/);
- assert.equal(await page.getByLabel('From date').inputValue(),await page.getByLabel('To date').inputValue());
+ assert.equal(await page.getByLabel('Visit date from').inputValue(),await page.getByLabel('Visit date to').inputValue());
  await page.getByRole('link',{name:'Next 7 days',exact:true}).click();
- assert.equal((Date.parse(await page.getByLabel('To date').inputValue())-Date.parse(await page.getByLabel('From date').inputValue()))/86400000,6);
+ assert.equal((Date.parse(await page.getByLabel('Visit date to').inputValue())-Date.parse(await page.getByLabel('Visit date from').inputValue()))/86400000,6);
  await page.getByRole('link',{name:'All visits',exact:true}).click();
  await page.getByLabel('Search reference or name').fill('Special');
  await page.getByLabel('Destination',{exact:true}).selectOption('galana');
@@ -58,7 +58,9 @@ try {
  assert.match(await page.locator('main').innerText(),/5 \/ 5/);
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile booking reference must wrap');
  await page.screenshot({path:join(tmpdir(),'nyumba-admin-mobile.png'),fullPage:true});
- assert.match(await page.locator('main').innerText(),/3 May 2099/);
+ // A stored multi-night booking still shows through the single overnight line.
+ assert.match(await page.locator('main').innerText(),/Overnight stay\s+Requested/);
+ assert.doesNotMatch(await page.locator('main').innerText(),/3 May 2099|Arrival|Departure|Overnight guests/);
  assert.match(await page.locator('main').innerText(),/<script>alert\(1\)<\/script>/);
  assert.equal(await page.locator('main script').count(),0);
  await page.getByRole('link',{name:'Back to bookings'}).click();
@@ -132,7 +134,7 @@ try {
  await outsider.close();
  assert.deepEqual(domainSnapshot(),beforeAdmin,'Populated migration and admin navigation preserve all domain records');
  // A public booking remains separate from the authenticated admin session.
- await page.goto(origin+'/?book=feeding');
+ await page.goto(origin+'/?book=galana');
  await page.locator('#full-name').fill('Public Visitor'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('public@example.com');
  await page.locator('#visit-date').fill('2099-05-02'); await page.locator('#time-slot').selectOption('11:00'); await page.locator('#attendees').fill('2');
  await page.locator('[type=submit]').click(); await page.waitForURL(/confirmation=1/);

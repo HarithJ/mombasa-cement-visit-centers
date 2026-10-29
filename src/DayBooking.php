@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/PhoneNumber.php';
+require_once __DIR__.'/InterestRegistration.php';
 final class DayBooking {
     public static function validate(array $input, array $destinations): array {
         $data = [];
-        foreach (['fullName', 'organization', 'email', 'phone', 'location', 'visitDate', 'timeSlot', 'attendees', 'transportRequested', 'overnight', 'arrivalDate', 'departureDate', 'overnightGuests'] as $key) $data[$key] = is_string($input[$key] ?? null) ? trim($input[$key]) : '';
+        foreach (['fullName', 'organization', 'email', 'phone', 'location', 'visitDate', 'timeSlot', 'attendees', 'transportRequested', 'overnight'] as $key) $data[$key] = is_string($input[$key] ?? null) ? trim($input[$key]) : '';
         $errors = [];
         if ($data['fullName'] === '' || mb_strlen($data['fullName']) > 120 || preg_match('/[\x00-\x1F\x7F]/u', $data['fullName'])) $errors['fullName'] = 'Enter your full name (up to 120 characters).';
         if (mb_strlen($data['organization']) > 120 || preg_match('/[\x00-\x1F\x7F]/u', $data['organization'])) $errors['organization'] = 'Enter an organization name up to 120 characters.';
@@ -13,22 +14,22 @@ final class DayBooking {
         if ($phone === null) $errors['phone'] = 'Enter a phone number with 7–15 digits, optionally using +, spaces, parentheses or hyphens.';
         else $data['phone'] = $phone;
         if (!isset($destinations[$data['location']])) $errors['location'] = 'Choose one of the three destinations.';
+        elseif (InterestRegistration::interestOnly($data['location'])) $errors['location'] = 'Visits to this destination are not open for booking yet.';
         if (!in_array($data['timeSlot'], $destinations[$data['location']]['slots'] ?? [], true)) $errors['timeSlot'] = 'Choose a time offered for this destination.';
         $zone = new DateTimeZone('Africa/Nairobi');
         $date = preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/D', $data['visitDate']) ? DateTimeImmutable::createFromFormat('!Y-m-d', $data['visitDate'], $zone) : false;
-        if (!$date || $date->format('Y-m-d') !== $data['visitDate']) $errors['visitDate'] = 'Choose a valid visit date.';
+        $validDate = $date && $date->format('Y-m-d') === $data['visitDate'];
+        if (!$validDate) $errors['visitDate'] = 'Choose a valid visit date.';
         elseif ($data['visitDate'] < (new DateTimeImmutable('now', $zone))->format('Y-m-d')) $errors['visitDate'] = 'Choose today or a future date.';
         if (!preg_match('/^[1-9][0-9]*$/D', $data['attendees']) || filter_var($data['attendees'], FILTER_VALIDATE_INT) === false) $errors['attendees'] = 'Enter a whole number of at least 1, including yourself.';
         if (isset($input['transportRequested']) && (!is_string($input['transportRequested']) || !in_array($input['transportRequested'], ['', 'on'], true))) $errors['transportRequested'] = 'Choose whether you would like transport arranged.';
         $active = $data['location'] === 'galana' && $data['overnight'] !== '';
         if ($active) {
             if (!in_array($data['overnight'], ['on', '1'], true)) $errors['overnight'] = 'Choose whether you would like to stay overnight.';
-            if ($data['arrivalDate'] !== $data['visitDate'] || !$date) $errors['arrivalDate'] = 'Arrival must match your valid visit date.';
-            $departure = preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/D', $data['departureDate']) ? DateTimeImmutable::createFromFormat('!Y-m-d', $data['departureDate'], $zone) : false;
-            if (!$departure || $departure->format('Y-m-d') !== $data['departureDate']) $errors['departureDate'] = 'Choose a valid departure date.';
-            elseif ($data['departureDate'] <= $data['arrivalDate']) $errors['departureDate'] = 'Departure must be after arrival.';
-            if (!preg_match('/^[1-9][0-9]*$/D', $data['overnightGuests']) || filter_var($data['overnightGuests'], FILTER_VALIDATE_INT) === false) $errors['overnightGuests'] = 'Enter a whole number of staying guests, at least 1.';
-            elseif (!isset($errors['attendees']) && (int)$data['overnightGuests'] > (int)$data['attendees']) $errors['overnightGuests'] = 'Staying guests cannot exceed total attendees.';
+            // Stays are always one night for the whole group, so these are derived rather than submitted.
+            $data['arrivalDate'] = $validDate ? $data['visitDate'] : null;
+            $data['departureDate'] = $validDate ? $date->modify('+1 day')->format('Y-m-d') : null;
+            $data['overnightGuests'] = $validDate ? $data['attendees'] : null;
             $data['overnight'] = 'on';
         } else {
             $data['overnight'] = ''; $data['arrivalDate'] = null; $data['departureDate'] = null; $data['overnightGuests'] = null;

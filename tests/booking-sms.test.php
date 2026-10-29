@@ -48,8 +48,11 @@ try {
         check(str_contains($visitor,'NY-TEST') && str_contains($manager,'+254712345678'), 'Reference and visitor phone');
         check(str_contains($visitor,'transport') === (bool)$transport, 'Visitor transport text is relevant');
         check(str_contains($manager,'No company transport was requested.') === !$transport, 'Manager transport choice');
-        check(str_contains($visitor,'3 May 2099') === (bool)$overnight, 'Overnight dates only when requested');
-        check(str_contains($manager,'2 guests') === (bool)$overnight, 'Overnight count distinct from total');
+        foreach ([$visitor,$manager] as $text) {
+            check(str_contains($text,'overnight stay') === (bool)$overnight, 'Overnight stay mentioned only when requested');
+            check(!str_contains($text,'3 May 2099') && !str_contains($text,'2 guests'), 'No overnight dates or staying-guest count');
+        }
+        if ($overnight) check(str_contains($manager,'availability'), 'Manager accommodation is subject to availability');
         if ($overnight || $transport) check(str_contains($visitor,'confirm') && str_contains($visitor,'availability'), 'Requests not guarantees');
     }
     $solo=array_merge($fixture,['attendees'=>1]);

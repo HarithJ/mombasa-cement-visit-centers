@@ -21,7 +21,7 @@ final class Feedback {
     public function __construct(private PDO $db) {}
     public function find(string $token): ?array {
         if (!preg_match('/^[a-f0-9]{64}$/D', $token)) return null;
-        $query = $this->db->prepare('SELECT i.booking_id, i.version, b.destination, b.visit_date, b.overnight, b.arrival_date, b.departure_date, r.submitted_at FROM feedback_invitations i JOIN bookings b ON b.id = i.booking_id LEFT JOIN feedback_responses r ON r.booking_id = i.booking_id WHERE i.token_hash = ?');
+        $query = $this->db->prepare('SELECT i.booking_id, i.version, b.destination, b.visit_date, b.overnight, r.submitted_at FROM feedback_invitations i JOIN bookings b ON b.id = i.booking_id LEFT JOIN feedback_responses r ON r.booking_id = i.booking_id WHERE i.token_hash = ?');
         $query->execute([hash('sha256', $token)]);
         return $query->fetch(PDO::FETCH_ASSOC) ?: null;
     }

@@ -21,9 +21,6 @@ final class BookingSms {
             '{date}' => self::formatDate($booking['visit_date']),
             '{time}' => (new DateTimeImmutable($booking['booked_time'], new DateTimeZone('Africa/Nairobi')))->format('g:i a').' EAT',
             '{people}' => self::peopleLabel((int)$booking['attendees'], 'person', 'people'),
-            '{guests}' => self::peopleLabel((int)($booking['overnight_guests'] ?? 0), 'guest', 'guests'),
-            '{arrival}' => $booking['arrival_date'] ? self::formatDate($booking['arrival_date']) : '',
-            '{departure}' => $booking['departure_date'] ? self::formatDate($booking['departure_date']) : '',
             '{phone}' => $booking['phone'], '{reference}' => $booking['reference'],
         ];
     }
@@ -31,8 +28,8 @@ final class BookingSms {
         $templates = [
             'day' => "Hi {name}, thanks for booking a visit to {destination}! We look forward to welcoming you on {date} at {time}. Your booking reference is {reference}.",
             'day_transport' => "Hi {name}, thanks for booking a visit to {destination} on {date} at {time}! We've received your transport request, and our team will contact you to discuss arrangements and confirm availability. Your booking reference is {reference}.",
-            'overnight' => "Hi {name}, thanks for booking a visit to Galana Farm on {date} at {time}! We've received your request to stay from {arrival} to {departure}. Our team will contact you to confirm accommodation availability. Your booking reference is {reference}.",
-            'overnight_transport' => "Hi {name}, thanks for booking a visit to Galana Farm on {date} at {time}! We've received your requests for transport and a stay from {arrival} to {departure}. Our team will contact you to discuss arrangements and confirm availability. Your booking reference is {reference}.",
+            'overnight' => "Hi {name}, thanks for booking a visit to Galana Farm on {date} at {time}! We've received your overnight stay request. Our team will contact you to confirm accommodation availability. Your booking reference is {reference}.",
+            'overnight_transport' => "Hi {name}, thanks for booking a visit to Galana Farm on {date} at {time}! We've received your requests for transport and an overnight stay. Our team will contact you to discuss arrangements and confirm availability. Your booking reference is {reference}.",
         ];
         return strtr($templates[self::scenario($booking)], self::values($booking));
     }
@@ -40,8 +37,8 @@ final class BookingSms {
         $templates = [
             'day' => "Hi, {name} has booked a visit to {destination} on {date} at {time} for a total of {people}. No company transport was requested. You can reach them on {phone}. Booking reference: {reference}.",
             'day_transport' => "Hi, {name} has booked a visit to {destination} on {date} at {time} for a total of {people} and has requested company transport. Please contact them on {phone} to discuss arrangements and confirm availability. Booking reference: {reference}.",
-            'overnight' => "Hi, {name} has booked a visit to Galana Farm on {date} at {time} for a total of {people}, with {guests} staying overnight from {arrival} to {departure}, subject to availability. No company transport was requested. Please contact them on {phone} to confirm accommodation arrangements. Booking reference: {reference}.",
-            'overnight_transport' => "Hi, {name} has booked a visit to Galana Farm on {date} at {time} for a total of {people}. They've requested company transport and accommodation for {guests} from {arrival} to {departure}. Please contact them on {phone} to coordinate transport and confirm accommodation availability. Booking reference: {reference}.",
+            'overnight' => "Hi, {name} has booked a visit to Galana Farm on {date} at {time} for a total of {people} and has requested an overnight stay, subject to availability. No company transport was requested. Please contact them on {phone} to confirm accommodation arrangements. Booking reference: {reference}.",
+            'overnight_transport' => "Hi, {name} has booked a visit to Galana Farm on {date} at {time} for a total of {people}. They've requested company transport and an overnight stay. Please contact them on {phone} to coordinate transport and confirm accommodation availability. Booking reference: {reference}.",
         ];
         return strtr($templates[self::scenario($booking)], self::values($booking));
     }

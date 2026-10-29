@@ -16,7 +16,7 @@ try {
  browser=await chromium.launch({executablePath:process.env.UI_BROWSER_PATH});
  const combined=await access('src/views/v1.php').then(()=>true,()=>false);
  const page=await browser.newPage();
- await page.goto(origin+(combined?'/v1':'/')+'?book=feeding');
+ await page.goto(origin+(combined?'/v1':'/')+'?book=galana');
  await page.locator('#full-name').fill('Feedback Visitor');
  await page.locator('#email').fill('visitor@example.com');
  await page.locator('#phone').fill('0712345678');
@@ -48,27 +48,31 @@ try {
  await page.goto(url);
  assert.equal(await page.locator('form').count(),0);
  assert.equal(worker('2099-05-03T06:00:00Z').messages.length,0);
- // An overnight invitation must wait until the morning after departure.
+ // An overnight stay is one night, so the invitation waits until the morning after the derived departure.
  await page.goto(origin+(combined?'/v2':'/')+'?book=galana');
  await page.locator('#full-name').fill('Overnight Feedback');
  await page.locator('#email').fill('overnight@example.com');
  await page.locator('#phone').fill('0712345678');
- await page.locator('#visit-date').fill('2099-12-30');
+ await page.locator('#visit-date').fill('2099-12-31');
  await page.locator('#time-slot').selectOption('11:00');
  await page.locator('#attendees').fill('2');
  await page.locator('#overnight').check();
- await page.locator('#departure-date').fill('2100-01-02');
- await page.locator('#overnight-guests').fill('2');
  await page.locator('[type=submit]').click();
  await page.waitForURL(/confirmation=1/);
- assert.equal(worker('2100-01-03T05:59:59Z').messages.length,0);
- const overnight=worker('2100-01-03T06:00:00Z').messages;
+ assert.equal(worker('2100-01-01T06:00:00Z').messages.length,0,'not while the guest is still at the farm');
+ assert.equal(worker('2100-01-02T05:59:59Z').messages.length,0);
+ const overnight=worker('2100-01-02T06:00:00Z').messages;
  assert.equal(overnight.length,1,'invitation after overnight departure');
- assert.match(overnight[0].payload.text,/30 December 2099 to 2 January 2100/);
+ // A one-night stay is shown by its visit date and a short note, never as a stay range.
+ assert.match(overnight[0].payload.text,/31 December 2099 · Overnight stay/);
+ assert.doesNotMatch(overnight[0].payload.text,/1 January 2100/);
  const overnightUrl=overnight[0].payload.text.match(/https:\/\/visits\.example\.com\/\S+/)[0].replace('https://visits.example.com',origin);
  const native=await browser.newContext({javaScriptEnabled:false});
  const nativePage=await native.newPage();
  await nativePage.goto(overnightUrl);
+ const context=await nativePage.locator('.visit-context').innerText();
+ assert.match(context,/2099-12-31 · Overnight stay/);
+ assert.doesNotMatch(context,/2100-01-01/);
  await nativePage.getByLabel('I didn’t attend').check();
  await nativePage.getByRole('button',{name:'Send feedback',exact:true}).click();
  await nativePage.getByRole('heading',{name:'Thank you for your feedback.'}).waitFor();
@@ -76,7 +80,7 @@ try {
  console.log('PASS overnight year boundary and non-attendance without JavaScript');
  // Recovery path: pause, timeout, retry with the same payload, then stop at expiry.
  async function bookDay(email, route = combined?'/v3':'/', date = '2100-05-01') {
-  await page.goto(origin+route+'?book=sahajanand');
+  await page.goto(origin+route+'?book=galana');
   await page.locator('#full-name').fill('Retry Feedback'); await page.locator('#email').fill(email);
   await page.locator('#phone').fill('0712345678'); await page.locator('#visit-date').fill(date);
   await page.locator('#time-slot').selectOption('11:00'); await page.locator('#attendees').fill('1');

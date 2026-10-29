@@ -18,7 +18,7 @@ $done = !empty($invitation['submitted_at']);
 <p class="eyebrow">YOUR VISIT, YOUR VOICE</p><h1>Thank you for your feedback.</h1><p>Your response has been received. It helps us make future visits better.</p><p class="visit-context"><?= $e($destination) ?></p>
 <?php else: ?>
 <div id="feedback-form-view"><p class="eyebrow">YOUR VISIT, YOUR VOICE</p><h1>How was your visit?</h1><p class="intro">A few words from you can make the next visit even better.</p>
-<p class="visit-context"><strong><?= $e($destination) ?></strong><br><?= $e($invitation['overnight'] ? $invitation['arrival_date'].' – '.$invitation['departure_date'] : $invitation['visit_date']) ?></p>
+<p class="visit-context"><strong><?= $e($destination) ?></strong><br><?= $e($invitation['visit_date'].($invitation['overnight'] ? ' · Overnight stay' : '')) ?></p>
 <?php if ($errors): ?><div class="error-summary" role="alert" tabindex="-1"><strong>Please review your answers.</strong><ul><?php foreach ($errors as $message): ?><li><?= $e($message) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
 <form method="post" <?= $preview ? 'data-preview-form' : '' ?> novalidate>
 <?php if (!$preview): ?><input type="hidden" name="csrf" value="<?= $e($csrf) ?>"><?php endif; ?>
@@ -29,7 +29,7 @@ $done = !empty($invitation['submitted_at']);
 <?php foreach (['enjoyment'=>'What did you enjoy?','improvement'=>'What could we improve?','comments'=>'Anything else to share?'] as $name=>$label): ?>
 <div class="feedback-field"><label for="<?= $e($name) ?>"><?= $e($label) ?></label><p class="hint" id="<?= $e($name) ?>-hint">Optional · Up to 2,000 characters</p><textarea id="<?= $e($name) ?>" name="<?= $e($name) ?>" rows="3" maxlength="2000" aria-describedby="<?= $e($name) ?>-hint <?= $e($name) ?>-error" <?= isset($errors[$name]) ? 'aria-invalid="true"' : '' ?>><?= $e($input[$name] ?? '') ?></textarea><p id="<?= $e($name) ?>-error" class="field-error"><?= $e($errors[$name] ?? '') ?></p></div>
 <?php endforeach; ?>
-<p class="privacy-note"><?= $preview ? 'Use sample answers. This preview does not send or save feedback.' : 'Your feedback is linked to your booking and is not published publicly.' ?></p>
+<p class="privacy-note"><?= $preview ? 'Use sample answers. This preview does not send or save feedback.' : 'Your feedback is linked to your booking and is not published publicly. <a href="/privacy">Privacy notice</a>' ?></p>
 <button type="submit" <?= $preview ? 'disabled' : '' ?>><?= $preview ? 'Preview feedback' : 'Send feedback' ?> <span aria-hidden="true">↗</span></button>
 </form></div>
 <?php if ($preview): ?><div id="feedback-preview-done" hidden tabindex="-1"><h1>Thank you for trying it.</h1><p>This was a sample response. No feedback was sent or saved.</p><a href="">Try the sample again</a></div><?php endif; ?>

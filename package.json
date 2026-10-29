@@ -12,7 +12,8 @@
     "test:email": "php tests/email.test.php",
     "test:sms": "php tests/sms.test.php && php tests/booking-sms.test.php",
     "test": "node tests/all.test.mjs",
-    "test:admin": "node tests/admin.test.mjs"
+    "test:admin": "node tests/admin.test.mjs",
+    "test:interest": "node tests/interest.test.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

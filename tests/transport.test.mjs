@@ -21,25 +21,21 @@ try {
         const context = await browser.newContext({javaScriptEnabled,viewport:{width:390,height:844},reducedMotion:'reduce'});
         const page = await context.newPage();
         const errors=[]; page.on('pageerror',e=>errors.push(e.message));
-        for (const destination of ['feeding','sahajanand','galana']) {
+        // Only Galana Farm takes bookings; cover requested, not requested, and requested with an overnight stay.
+        for (const [requested, stay, retain] of [[true,false,true],[false,false,false],[true,true,false]]) {
             await page.goto(origin+route);
-            await page.locator(`[data-book="${destination}"]`).click();
+            await page.locator('[data-book="galana"]').click();
             const checkbox = page.getByRole('checkbox',{name:'I would like the company to arrange transport for my visit.',exact:true});
             assert.equal(await checkbox.isChecked(),false);
             assert.match(await page.locator('#transport-hint').innerText(),/subject to availability/);
-            const requested = destination !== 'sahajanand';
             if (requested) await checkbox.check();
             await page.locator('#full-name').fill('Transport visitor');
             await page.locator('#phone').fill('0712345678');
             await page.locator('#email').fill('visitor@example.com');
             await page.locator('#visit-date').fill('2099-05-01');
             await page.locator('#time-slot').selectOption({index:1});
-            if (destination === 'galana') {
-                await page.locator('#overnight').check();
-                if (!javaScriptEnabled) await page.locator('#arrival-date').fill('2099-05-01');
-                await page.locator('#departure-date').fill('2099-05-02');
-            }
-            if (javaScriptEnabled && destination === 'feeding') {
+            if (stay) await page.locator('#overnight').check();
+            if (javaScriptEnabled && retain) {
                 await page.locator('#full-name').fill('');
                 await page.evaluate(()=>{const f=document.querySelector('#booking-form'); f.noValidate=true; f.submit();});
                 await page.waitForLoadState('load');
@@ -50,7 +46,7 @@ try {
                 await page.locator('.checkbox-label').filter({has:checkbox}).screenshot({path:`test-results/transport-${route.replaceAll('/','') || 'standalone'}-mobile.png`});
                 assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth), 'No page overflow');
                 await page.locator('.close-button').click();
-                await page.locator('[data-book="feeding"]').click();
+                await page.locator('[data-book="galana"]').click();
                 assert.equal(await checkbox.isChecked(), false, 'A new form resets a previously retained request');
                 await checkbox.check();
                 await page.locator('#full-name').fill('Transport visitor');
@@ -65,10 +61,11 @@ try {
             assert.ok((await page.locator('#confirmation-details').innerText()).includes(expected));
             await page.reload();
             assert.ok((await page.locator('#confirmation-details').innerText()).includes(expected), 'Refresh preserves choice');
+            assert.equal(/Overnight stay\s+Requested/.test(await page.locator('#confirmation-details').innerText()), stay, 'Overnight line only for a stay');
         }
         assert.deepEqual(errors,[]);
         await context.close();
-        console.log(`PASS transport ${route}: checked/unchecked, all destinations, overnight, refresh, JS=${javaScriptEnabled}`);
+        console.log(`PASS transport ${route}: checked/unchecked, overnight, refresh, JS=${javaScriptEnabled}`);
     }
     const admin = await browser.newPage();
     await admin.goto(origin+'/admin');

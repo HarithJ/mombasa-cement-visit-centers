@@ -1,6 +1,6 @@
 # Visit Nyumba
 
-PHP-rendered visitor booking website for Sahajanand School, Galana and the Feeding Centre. The UI uses a bold outdoor-explorer identity: panoramic photography, oversized typography, deep green and tangerine, destination navigation, alternating destination stories and trip-planning forms. Day bookings use real SQLite persistence. Galana overnight requests include saved arrival/departure dates and staying guest counts. Hosting is not selected.
+PHP-rendered visitor booking website for Sahajanand School, Galana and the Feeding Centre. The UI uses a bold outdoor-explorer identity: panoramic photography, oversized typography, deep green and tangerine, destination navigation, alternating destination stories and trip-planning forms. Day bookings use real SQLite persistence. Galana visits can include a one-night overnight request made with a single checkbox. Hosting is not selected.
 
 ## Run locally
 
@@ -23,7 +23,7 @@ Open http://127.0.0.1:8080. Serve only `public/`, never the repository root. Mig
 
 ## Booking behavior
 
-Visits collect name, email address, phone, destination, date/time and positive integer attendee count including the contact. Galana can include an overnight request: arrival matches the visit date, departure is later, and staying guests must be whole-number 1–attendees. Unchecked/non-Galana requests discard all overnight fields. A valid visitor email address is required. Optional Resend emails send a visitor confirmation and notify destination contacts; see [Resend setup](docs/resend.md). No ID, accounts, approval workflow or admin screens are introduced. Successful transactional writes are followed by an on-screen registered-visit summary, hard-to-guess reference and masked phone. Registration does not imply a capacity check or accommodation allocation. CSRF/session submission tokens and redirect-after-success prevent accidental replay duplicates. Errors preserve correctable input; failed writes do not display confirmation. Day and overnight booking/confirmation work without JavaScript. Overnight requests do not allocate rooms or guarantee accommodation.
+Visits collect name, email address, phone, destination, date/time and positive integer attendee count including the contact. Galana can include an overnight request: a single “Stay overnight at Galana Farm” checkbox. A stay is always one night for the whole group, so the server derives arrival (the visit date), departure (the next day) and staying guests (the attendee count) and ignores any submitted values. Confirmations, emails, SMS, admin details and feedback show only that an overnight stay was requested, never stay dates or a staying-guest count. Unchecked/non-Galana requests discard all overnight fields. A valid visitor email address is required. Optional Resend emails send a visitor confirmation and notify destination contacts; see [Resend setup](docs/resend.md). No ID, accounts, approval workflow or admin screens are introduced. Successful transactional writes are followed by an on-screen registered-visit summary, hard-to-guess reference and masked phone. Registration does not imply a capacity check or accommodation allocation. CSRF/session submission tokens and redirect-after-success prevent accidental replay duplicates. Errors preserve correctable input; failed writes do not display confirmation. Day and overnight booking/confirmation work without JavaScript. Overnight requests do not allocate rooms or guarantee accommodation.
 
 Phone policy: 7–15 digits, optional leading +, spaces, parentheses and hyphens. Ten-digit Kenyan 01/07 numbers normalize to +254; twelve-digit 254 numbers receive +. Other numbers retain supplied +, or digits only without guessing their country.
 
@@ -41,7 +41,11 @@ npm run test:bookings
 
 `npm run test:overnight` runs the Galana suite; `npm run test:ui` runs both day and overnight suites. Tests start an isolated PHP server with temporary SQLite/session storage and remove their own generated data afterward. Database inspection is used only for the agreed persistence assertions, not through a public retrieval endpoint. Screenshots are written to ignored `test-results/`. `UI_BROWSER_PATH` can select an existing Chromium executable. `PLAYWRIGHT_MODULE_PATH` can select an installed Playwright module.
 
-Tickets 02 and 03 are complete; ten day and seven overnight browser groups pass. Requirement evidence is in `docs/day-booking-review.md` and `docs/overnight-booking-review.md`. This is not production deployment approval; broader release hardening remains ticket 04.
+Tickets 02 and 03 are complete; ten day and nine overnight browser groups pass. Requirement evidence is in `docs/day-booking-review.md` and `docs/overnight-booking-review.md`. This is not production deployment approval; broader release hardening remains ticket 04.
+
+## Interest registrations
+
+Kibarani Feeding center and Sahajanand Special School are not open for booking. Their cards invite visitors to register interest instead: name, phone, optional email and organization, a preferred date from tomorrow to 12 months ahead, and attendees. The server rejects bookings for these places. Registrations are stored separately from bookings, shown on-screen without a reference, and emailed only to the group managers when booking email is enabled; nothing is sent to the visitor or destination teams. Admins see totals, monthly counts, a filterable list and a CSV export at `/admin/interest`. To reopen a place, remove it from `InterestRegistration::PLACES`.
 
 ## Booking location maps
 

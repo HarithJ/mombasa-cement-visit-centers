@@ -25,7 +25,7 @@ try {
         const page = await context.newPage();
         const errors=[]; page.on('pageerror',e=>errors.push(e.message));
         await page.goto(origin);
-        await page.locator('[data-book="feeding"]').click();
+        await page.locator('[data-book="galana"]').click();
         const field = page.getByLabel('Organization (optional)');
         assert.equal(await field.inputValue(), '');
         assert.equal(await field.getAttribute('required'), null, 'Organization is not required');
@@ -39,7 +39,7 @@ try {
 
         // Entered organization is saved, shown and survives a refresh.
         await page.goto(origin);
-        await page.locator('[data-book="feeding"]').click();
+        await page.locator('[data-book="galana"]').click();
         await fillRequired(page, 'With organization');
         await field.fill('Mombasa Primary School');
         await page.locator('[type="submit"]').click();
@@ -50,7 +50,7 @@ try {
         // Server-side rejection retains the typed organization.
         if (javaScriptEnabled) {
             await page.goto(origin);
-            await page.locator('[data-book="feeding"]').click();
+            await page.locator('[data-book="galana"]').click();
             await fillRequired(page, 'Too long');
             await page.evaluate(()=>{const f=document.querySelector('#booking-form'); f.noValidate=true; f.organization.removeAttribute('maxlength'); f.organization.value='x'.repeat(121); f.submit();});
             await page.locator('#organization[aria-invalid="true"]').waitFor();
