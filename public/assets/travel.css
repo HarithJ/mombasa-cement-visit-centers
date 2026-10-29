@@ -53,4 +53,8 @@ input:focus-visible,select:focus-visible{outline:0;border-color:var(--green);box
 input[aria-invalid=true]:focus-visible,select[aria-invalid=true]:focus-visible{border-color:var(--error);box-shadow:0 0 0 3px #a6323226}
 
 /* Badges on the light destination cards (the featured card is dark). */
-.destination-card .destination-badge{border-color:#173f3533;background:#173f350a;color:#173f35}
+.destination-card .destination-badge{margin:auto 0 14px;padding:7px 14px 7px 11px;border-color:#173f3524;background:#173f3508;color:#31574a;font-size:11px}
+.destination-card .destination-badge .icon{width:14px;height:14px}
+/* The badge takes the bottom-aligned spot, so the button follows it directly. */
+.destination-card .destination-badge+.book-button{margin-top:0}
+@media(max-width:360px){.destination-card .destination-badge{gap:7px;padding:7px 11px 7px 9px;font-size:10px;letter-spacing:-.01em}.destination-card .destination-badge .icon{width:13px;height:13px}}
