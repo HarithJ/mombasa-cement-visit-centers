@@ -139,3 +139,7 @@ The privacy notice drops its statement of how long data is kept and gains a line
 Implemented on `main` (2026-10-29). Kibarani and Sahajanand are interest-only in code; the server rejects bookings for them and Galana Farm is unchanged. Interest registrations are stored in `interest_registrations` (migration 017, which also lets a queued email belong to an interest registration). One email per registration is queued to both group managers, behind the existing booking-email switch, with the admin link when `BOOKING_SITE_URL` is set. Admin has a read-only Interest page and a filtered CSV export. The privacy notice covers the interest form and no longer states retention periods.
 
 Tests: new `tests/interest.test.mjs` (public form, queue, admin, CSV); existing suites that booked Kibarani or Sahajanand now book Galana Farm. Full suite passes. Not pushed or deployed.
+
+## Comments
+
+- 2026-10-29: After UI review, the card status moved from a badge above the button to a "Visits opening soon" label on the photo's top-left corner. The button keeps "Tell us you’re interested".

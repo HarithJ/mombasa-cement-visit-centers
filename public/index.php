@@ -116,17 +116,14 @@ $mode = fn(string $name) => 'data-mode="'.$name.'"'.($name === ($interestMode ? 
                     <?php endif; ?>
                     <div class="photo-bottom"><button class="photo-toggle" type="button" aria-label="Show alternate view of <?= e($destination['name']) ?>" aria-pressed="false"><?= icon('photo') ?><?php if (!$destination['placeholder'] && !$destination['still']): ?><svg class="photo-progress" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" pathLength="100" /></svg><?php endif; ?></button></div>
                 </div>
+                <?php if (InterestRegistration::interestOnly($id)): ?><span class="photo-status"><?= icon('clock') ?> Visits opening soon</span><?php endif; ?>
                 </div>
                 <div class="destination-info">
                     <p class="eyebrow category"><span>0<?= $number ?> /</span> <?= e($destination['category']) ?></p>
                     <h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
                     <?php if ($featured): ?><p class="destination-badge"><?= icon('moon') ?> Overnight stays on request</p><?php endif; ?>
-                    <?php if (InterestRegistration::interestOnly($id)): ?>
-                    <div class="card-actions"><a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Tell us you’re interested <?= icon('diagonal') ?></a><p class="destination-badge"><?= icon('clock') ?> Visits opening soon — register your interest</p></div>
-                    <?php else: ?>
-                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>
-                    <?php endif; ?>
+                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>"><?= InterestRegistration::interestOnly($id) ? 'Tell us you’re interested' : 'Let’s plan a visit' ?> <?= icon('diagonal') ?></a>
                 </div>
             </article>
             <?php endforeach; ?>
