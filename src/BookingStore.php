@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/BookingEmail.php';
 require_once __DIR__.'/BookingSms.php';
 require_once __DIR__.'/Feedback.php';
+require_once __DIR__.'/InterestEmail.php';
 final class BookingStore {
     private PDO $db;
     public function __construct(string $path) {
@@ -45,6 +46,60 @@ final class BookingStore {
             $this->db->commit();
             return $saved;
         } catch (Throwable $error) { $this->db->rollBack(); throw $error; }
+    }
+    public function createInterest(array $interest, string $token): array {
+        $this->db->beginTransaction();
+        try {
+            $query = $this->db->prepare('INSERT INTO interest_registrations(submission_token, full_name, organization, phone, email, destination, preferred_date, attendees, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(submission_token) DO NOTHING');
+            $query->execute([$token, $interest['fullName'], $interest['organization'] === '' ? null : $interest['organization'], $interest['phone'], $interest['email'] === '' ? null : $interest['email'], $interest['location'], $interest['visitDate'], $interest['attendees'], gmdate('Y-m-d\TH:i:s\Z')]);
+            $created = $query->rowCount() === 1;
+            $saved = $this->findInterestByToken($token);
+            if (!$saved) throw new RuntimeException('Interest not saved');
+            if ($created && BookingEmail::configured()) $this->db->prepare("INSERT INTO booking_emails(interest_id, kind, payload, idempotency_key) VALUES (?, 'interest', ?, ?)")->execute([$saved['id'], json_encode(InterestEmail::payload($saved), JSON_THROW_ON_ERROR), 'interest/'.$saved['id'].'/'.substr($token, 0, 16)]);
+            $this->db->commit();
+            return $saved;
+        } catch (Throwable $error) { $this->db->rollBack(); throw $error; }
+    }
+    public function findInterestByToken(string $token): ?array {
+        $query = $this->db->prepare('SELECT * FROM interest_registrations WHERE submission_token = ?');
+        $query->execute([$token]);
+        return $query->fetch() ?: null;
+    }
+    // Filters: destination, from/to registration dates (Nairobi) and q across name, phone and organization.
+    private function interestWhere(array $filters): array {
+        $where = []; $params = [];
+        if (!empty($filters['destination'])) { $where[] = 'destination = ?'; $params[] = $filters['destination']; }
+        $zone = new DateTimeZone('Africa/Nairobi');
+        $utc = fn(string $date, string $modify) => (new DateTimeImmutable($date, $zone))->modify($modify)->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:s\Z');
+        if (!empty($filters['from'])) { $where[] = 'created_at >= ?'; $params[] = $utc($filters['from'], 'midnight'); }
+        if (!empty($filters['to'])) { $where[] = 'created_at < ?'; $params[] = $utc($filters['to'], 'midnight +1 day'); }
+        if (($filters['q'] ?? '') !== '') {
+            $where[] = "(instr(lower(full_name), lower(?)) > 0 OR instr(phone, ?) > 0 OR instr(lower(coalesce(organization, '')), lower(?)) > 0)";
+            array_push($params, $filters['q'], $filters['q'], $filters['q']);
+        }
+        return [$where ? ' WHERE '.implode(' AND ', $where) : '', $params];
+    }
+    public function adminInterest(array $filters, ?int $page = null): array {
+        [$where, $params] = $this->interestWhere($filters);
+        $query = $this->db->prepare('SELECT id, full_name, organization, phone, email, destination, preferred_date, attendees, created_at FROM interest_registrations'.$where.' ORDER BY created_at DESC, id DESC'.($page === null ? '' : ' LIMIT 26 OFFSET '.(($page - 1) * 25)));
+        $query->execute($params);
+        return $query->fetchAll();
+    }
+    public function interestTotals(?string $destination): array {
+        [$where, $params] = $this->interestWhere(['destination' => $destination]);
+        $query = $this->db->prepare('SELECT destination, COUNT(*) AS registrations, SUM(attendees) AS attendees FROM interest_registrations'.$where.' GROUP BY destination');
+        $query->execute($params);
+        return array_column($query->fetchAll(), null, 'destination');
+    }
+    // Registrations per destination for each Nairobi month since $since (a UTC timestamp string).
+    public function interestByMonth(?string $destination, string $since): array {
+        [$where, $params] = $this->interestWhere(['destination' => $destination]);
+        // Africa/Nairobi is UTC+3 all year, with no daylight saving.
+        $query = $this->db->prepare("SELECT strftime('%Y-%m', created_at, '+3 hours') AS month, destination, COUNT(*) AS registrations FROM interest_registrations".($where ? $where.' AND' : ' WHERE').' created_at >= ? GROUP BY month, destination');
+        $query->execute([...$params, $since]);
+        $months = [];
+        foreach ($query->fetchAll() as $row) $months[$row['month']][$row['destination']] = (int)$row['registrations'];
+        return $months;
     }
     public function findByToken(string $token): ?array {
         $query = $this->db->prepare('SELECT * FROM bookings WHERE submission_token = ?');

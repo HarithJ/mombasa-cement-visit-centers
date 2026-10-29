@@ -16,7 +16,7 @@ try {
  browser=await chromium.launch({executablePath:process.env.UI_BROWSER_PATH});
  const combined=await access('src/views/v1.php').then(()=>true,()=>false);
  const page=await browser.newPage();
- await page.goto(origin+(combined?'/v1':'/')+'?book=feeding');
+ await page.goto(origin+(combined?'/v1':'/')+'?book=galana');
  await page.locator('#full-name').fill('Feedback Visitor');
  await page.locator('#email').fill('visitor@example.com');
  await page.locator('#phone').fill('0712345678');
@@ -76,7 +76,7 @@ try {
  console.log('PASS overnight year boundary and non-attendance without JavaScript');
  // Recovery path: pause, timeout, retry with the same payload, then stop at expiry.
  async function bookDay(email, route = combined?'/v3':'/', date = '2100-05-01') {
-  await page.goto(origin+route+'?book=sahajanand');
+  await page.goto(origin+route+'?book=galana');
   await page.locator('#full-name').fill('Retry Feedback'); await page.locator('#email').fill(email);
   await page.locator('#phone').fill('0712345678'); await page.locator('#visit-date').fill(date);
   await page.locator('#time-slot').selectOption('11:00'); await page.locator('#attendees').fill('1');

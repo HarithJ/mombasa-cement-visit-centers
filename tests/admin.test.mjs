@@ -132,7 +132,7 @@ try {
  await outsider.close();
  assert.deepEqual(domainSnapshot(),beforeAdmin,'Populated migration and admin navigation preserve all domain records');
  // A public booking remains separate from the authenticated admin session.
- await page.goto(origin+'/?book=feeding');
+ await page.goto(origin+'/?book=galana');
  await page.locator('#full-name').fill('Public Visitor'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('public@example.com');
  await page.locator('#visit-date').fill('2099-05-02'); await page.locator('#time-slot').selectOption('11:00'); await page.locator('#attendees').fill('2');
  await page.locator('[type=submit]').click(); await page.waitForURL(/confirmation=1/);

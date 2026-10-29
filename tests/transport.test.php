@@ -22,7 +22,7 @@ try {
     check($store->findByToken('old')['transport_requested'] === 0, 'Migration defaults old bookings to not requested');
     check($db->query('SELECT provider_id FROM booking_emails')->fetchColumn() === 'original-id', 'Migration preserves existing email state');
     $schedule = require __DIR__.'/../config/destinations.php';
-    $base = ['fullName'=>'Transport visitor','phone'=>'0712345678','email'=>'visitor@example.com','location'=>'feeding','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>'3'];
+    $base = ['fullName'=>'Transport visitor','phone'=>'0712345678','email'=>'visitor@example.com','location'=>'galana','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>'3'];
     foreach ([null, '', 'on'] as $choice) {
         $input = $base;
         if ($choice !== null) $input['transportRequested'] = $choice;

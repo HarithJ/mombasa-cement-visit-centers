@@ -26,6 +26,8 @@ try {
   assert.match(await page.locator('#route-image').getAttribute('alt'),/Not to scale/);
   const destinationName = {sahajanand:'Sahajanand Special School',galana:'Galana Farm',feeding:'Kibarani Feeding center'}[destination];
   assert.equal(await page.locator('#aside-destination').textContent(),destinationName);
+  // Interest-only places have no booking confirmation or team contacts to show.
+  if (destination !== 'galana') { assert.equal(await page.locator('[data-contact-destination]:visible').count(),0); continue; }
   await page.locator('#full-name').fill('Contact Test');
   await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill(destination === 'galana' ? 'visitor@example.com' : '');
   assert.equal(await page.locator('#email').getAttribute('required'),null);
@@ -43,7 +45,7 @@ try {
   assert.equal(await team.locator('a[href^="tel:+254"]').count(),emails.length);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  }
- console.log(`PASS ${route}: all destination contacts, JS=${javaScriptEnabled}`);
+ console.log(`PASS ${route}: all destination routes and Galana Farm booking contacts, JS=${javaScriptEnabled}`);
  await context.close();
  }
 } finally {await browser?.close();server.kill();await rm(storage,{recursive:true,force:true});}

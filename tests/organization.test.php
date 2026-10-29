@@ -11,7 +11,7 @@ putenv('FEEDBACK_EMAIL_ENABLED=0');
 try {
     $store = new BookingStore($path);
     $schedule = require __DIR__.'/../config/destinations.php';
-    $base = ['fullName'=>'Org visitor','phone'=>'0712345678','email'=>'visitor@example.com','location'=>'feeding','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>'3'];
+    $base = ['fullName'=>'Org visitor','phone'=>'0712345678','email'=>'visitor@example.com','location'=>'galana','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>'3'];
 
     foreach ([[null, null], ['', null], ['   ', null], ['  Mombasa Primary School  ', 'Mombasa Primary School']] as [$choice, $expected]) {
         $input = $base;

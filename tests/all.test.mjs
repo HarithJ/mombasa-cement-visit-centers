@@ -15,6 +15,7 @@ const checks = [
  ['php','tests/feedback-worker.test.php'],
  ['php','tests/feedback-migration.test.php'],
  [process.execPath,'tests/bookings.test.mjs'],
+ [process.execPath,'tests/interest.test.mjs'],
  [process.execPath,'tests/overnight.test.mjs'],
  [process.execPath,'tests/contacts.test.mjs'],
  [process.execPath,'tests/versions.test.mjs'],

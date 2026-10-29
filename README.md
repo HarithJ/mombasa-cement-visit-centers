@@ -43,6 +43,10 @@ npm run test:bookings
 
 Tickets 02 and 03 are complete; ten day and seven overnight browser groups pass. Requirement evidence is in `docs/day-booking-review.md` and `docs/overnight-booking-review.md`. This is not production deployment approval; broader release hardening remains ticket 04.
 
+## Interest registrations
+
+Kibarani Feeding center and Sahajanand Special School are not open for booking. Their cards invite visitors to register interest instead: name, phone, optional email and organization, a preferred date from tomorrow to 12 months ahead, and attendees. The server rejects bookings for these places. Registrations are stored separately from bookings, shown on-screen without a reference, and emailed only to the group managers when booking email is enabled; nothing is sent to the visitor or destination teams. Admins see totals, monthly counts, a filterable list and a CSV export at `/admin/interest`. To reopen a place, remove it from `InterestRegistration::PLACES`.
+
 ## Booking location maps
 
 An expandable illustrated route sits directly above Book my visit. Each destination uses its owner-approved static artwork, with descriptive alternative text and a link to open the full image. The schematic illustrations are not to scale. Google Maps directions remain available through the existing external link; no map iframe or third-party map request is loaded. The illustrations also work without JavaScript. `config/route-illustrations.php` maps destinations to local assets, and `config/locations.php` retains the owner-supplied directions links.

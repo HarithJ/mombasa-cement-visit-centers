@@ -73,7 +73,8 @@ try {
   assert.equal((await page.request.post('http://127.0.0.1:8092/', { form: payload, maxRedirects: 0 })).status(), 303);
   assert.equal(records().length, 3); assert.equal(records().at(-1).departure_date, '2099-06-15');
   console.log('PASS multi-night stays have no invented maximum and replay/refresh preserve one request');
-  for (const destination of ['galana', 'feeding', 'sahajanand']) {
+  // Kibarani and Sahajanand take interest registrations only, so Galana Farm is the one bookable destination.
+  for (const destination of ['galana']) {
     await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
     await page.locator('#full-name').fill('Day Only'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#overnight').check();
@@ -106,7 +107,7 @@ try {
     assert.equal(saved.departure_date, null); assert.equal(saved.overnight_guests, null);
     assert.doesNotMatch(await page.locator('#confirmation-details').innerText(), /Overnight stay|Staying guests/);
   }
-  console.log('PASS unchecked and changed-destination day bookings discard even tampered stale overnight fields');
+  console.log('PASS unchecked day bookings discard even tampered stale overnight fields');
   const legacy = join(storage, 'legacy.sqlite');
   execFileSync('php', ['-r', '$db=new PDO("sqlite:".$argv[1]);$db->exec(file_get_contents("migrations/001-day-bookings.sql"));$db->prepare("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)")->execute(json_decode($argv[2],true));', legacy, JSON.stringify(['NY-LEGACY','legacy-token','Existing Day','+254712345678','feeding','2099-05-01','11:00',2,'automatically_confirmed','2026-09-15T12:00:00Z'])]);
   for (let i = 0; i < 2; i++) execFileSync('php', ['bin/migrate.php'], { env: { ...process.env, BOOKING_DB: legacy } });

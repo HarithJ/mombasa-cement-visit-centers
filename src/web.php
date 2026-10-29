@@ -5,8 +5,10 @@ if (!in_array(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), ['/', '/index.ph
 }
 require_once __DIR__.'/BookingStore.php';
 require_once __DIR__.'/DayBooking.php';
+require_once __DIR__.'/InterestRegistration.php';
 require_once __DIR__.'/Schedule.php';
 $schedule = Schedule::load();
+foreach (InterestRegistration::PLACES as $id) $schedule[$id]['interestOnly'] = true;
 ini_set('session.use_strict_mode', '1');
 if ($sessionPath = getenv('BOOKING_SESSION_PATH')) session_save_path($sessionPath);
 session_set_cookie_params(['httponly' => true, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'samesite' => 'Lax', 'path' => '/']);
@@ -15,12 +17,13 @@ header('Cache-Control: no-store, private');
 header('Referrer-Policy: no-referrer');
 header('X-Content-Type-Options: nosniff');
 $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
-$errors = []; $input = []; $confirmation = null; $openForm = false;
+$errors = []; $input = []; $confirmation = null; $interestConfirmation = null; $openForm = false;
 $dbPath = getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite';
 $newToken = fn() => bin2hex(random_bytes(32));
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $openForm = true;
-    [$input, $errors] = DayBooking::validate($_POST, $schedule);
+    $interest = ($_POST['intent'] ?? '') === 'interest';
+    [$input, $errors] = $interest ? InterestRegistration::validate($_POST, $schedule) : DayBooking::validate($_POST, $schedule);
     $csrf = is_string($_POST['csrf'] ?? null) ? $_POST['csrf'] : '';
     $token = is_string($_POST['submissionToken'] ?? null) ? $_POST['submissionToken'] : '';
     if (!hash_equals($_SESSION['csrf'], $csrf) || !isset($_SESSION['tokens'][$token])) {
@@ -29,12 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$errors) {
         try {
             $store = new BookingStore($dbPath);
+            if ($interest) {
+                $store->createInterest($input, hash('sha256', $token));
+                $_SESSION['interestToken'] = hash('sha256', $token);
+                header('Location: /?interest=1', true, 303); exit;
+            }
             $saved = $store->create($input, hash('sha256', $token), $uiVersion ?? 'v3', '/');
             $_SESSION['confirmationToken'] = hash('sha256', $token);
             header('Location: /?confirmation=1', true, 303); exit;
         } catch (Throwable $error) {
-            error_log('Nyumba booking storage failure: '.get_class($error));
-            http_response_code(503); $errors['_form'] = 'We could not save your visit. Your details are still here; please try again. No confirmation has been issued.';
+            error_log('Nyumba '.($interest ? 'interest' : 'booking').' storage failure: '.get_class($error));
+            http_response_code(503); $errors['_form'] = $interest ? 'We could not save your interest. Your details are still here; please try again.' : 'We could not save your visit. Your details are still here; please try again. No confirmation has been issued.';
         }
     } else http_response_code(422);
 } else {
@@ -46,5 +54,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try { $confirmation = (new BookingStore($dbPath))->findByToken($_SESSION['confirmationToken']); }
         catch (Throwable $error) { http_response_code(503); $errors['_form'] = 'Your confirmation is temporarily unavailable. Please try refreshing.'; }
     }
+    if (isset($_GET['interest'], $_SESSION['interestToken'])) {
+        try { $interestConfirmation = (new BookingStore($dbPath))->findInterestByToken($_SESSION['interestToken']); }
+        catch (Throwable $error) { http_response_code(503); $errors['_form'] = 'Your confirmation is temporarily unavailable. Please try refreshing.'; }
+    }
 }
-$webState = ['input' => $input, 'errors' => $errors, 'confirmation' => $confirmation, 'openForm' => $openForm];
+$webState = ['input' => $input, 'errors' => $errors, 'confirmation' => $confirmation, 'interestConfirmation' => $interestConfirmation, 'openForm' => $openForm, 'interestDates' => InterestRegistration::dateRange()];

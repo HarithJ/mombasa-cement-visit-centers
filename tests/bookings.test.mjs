@@ -16,7 +16,7 @@ try {
   browser = await chromium.launch({ executablePath: process.env.UI_BROWSER_PATH });
   const page = await browser.newPage();
   await page.goto('http://127.0.0.1:8091');
-  await page.locator('[data-book="feeding"]').click();
+  await page.locator('[data-book="galana"]').click();
   await page.locator('#full-name').fill('Alex Mwangi');
   await page.locator('#phone').fill('0712 345 678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-01-15');
@@ -27,9 +27,9 @@ try {
   await page.locator('#confirmation-view').waitFor({ state: 'visible' });
   assert.match(await page.locator('#confirmation-view').innerText(), /Visit registered/);
   assert.match(await page.locator('.reference-label strong').innerText(), /^NY-[A-F0-9]{24}$/);
-  assert.match(await page.locator('#confirmation-details').innerText(), /Kibarani Feeding center/);
+  assert.match(await page.locator('#confirmation-details').innerText(), /Galana Farm/);
   assert.match(await page.locator('#confirmation-details').innerText(), /4/);
-  console.log('PASS Kibarani Feeding center group day booking is saved and confirmed');
+  console.log('PASS Galana Farm group day booking is saved and confirmed');
   const reference = await page.locator('.reference-label strong').innerText();
   await page.reload();
   assert.equal(await page.locator('.reference-label strong').innerText(), reference);
@@ -46,7 +46,7 @@ try {
   const noScript = await browser.newContext({ javaScriptEnabled: false });
   const nativePage = await noScript.newPage();
   await nativePage.goto('http://127.0.0.1:8091/');
-  await nativePage.locator('[data-book="feeding"]').click();
+  await nativePage.locator('[data-book="galana"]').click();
   await nativePage.locator('#full-name').fill('Sam Test', { timeout: 3000 });
   await nativePage.locator('#phone').fill('+44 20 7946 0958'); await nativePage.locator('#email').fill('visitor@example.com');
   await nativePage.locator('#visit-date').fill('2099-01-20');
@@ -60,13 +60,14 @@ try {
     ['fullName', '', 'full name'], ['phone', 'abc', 'phone number'],
     ['attendees', '0', 'whole number'], ['attendees', '1.5', 'whole number'],
     ['visitDate', '2000-01-01', 'future date'], ['visitDate', '2099-02-30', 'valid visit date'],
-    ['location', 'unknown', 'three destinations'], ['timeSlot', '09:00', 'time offered'],
+    ['location', 'unknown', 'three destinations'], ['timeSlot', '08:00', 'time offered'],
+    ['location', 'feeding', 'not open for booking'], ['location', 'sahajanand', 'not open for booking'],
   ]) {
     await page.goto('http://127.0.0.1:8091/');
-    await page.locator('[data-book="feeding"]').click();
+    await page.locator('[data-book="galana"]').click();
     const responsePromise = page.waitForResponse(response => response.request().method() === 'POST');
     await page.locator('form').evaluate((form, change) => {
-      const values = { email: 'visitor@example.com', fullName: 'Retained Test', phone: '+44 20 7946 0958', location: 'feeding', visitDate: '2099-02-15', timeSlot: '11:00', attendees: '3', ...change };
+      const values = { email: 'visitor@example.com', fullName: 'Retained Test', phone: '+44 20 7946 0958', location: 'galana', visitDate: '2099-02-15', timeSlot: '11:00', attendees: '3', ...change };
       for (const [key, value] of Object.entries(values)) {
         let input = form.elements[key];
         if (input?.tagName === 'SELECT') input.add(new Option(value, value));
@@ -81,8 +82,8 @@ try {
     if (field !== 'fullName') assert.equal(await page.locator('#full-name').inputValue(), 'Retained Test');
     assert.equal(records().length, 2);
   }
-  console.log('PASS server rejects invalid fields and tampered destinations/slots without saving');
-  for (const destination of ['sahajanand', 'galana']) {
+  console.log('PASS server rejects invalid fields, tampered destinations/slots and interest-only destinations without saving');
+  for (const destination of ['galana']) {
     await page.goto('http://127.0.0.1:8091/'); await page.locator(`[data-book="${destination}"]`).click();
     assert.equal(await page.locator('#location').inputValue(), destination);
     await page.locator('#full-name').fill('Day Visitor'); await page.locator('#phone').fill('+1 (202) 555-0123'); await page.locator('#email').fill('visitor@example.com');
@@ -91,9 +92,9 @@ try {
     await page.locator('#confirmation-view').waitFor({ state: 'visible' });
     assert.match(await page.locator('#confirmation-view').innerText(), /Visit registered/);
   }
-  assert.equal(records().length, 4);
-  console.log('PASS school and Galana Farm day visits are saved through their preselected forms');
-  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="feeding"]').click();
+  assert.equal(records().length, 3);
+  console.log('PASS Galana Farm day visits are saved through the preselected form');
+  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="galana"]').click();
   const escapedName = '<img src=x onerror="window.injected=true">';
   await page.locator('#full-name').fill(escapedName); await page.locator('#phone').fill('0712 345 678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-02-20'); await page.locator('#time-slot').selectOption('11:00');
@@ -102,17 +103,17 @@ try {
   assert.equal((await rejection).status(), 403);
   await page.locator('#error-summary').waitFor({ state: 'visible' });
   assert.equal(await page.locator('#full-name').inputValue(), escapedName);
-  assert.equal(records().length, 4);
+  assert.equal(records().length, 3);
   await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
   await page.locator('#confirmation-view').waitFor({ state: 'visible' });
   assert.match(await page.locator('#confirmation-details').innerText(), /<img src=x/);
   assert.equal(await page.locator('#confirmation-details img').count(), 0);
   assert.equal(await page.evaluate(() => !!window.injected), false);
-  assert.equal(records().length, 5);
+  assert.equal(records().length, 4);
   for (const path of ['/var/bookings.sqlite', '/config/destinations.php', '/src/web.php', '/migrations/001-day-bookings.sql']) assert.equal((await page.request.get('http://127.0.0.1:8091' + path)).status(), 404);
   console.log('PASS CSRF rejection retains correctable input, submitted text is escaped, and private files are not served');
   await stop(); server = launchServer(storage); await ready();
-  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="feeding"]').click();
+  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="galana"]').click();
   await page.locator('#full-name').fill('Retry Visitor'); await page.locator('#phone').fill('+254712345678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-03-01'); await page.locator('#time-slot').selectOption('11:00');
   rejection = page.waitForResponse(response => response.request().method() === 'POST');
@@ -122,22 +123,22 @@ try {
   assert.match(await page.locator('#error-summary').innerText(), /could not save/);
   assert.equal(await page.locator('#confirmation-view').isVisible(), false);
   assert.equal(await page.locator('#full-name').inputValue(), 'Retry Visitor');
-  assert.equal(records().length, 5);
+  assert.equal(records().length, 4);
   await stop(); server = launchServer(); await ready();
   await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
   await page.locator('#confirmation-view').waitFor({ state: 'visible' });
-  assert.equal(records().length, 6);
+  assert.equal(records().length, 5);
   console.log('PASS failed storage never confirms, retains details, and permits a successful retry');
   for (let i = 0; i < 2; i++) execFileSync('php', ['bin/migrate.php'], { env: { ...process.env, BOOKING_DB: join(storage, 'bookings.sqlite') } });
-  assert.equal(records().length, 6);
+  assert.equal(records().length, 5);
   assert.ok(records().every(record => record.status === 'automatically_confirmed' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(record.created_at)));
   const config = join(storage, 'schedule.php');
   await writeFile(config, "<?php return ['feeding'=>['name'=>'Kibarani Feeding center','slots'=>['11:30']],'sahajanand'=>['name'=>'Sahajanand Special School','slots'=>['09:00']],'galana'=>['name'=>'Galana Farm','slots'=>['14:00']]];");
   await stop(); server = launchServer(join(storage, 'bookings.sqlite'), config); await ready();
   await page.reload();
   assert.match(await page.locator('#confirmation-details').innerText(), /11:00/);
-  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="feeding"]').click();
-  assert.match(await page.locator('#time-slot').innerText(), /11:30/);
+  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="galana"]').click();
+  assert.match(await page.locator('#time-slot').innerText(), /2:00 pm/);
   assert.equal(records().at(-1).booked_time, '11:00');
   console.log('PASS repeated migrations retain records and schedule changes preserve booked times');
   await stop(); server = launchServer(); await ready();
@@ -170,14 +171,13 @@ try {
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('[data-book="sahajanand"]').evaluate(el => el === document.activeElement), true);
   await page.locator('#booking-dialog').waitFor({state:'hidden'});
-  await page.locator('[data-book="feeding"]').click();
-  assert.equal(await page.locator('#location').inputValue(), 'feeding');
-  assert.match(await page.locator('#time-slot').innerText(), /11:00/);
-  assert.doesNotMatch(await page.locator('#time-slot').innerText(), /9:00/);
+  await page.locator('[data-book="galana"]').click();
+  assert.equal(await page.locator('#location').inputValue(), 'galana');
+  assert.match(await page.locator('#time-slot').innerText(), /4:00 pm/);
   await page.locator('.close-button').focus(); await page.keyboard.press('Tab');
   assert.equal(await page.evaluate(() => document.activeElement.closest('dialog')?.id), 'booking-dialog');
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('[data-book="feeding"]').evaluate(el => el === document.activeElement), true);
+  assert.equal(await page.locator('[data-book="galana"]').evaluate(el => el === document.activeElement), true);
   await page.locator('[data-destination="sahajanand"] .photo-toggle').click();
   await page.waitForFunction(()=>document.querySelector('#gallery-image').getAttribute('src')?.endsWith('/01-entrance.webp'));
   assert.equal(await page.locator('#gallery-next').isVisible(), false);

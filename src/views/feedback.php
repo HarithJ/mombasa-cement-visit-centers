@@ -29,7 +29,7 @@ $done = !empty($invitation['submitted_at']);
 <?php foreach (['enjoyment'=>'What did you enjoy?','improvement'=>'What could we improve?','comments'=>'Anything else to share?'] as $name=>$label): ?>
 <div class="feedback-field"><label for="<?= $e($name) ?>"><?= $e($label) ?></label><p class="hint" id="<?= $e($name) ?>-hint">Optional · Up to 2,000 characters</p><textarea id="<?= $e($name) ?>" name="<?= $e($name) ?>" rows="3" maxlength="2000" aria-describedby="<?= $e($name) ?>-hint <?= $e($name) ?>-error" <?= isset($errors[$name]) ? 'aria-invalid="true"' : '' ?>><?= $e($input[$name] ?? '') ?></textarea><p id="<?= $e($name) ?>-error" class="field-error"><?= $e($errors[$name] ?? '') ?></p></div>
 <?php endforeach; ?>
-<p class="privacy-note"><?= $preview ? 'Use sample answers. This preview does not send or save feedback.' : 'Your feedback is linked to your booking and is not published publicly.' ?></p>
+<p class="privacy-note"><?= $preview ? 'Use sample answers. This preview does not send or save feedback.' : 'Your feedback is linked to your booking and is not published publicly. <a href="/privacy">Privacy notice</a>' ?></p>
 <button type="submit" <?= $preview ? 'disabled' : '' ?>><?= $preview ? 'Preview feedback' : 'Send feedback' ?> <span aria-hidden="true">↗</span></button>
 </form></div>
 <?php if ($preview): ?><div id="feedback-preview-done" hidden tabindex="-1"><h1>Thank you for trying it.</h1><p>This was a sample response. No feedback was sent or saved.</p><a href="">Try the sample again</a></div><?php endif; ?>

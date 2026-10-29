@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="/assets/admin/workspace.css"></head><body>
 <header><a class="brand" href="/admin"><img src="/assets/nyumba-group.svg" alt="Nyumba Group" width="42" height="55"><span>NYUMBA GROUP<small>Visit administration</small></span></a><?php if ($authenticated): ?><form action="/admin/logout" method="post"><input type="hidden" name="csrf" value="<?=ae($_SESSION['csrf'])?>"><button>Sign out</button></form><?php endif; ?></header>
 <main>
-<nav class="shortcuts" aria-label="Administration"><a href="/admin">Bookings</a></nav>
+<nav class="shortcuts" aria-label="Administration"><a href="/admin" <?= $interestPage ? '' : 'aria-current="page"' ?>>Bookings</a><a href="/admin/interest" <?= $interestPage ? 'aria-current="page"' : '' ?>>Interest</a></nav>
 <?php if ($error): ?><p class="error" role="alert"><?=ae($error)?></p><?php endif; ?>
 <?php if ($booking): ?>
 <a href="<?=ae(adminListUrl($filters,$page))?>">Back to bookings</a>
@@ -17,6 +17,8 @@ if ($booking['overnight']) $fields += ['Arrival'=>date('j M Y',strtotime($bookin
 foreach($fields as $label=>$value): ?><dt><?=ae($label)?></dt><dd><?php if($label==='Phone'): ?><a href="tel:<?=ae(preg_replace('/[^+0-9]/','',$value))?>"><?=ae($value)?></a><?php elseif($label==='Email' && $booking['email']): ?><a href="mailto:<?=ae($value)?>"><?=ae($value)?></a><?php else: ?><?=ae($value)?><?php endif; ?></dd><?php endforeach; ?></dl></section>
 <section class="panel"><h2>Visitor feedback</h2><?php if (!$booking['attendance']): ?><div class="empty-feedback"><span class="badge pending">No feedback received</span><p>This visitor has not submitted a response.</p></div><?php else: ?><dl><dt>Self-reported attendance</dt><dd><span class="badge"><?=$booking['attendance']==='attended'?'Attended':'Did not attend'?></span></dd><?php if($booking['attendance']==='attended'): ?><dt>Rating</dt><dd class="rating"><?=ae($booking['rating'])?> / 5</dd><?php endif; ?>
 <?php foreach(['enjoyment'=>'What they enjoyed','improvement'=>'Suggested improvements','comments'=>'Comments'] as $key=>$label): ?><dt><?=ae($label)?></dt><dd><?=ae($booking[$key] ?: 'Not provided')?></dd><?php endforeach; ?><dt>Submitted</dt><dd><?=ae(adminTimestamp($booking['submitted_at']))?></dd></dl><?php endif; ?></section></div>
+<?php elseif ($interestPage): ?>
+<?php require __DIR__.'/admin-interest.php'; ?>
 <?php else: ?>
 <div class="page-heading"><div><p class="eyebrow">Your workspace</p><h1>Bookings</h1><p class="muted">Visits and feedback across your destinations.</p></div><span class="readonly">Read-only access</span></div>
 <?php
