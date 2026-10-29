@@ -18,7 +18,7 @@ $done = !empty($invitation['submitted_at']);
 <p class="eyebrow">YOUR VISIT, YOUR VOICE</p><h1>Thank you for your feedback.</h1><p>Your response has been received. It helps us make future visits better.</p><p class="visit-context"><?= $e($destination) ?></p>
 <?php else: ?>
 <div id="feedback-form-view"><p class="eyebrow">YOUR VISIT, YOUR VOICE</p><h1>How was your visit?</h1><p class="intro">A few words from you can make the next visit even better.</p>
-<p class="visit-context"><strong><?= $e($destination) ?></strong><br><?= $e($invitation['overnight'] ? $invitation['arrival_date'].' – '.$invitation['departure_date'] : $invitation['visit_date']) ?></p>
+<p class="visit-context"><strong><?= $e($destination) ?></strong><br><?= $e($invitation['visit_date'].($invitation['overnight'] ? ' · Overnight stay' : '')) ?></p>
 <?php if ($errors): ?><div class="error-summary" role="alert" tabindex="-1"><strong>Please review your answers.</strong><ul><?php foreach ($errors as $message): ?><li><?= $e($message) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
 <form method="post" <?= $preview ? 'data-preview-form' : '' ?> novalidate>
 <?php if (!$preview): ?><input type="hidden" name="csrf" value="<?= $e($csrf) ?>"><?php endif; ?>

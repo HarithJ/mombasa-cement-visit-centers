@@ -63,11 +63,16 @@ try {
  assert.equal(worker('2100-01-02T05:59:59Z').messages.length,0);
  const overnight=worker('2100-01-02T06:00:00Z').messages;
  assert.equal(overnight.length,1,'invitation after overnight departure');
- assert.match(overnight[0].payload.text,/31 December 2099 to 1 January 2100/);
+ // A one-night stay is shown by its visit date and a short note, never as a stay range.
+ assert.match(overnight[0].payload.text,/31 December 2099 · Overnight stay/);
+ assert.doesNotMatch(overnight[0].payload.text,/1 January 2100/);
  const overnightUrl=overnight[0].payload.text.match(/https:\/\/visits\.example\.com\/\S+/)[0].replace('https://visits.example.com',origin);
  const native=await browser.newContext({javaScriptEnabled:false});
  const nativePage=await native.newPage();
  await nativePage.goto(overnightUrl);
+ const context=await nativePage.locator('.visit-context').innerText();
+ assert.match(context,/2099-12-31 · Overnight stay/);
+ assert.doesNotMatch(context,/2100-01-01/);
  await nativePage.getByLabel('I didn’t attend').check();
  await nativePage.getByRole('button',{name:'Send feedback',exact:true}).click();
  await nativePage.getByRole('heading',{name:'Thank you for your feedback.'}).waitFor();

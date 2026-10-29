@@ -16,6 +16,10 @@ try {
     }
     [$valid, $errors] = DayBooking::validate(array_merge($booking, ['email' => '  Visitor+test@example.com  ']), $schedule);
     check(!$errors && $valid['email'] === 'Visitor+test@example.com', 'Trim email without changing local part');
+    foreach (['2099-02-30', 'not-a-date'] as $badDate) {
+        [$invalid, $errors] = DayBooking::validate(array_merge($booking, ['visitDate' => $badDate]), $schedule);
+        check(isset($errors['visitDate']) && $invalid['arrivalDate'] === null && $invalid['departureDate'] === null && $invalid['overnightGuests'] === null, 'An invalid visit date never yields a partial overnight stay');
+    }
     $saved = $store->create($booking, 'test-token');
     check($saved['email'] === 'visitor@example.com', 'Email persisted');
     $store->create($booking, 'test-token');

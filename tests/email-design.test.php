@@ -38,4 +38,7 @@ $feedback=FeedbackEmail::payload($booking,$link);
 check(str_contains($feedback['html'],'href="https://example.com/feedback?token=sample&amp;source=email"'),'Feedback CTA preserves private link');
 check(str_contains($feedback['text'],$link) && str_contains($feedback['text'],"If you didn't attend"),'Text version includes action and non-attendance');
 check(str_contains($feedback['html'],'&lt;Alex &amp; Test&gt;'),'Feedback greeting escaped');
+check(str_contains($feedback['text'],'Visit date: 1 May 2099') && !str_contains($feedback['text'],'Overnight stay'),'Day feedback shows only the visit date');
+$overnightFeedback=FeedbackEmail::payload(array_merge($booking,['overnight'=>1,'arrival_date'=>'2099-05-01','departure_date'=>'2099-05-03','overnight_guests'=>2]),$link);
+check(str_contains($overnightFeedback['text'],'1 May 2099 · Overnight stay') && !str_contains($overnightFeedback['text'],'3 May 2099'),'Overnight feedback shows the visit date and a note, no stay range');
 echo "PASS email design: all scenarios, conversational copy, escaped HTML, text alternatives, routing, contact links and feedback CTA\n";

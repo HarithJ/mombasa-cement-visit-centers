@@ -21,7 +21,7 @@ $updated = '29 October 2026';
 <h2>What we collect</h2>
 <ul>
 <li><strong>Booking details:</strong> your full name, phone number, and, if you provide them, your email address and organization.</li>
-<li><strong>Visit details:</strong> destination, date and time, number of attendees, whether you requested transport, and for Galana Farm any overnight dates and number of staying guests.</li>
+<li><strong>Visit details:</strong> destination, date and time, number of attendees, whether you requested transport, and for Galana Farm whether you requested an overnight stay.</li>
 <li><strong>Interest registrations:</strong> for places not yet open for booking, your name, phone number, optional email address and organization, the place, your preferred visit date and number of attendees.</li>
 <li><strong>Feedback:</strong> if you answer our post-visit feedback request, whether you attended, your rating and any comments. Feedback is linked to your booking.</li>
 <li><strong>Technical data:</strong> our web server records IP addresses and request details in standard logs for security and troubleshooting.</li>

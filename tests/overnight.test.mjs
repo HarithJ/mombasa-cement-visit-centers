@@ -116,6 +116,27 @@ try {
     assert.doesNotMatch(await page.locator('#confirmation-details').innerText(), /Overnight stay|Staying guests/);
   }
   console.log('PASS unchecked day bookings discard even tampered stale overnight fields');
+  // A tampered non-Galana booking with the overnight box ticked is refused, so no overnight values reach storage.
+  for (const destination of ['feeding', 'sahajanand']) {
+    await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
+    const count = records().length;
+    const response = page.waitForResponse(response => response.request().method() === 'POST');
+    await page.locator('form').evaluate((form, location) => {
+      for (const [key, value] of Object.entries({ email: 'visitor@example.com', fullName: 'Tampered Elsewhere', phone: '0712345678', location, visitDate: '2099-05-01', timeSlot: '11:00', attendees: '4', overnight: 'on', arrivalDate: '2099-05-01', departureDate: '2099-05-02', overnightGuests: '4' })) {
+        let input = form.elements[key];
+        if (!input || key === 'overnight') { input = document.createElement('input'); input.name = key; input.type = 'hidden'; form.append(input); }
+        else if (input.tagName === 'INPUT') input.type = 'text';
+        input.disabled = false; input.value = value;
+      }
+      form.submit();
+    }, destination);
+    assert.equal((await response).status(), 422, `${destination} booking refused`);
+    await page.locator('#error-summary').waitFor({ state: 'visible' });
+    assert.match(await page.locator('#error-summary').innerText(), /not open for booking/);
+    assert.equal(records().length, count, `${destination} stores no booking`);
+  }
+  assert.equal(records().filter(row => row.destination !== 'galana' && (row.overnight || row.arrival_date || row.departure_date || row.overnight_guests)).length, 0);
+  console.log('PASS tampered non-Galana overnight submissions store no overnight values');
   const legacy = join(storage, 'legacy.sqlite');
   execFileSync('php', ['-r', '$db=new PDO("sqlite:".$argv[1]);$db->exec(file_get_contents("migrations/001-day-bookings.sql"));$db->prepare("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)")->execute(json_decode($argv[2],true));', legacy, JSON.stringify(['NY-LEGACY','legacy-token','Existing Day','+254712345678','feeding','2099-05-01','11:00',2,'automatically_confirmed','2026-09-15T12:00:00Z'])]);
   for (let i = 0; i < 2; i++) execFileSync('php', ['bin/migrate.php'], { env: { ...process.env, BOOKING_DB: legacy } });

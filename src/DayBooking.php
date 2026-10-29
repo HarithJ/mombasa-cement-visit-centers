@@ -18,7 +18,8 @@ final class DayBooking {
         if (!in_array($data['timeSlot'], $destinations[$data['location']]['slots'] ?? [], true)) $errors['timeSlot'] = 'Choose a time offered for this destination.';
         $zone = new DateTimeZone('Africa/Nairobi');
         $date = preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/D', $data['visitDate']) ? DateTimeImmutable::createFromFormat('!Y-m-d', $data['visitDate'], $zone) : false;
-        if (!$date || $date->format('Y-m-d') !== $data['visitDate']) $errors['visitDate'] = 'Choose a valid visit date.';
+        $validDate = $date && $date->format('Y-m-d') === $data['visitDate'];
+        if (!$validDate) $errors['visitDate'] = 'Choose a valid visit date.';
         elseif ($data['visitDate'] < (new DateTimeImmutable('now', $zone))->format('Y-m-d')) $errors['visitDate'] = 'Choose today or a future date.';
         if (!preg_match('/^[1-9][0-9]*$/D', $data['attendees']) || filter_var($data['attendees'], FILTER_VALIDATE_INT) === false) $errors['attendees'] = 'Enter a whole number of at least 1, including yourself.';
         if (isset($input['transportRequested']) && (!is_string($input['transportRequested']) || !in_array($input['transportRequested'], ['', 'on'], true))) $errors['transportRequested'] = 'Choose whether you would like transport arranged.';
@@ -26,9 +27,9 @@ final class DayBooking {
         if ($active) {
             if (!in_array($data['overnight'], ['on', '1'], true)) $errors['overnight'] = 'Choose whether you would like to stay overnight.';
             // Stays are always one night for the whole group, so these are derived rather than submitted.
-            $data['arrivalDate'] = $date ? $data['visitDate'] : null;
-            $data['departureDate'] = $date ? $date->modify('+1 day')->format('Y-m-d') : null;
-            $data['overnightGuests'] = $data['attendees'];
+            $data['arrivalDate'] = $validDate ? $data['visitDate'] : null;
+            $data['departureDate'] = $validDate ? $date->modify('+1 day')->format('Y-m-d') : null;
+            $data['overnightGuests'] = $validDate ? $data['attendees'] : null;
             $data['overnight'] = 'on';
         } else {
             $data['overnight'] = ''; $data['arrivalDate'] = null; $data['departureDate'] = null; $data['overnightGuests'] = null;
