@@ -85,28 +85,23 @@ final class BookingStore {
         $query->execute($params);
         return $query->fetchAll();
     }
-    public function interestTotals(?string $destination): array {
-        [$where, $params] = $this->interestWhere(['destination' => $destination]);
+    // Registrations and people per destination, plus the preferred month most registrations ask for (earliest on a tie).
+    public function interestTotals(array $filters): array {
+        [$where, $params] = $this->interestWhere($filters);
         $query = $this->db->prepare('SELECT destination, COUNT(*) AS registrations, SUM(attendees) AS attendees FROM interest_registrations'.$where.' GROUP BY destination');
         $query->execute($params);
-        return array_column($query->fetchAll(), null, 'destination');
-    }
-    // Registrations per destination for each Nairobi month since $since (a UTC timestamp string).
-    public function interestByMonth(?string $destination, string $since): array {
-        [$where, $params] = $this->interestWhere(['destination' => $destination]);
-        // Africa/Nairobi is UTC+3 all year, with no daylight saving.
-        $query = $this->db->prepare("SELECT strftime('%Y-%m', created_at, '+3 hours') AS month, destination, COUNT(*) AS registrations FROM interest_registrations".($where ? $where.' AND' : ' WHERE').' created_at >= ? GROUP BY month, destination');
-        $query->execute([...$params, $since]);
-        $months = [];
-        foreach ($query->fetchAll() as $row) $months[$row['month']][$row['destination']] = (int)$row['registrations'];
-        return $months;
+        $totals = array_column($query->fetchAll(), null, 'destination');
+        $query = $this->db->prepare("SELECT destination, substr(preferred_date, 1, 7) AS month FROM interest_registrations".$where." GROUP BY destination, month ORDER BY COUNT(*) DESC, month ASC");
+        $query->execute($params);
+        foreach ($query->fetchAll() as $row) $totals[$row['destination']]['top_month'] ??= $row['month'];
+        return $totals;
     }
     public function findByToken(string $token): ?array {
         $query = $this->db->prepare('SELECT * FROM bookings WHERE submission_token = ?');
         $query->execute([$token]);
         return $query->fetch() ?: null;
     }
-    public function adminBookings(int $page, array $filters = []): array {
+    private function bookingWhere(array $filters): array {
         $where = []; $params = [];
         foreach (['destination' => 'destination = ?', 'from' => 'visit_date >= ?', 'to' => 'visit_date <= ?'] as $key => $clause) {
             if (!empty($filters[$key])) { $where[] = $clause; $params[] = $filters[$key]; }
@@ -115,10 +110,29 @@ final class BookingStore {
             $where[] = '(instr(lower(reference), lower(?)) > 0 OR instr(lower(full_name), lower(?)) > 0)';
             $params[] = $filters['q']; $params[] = $filters['q'];
         }
-        $query = $this->db->prepare('SELECT id, reference, full_name, destination, visit_date, booked_time, attendees, EXISTS(SELECT 1 FROM feedback_responses WHERE booking_id = bookings.id) AS has_feedback, (SELECT attendance FROM feedback_responses WHERE booking_id = bookings.id) AS feedback_attendance FROM bookings'.($where ? ' WHERE '.implode(' AND ', $where) : '').' ORDER BY visit_date DESC, id DESC LIMIT 26 OFFSET ?');
+        return [$where ? ' WHERE '.implode(' AND ', $where) : '', $params];
+    }
+    public function adminBookings(int $page, array $filters = []): array {
+        [$where, $params] = $this->bookingWhere($filters);
+        $query = $this->db->prepare('SELECT id, reference, full_name, destination, visit_date, booked_time, attendees, EXISTS(SELECT 1 FROM feedback_responses WHERE booking_id = bookings.id) AS has_feedback, (SELECT attendance FROM feedback_responses WHERE booking_id = bookings.id) AS feedback_attendance FROM bookings'.$where.' ORDER BY visit_date DESC, id DESC LIMIT 26 OFFSET ?');
         foreach ($params as $index => $value) $query->bindValue($index + 1, $value);
         $query->bindValue(count($params) + 1, ($page - 1) * 25, PDO::PARAM_INT);
         $query->execute();
+        return $query->fetchAll();
+    }
+    // Visits and guests per destination, plus the upcoming visits (the seven days from $today, Nairobi) and their overnight and transport requests.
+    public function bookingTotals(array $filters, string $today): array {
+        [$where, $params] = $this->bookingWhere($filters);
+        $weekEnd = (new DateTimeImmutable($today))->modify('+6 days')->format('Y-m-d');
+        $query = $this->db->prepare('SELECT destination, COUNT(*) AS visits, SUM(attendees) AS guests, SUM(visit_date BETWEEN ? AND ?) AS upcoming, SUM(visit_date BETWEEN ? AND ? AND overnight) AS overnight, SUM(visit_date BETWEEN ? AND ? AND transport_requested) AS transport FROM bookings'.$where.' GROUP BY destination');
+        $query->execute([$today, $weekEnd, $today, $weekEnd, $today, $weekEnd, ...$params]);
+        return array_column($query->fetchAll(), null, 'destination');
+    }
+    // Every booking matching the filters, with its feedback, for the CSV export.
+    public function adminBookingsExport(array $filters): array {
+        [$where, $params] = $this->bookingWhere($filters);
+        $query = $this->db->prepare('SELECT b.reference, b.full_name, b.organization, b.phone, b.email, b.destination, b.visit_date, b.booked_time, b.attendees, b.created_at, b.overnight, b.transport_requested, f.attendance, f.rating, f.enjoyment, f.improvement, f.comments, f.submitted_at FROM bookings b LEFT JOIN feedback_responses f ON f.booking_id = b.id'.$where.' ORDER BY b.visit_date DESC, b.id DESC');
+        $query->execute($params);
         return $query->fetchAll();
     }
     public function adminBooking(int $id): ?array {

@@ -62,24 +62,22 @@ try {
     if ($path === '/admin/login' && $authenticated) adminRedirect('/admin');
     if ($path !== '/admin/login') {
         $detail = preg_match('#^/admin/bookings/([1-9][0-9]{0,17})$#D', $path, $match);
-        if (!$detail && !$interestPage && $path !== '/admin' && $path !== '/admin/') { http_response_code(404); echo 'Page not found.'; return; }
+        if (!$detail && !$interestPage && !in_array($path, ['/admin', '/admin/', '/admin/bookings.csv'], true)) { http_response_code(404); echo 'Page not found.'; return; }
         $store = new BookingStore(getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite');
         $page = filter_var($_GET['page'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 1000000]]) ?: 1;
         if ($error) http_response_code(400);
+        elseif ($path === '/admin/bookings.csv') { adminBookingsCsv($store->adminBookingsExport($filters), $destinations, $now); return; }
         elseif ($path === '/admin/interest.csv') { adminInterestCsv($store->adminInterest($filters), $destinations, $now); return; }
         elseif ($interestPage) {
             $rows = $store->adminInterest($filters, $page);
-            $place = $filters['destination'] !== '' ? $filters['destination'] : null;
-            $interestTotals = $store->interestTotals($place);
-            // The last twelve Nairobi months, newest first.
-            $month = (new DateTimeImmutable('@'.$now))->setTimezone(new DateTimeZone('Africa/Nairobi'))->modify('first day of this month midnight');
-            $interestMonths = [];
-            for ($i = 0; $i < 12; $i++) $interestMonths[] = $month->modify("-$i months");
-            $interestByMonth = $store->interestByMonth($place, end($interestMonths)->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:s\Z'));
+            $interestTotals = $store->interestTotals($filters);
         } elseif ($detail) {
             $booking = $store->adminBooking((int)$match[1]);
             if (!$booking) { http_response_code(404); echo 'Booking not found. <a href="/admin">Back to bookings</a>'; return; }
-        } else $rows = $store->adminBookings($page, $filters);
+        } else {
+            $rows = $store->adminBookings($page, $filters);
+            $bookingTotals = $store->bookingTotals($filters, (new DateTimeImmutable('@'.$now))->setTimezone(new DateTimeZone('Africa/Nairobi'))->format('Y-m-d'));
+        }
     }
 } catch (Throwable $exception) { http_response_code(503); echo 'Administration temporarily unavailable.'; return; }
 // Values a spreadsheet would read as a formula are prefixed so they stay text. Normalised phone numbers are left alone.
@@ -89,12 +87,29 @@ function adminInterestCsv(array $rows, array $destinations, int $now): void {
     header('Content-Disposition: attachment; filename="interest-registrations-'.(new DateTimeImmutable('@'.$now))->setTimezone(new DateTimeZone('Africa/Nairobi'))->format('Y-m-d').'.csv"');
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF");
-    fputcsv($out, ['Registered at (Nairobi)', 'Place', 'Name', 'Organization', 'Phone', 'Email', 'Preferred visit date', 'Attendees'], ',', '"', '');
+    fputcsv($out, ['Registered at (Nairobi)', 'Destination', 'Visitor', 'Organization', 'Phone', 'Email', 'Preferred visit date', 'Guests'], ',', '"', '');
     foreach ($rows as $row) fputcsv($out, array_map('csvCell', [
         (new DateTimeImmutable($row['created_at']))->setTimezone(new DateTimeZone('Africa/Nairobi'))->format('Y-m-d H:i'),
         $destinations[$row['destination']] ?? $row['destination'], $row['full_name'], $row['organization'] ?? '', $row['phone'], $row['email'] ?? '', $row['preferred_date'], (string)$row['attendees'],
     ]), ',', '"', '');
     fclose($out);
 }
+function adminBookingsCsv(array $rows, array $destinations, int $now): void {
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="bookings-'.(new DateTimeImmutable('@'.$now))->setTimezone(new DateTimeZone('Africa/Nairobi'))->format('Y-m-d').'.csv"');
+    $nairobi = fn(?string $value) => $value ? (new DateTimeImmutable($value, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Africa/Nairobi'))->format('Y-m-d H:i') : '';
+    $out = fopen('php://output', 'w');
+    fwrite($out, "\xEF\xBB\xBF");
+    fputcsv($out, ['Reference', 'Booked at (Nairobi)', 'Destination', 'Visit date', 'Time', 'Visitor', 'Organization', 'Phone', 'Email', 'Guests', 'Overnight stay', 'Transport', 'Feedback attendance', 'Rating', 'What they enjoyed', 'Suggested improvements', 'Comments', 'Feedback submitted (Nairobi)'], ',', '"', '');
+    foreach ($rows as $row) fputcsv($out, array_map('csvCell', [
+        $row['reference'], $nairobi($row['created_at']), $destinations[$row['destination']] ?? $row['destination'], $row['visit_date'], date('H:i', strtotime($row['booked_time'])),
+        $row['full_name'], $row['organization'] ?? '', $row['phone'], $row['email'] ?? '', (string)$row['attendees'],
+        $row['overnight'] ? 'Requested' : '', !empty($row['transport_requested']) ? 'Requested' : '',
+        match ($row['attendance']) { 'attended' => 'Attended', 'not_attended' => 'Did not attend', default => '' },
+        (string)($row['rating'] ?? ''), $row['enjoyment'] ?? '', $row['improvement'] ?? '', $row['comments'] ?? '', $nairobi($row['submitted_at']),
+    ]), ',', '"', '');
+    fclose($out);
+}
+function adminCount(int $count, string $one, string $many): string { return '<strong>'.$count.'</strong> '.($count === 1 ? $one : $many); }
 function adminTimestamp(string $value): string { return (new DateTimeImmutable($value, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Africa/Nairobi'))->format('j M Y, g:i A'); }
 require __DIR__.'/views/admin.php';

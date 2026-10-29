@@ -42,9 +42,9 @@ try {
  assert.equal(await page.getByRole('heading',{name:'Bookings',exact:true}).count(),1);
  await page.getByRole('link',{name:'Today',exact:true}).click();
  assert.match(await page.locator('main').innerText(),/No bookings found/);
- assert.equal(await page.getByLabel('From date').inputValue(),await page.getByLabel('To date').inputValue());
+ assert.equal(await page.getByLabel('Visit date from').inputValue(),await page.getByLabel('Visit date to').inputValue());
  await page.getByRole('link',{name:'Next 7 days',exact:true}).click();
- assert.equal((Date.parse(await page.getByLabel('To date').inputValue())-Date.parse(await page.getByLabel('From date').inputValue()))/86400000,6);
+ assert.equal((Date.parse(await page.getByLabel('Visit date to').inputValue())-Date.parse(await page.getByLabel('Visit date from').inputValue()))/86400000,6);
  await page.getByRole('link',{name:'All visits',exact:true}).click();
  await page.getByLabel('Search reference or name').fill('Special');
  await page.getByLabel('Destination',{exact:true}).selectOption('galana');

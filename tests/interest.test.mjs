@@ -141,32 +141,27 @@ try {
  await admin.locator('[type="submit"]').click(); await admin.waitForURL(/\/admin$/);
  await admin.getByRole('navigation',{name:'Administration'}).getByRole('link',{name:'Interest'}).click();
  await admin.waitForURL(/\/admin\/interest$/);
- const cards=await admin.locator('.interest-cards').innerText();
+ const cards=await admin.locator('.summary-cards').innerText();
  // Sahajanand: 2 boundary + 1 no-script + 9 seeded; Kibarani: Amina (12 people) + 18 seeded.
  assert.match(cards,/Sahajanand Special School\s+12 registrations\s+21 people/);
  assert.match(cards,/Kibarani Feeding Center\s+19 registrations\s+48 people/);
- const months=await admin.locator('.interest-months tbody tr').allInnerTexts();
- assert.equal(months.length,12);
- assert.match(months[0],new RegExp(`^${new Date().toLocaleString('en-GB',{month:'long',year:'numeric',timeZone:'Africa/Nairobi'})}\\s+3\\s+1\\s+4$`),'This month: 3 Sahajanand, 1 Kibarani');
- const monthTotal=months.reduce((sum,row)=>sum+Number(row.trim().split(/\s+/).at(-1)),0);
- const inWindow=query(`SELECT COUNT(*) AS n FROM interest_registrations WHERE strftime('%Y-%m', created_at, '+3 hours') >= '${iso(new Date(Date.UTC(year,month-12,1))).slice(0,7)}'`)[0].n;
- assert.equal(monthTotal,inWindow,'Monthly table counts the last twelve months');
  const rows=admin.locator('tbody tr[role=row]');
  assert.equal(await rows.count(),25);
  assert.match(await rows.first().innerText(),/No Script/,'Newest first');
  await admin.getByRole('link',{name:'Next'}).click();
  assert.equal(await rows.count(),6);
- console.log('PASS admin Interest page shows totals, twelve months, newest-first list and pagination');
+ console.log('PASS admin Interest page shows totals, newest-first list and pagination');
 
  await admin.goto(origin+'/admin/interest?destination=sahajanand');
  assert.equal(await rows.count(),12);
- assert.doesNotMatch(await admin.locator('.interest-cards').innerText(),/Kibarani/);
+ assert.doesNotMatch(await admin.locator('.summary-cards').innerText(),/Kibarani/);
  await admin.goto(origin+'/admin/interest?q=coast');
  assert.match(await rows.innerText(),/Seed 1/); assert.equal(await rows.count(),1);
  await admin.goto(origin+'/admin/interest?q=%2B254700000005');
  assert.match(await rows.innerText(),/Seed 5/); assert.equal(await rows.count(),1);
  await admin.goto(origin+'/admin/interest?q=amina');
  assert.equal(await rows.count(),1);
+ assert.match(await admin.locator('.summary-cards').innerText(),/Sahajanand Special School\s+0 registrations\s+0 people[\s\S]*Kibarani Feeding Center\s+1 registration\s+12 people/,'Cards follow the filters');
  await admin.goto(origin+`/admin/interest?from=${today}&to=${today}`);
  assert.equal(await rows.count(),4,'Registrations made today');
  for(const bad of ['destination=galana','from=2099-02-30','from=2099-02-02&to=2099-02-01']) assert.equal((await admin.goto(origin+'/admin/interest?'+bad)).status(),400,bad);
@@ -178,7 +173,7 @@ try {
  assert.match(csv.headers()['content-type'],/^text\/csv/);
  assert.match(csv.headers()['content-disposition'],/attachment; filename="interest-registrations-\d{4}-\d{2}-\d{2}\.csv"/);
  const lines=(await csv.text()).replace(/^﻿/,'').trim().split('\n');
- assert.equal(lines[0],'"Registered at (Nairobi)",Place,Name,Organization,Phone,Email,"Preferred visit date",Attendees');
+ assert.equal(lines[0],'"Registered at (Nairobi)",Destination,Visitor,Organization,Phone,Email,"Preferred visit date",Guests');
  assert.equal(lines.length,13,'Header and twelve filtered rows, without pagination');
  assert.ok(lines.every((line,i)=>i===0||line.includes('Sahajanand Special School')));
  const formula=lines.find(line=>line.includes('HYPERLINK'));
