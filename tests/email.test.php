@@ -7,7 +7,8 @@ $path = sys_get_temp_dir().'/nyumba-email-'.bin2hex(random_bytes(8)).'/bookings.
 try {
     putenv('BOOKING_EMAIL_ENABLED=1');
     $store = new BookingStore($path);
-    $booking = ['email' => 'visitor@example.com', 'fullName' => '<Visitor & Test>', 'phone' => '+254712345678', 'location' => 'galana', 'visitDate' => '2099-05-01', 'timeSlot' => '11:00', 'attendees' => '3', 'overnight' => 'on', 'arrivalDate' => '2099-05-01', 'departureDate' => '2099-05-02', 'overnightGuests' => '2'];
+    $booking = ['email' => 'visitor@example.com', 'fullName' => '<Visitor & Test>', 'phone' => '+254712345678', 'location' => 'galana', 'visitDate' => '2099-05-01', 'timeSlot' => '11:00', 'attendees' => '3', 'overnight' => 'on', 'arrivalDate' => '2099-05-01', 'departureDate' => '2099-05-02', 'overnightGuests' => '3'];
+    $oneNight = fn(string $text): bool => str_contains($text, 'Overnight stay: Requested (subject to availability)') && !str_contains($text, '2 May 2099') && !str_contains($text, 'Staying guests');
     $schedule = require __DIR__.'/../config/destinations.php';
     foreach (['invalid', 'a@b', "a@example.com\r\nBcc: b@example.com", str_repeat('a', 255).'@example.com'] as $invalid) {
         [, $errors] = DayBooking::validate(array_merge($booking, ['email' => $invalid]), $schedule);
@@ -22,19 +23,19 @@ try {
     check((int)$db->query('SELECT COUNT(*) FROM booking_emails')->fetchColumn() === 2, 'Replay must not queue twice');
     $worker = new EmailWorker($db);
     $firstPayload = null; $firstKey = null;
-    $failed = $worker->run(function ($payload, $key) use (&$firstPayload, &$firstKey) {
+    $failed = $worker->run(function ($payload, $key) use (&$firstPayload, &$firstKey, $oneNight) {
         $firstPayload = $payload; $firstKey = $key;
         check($payload['to'] === ['jaco@nyumbagri.com', 'pravin@nyumbagri.com', 'harithjaved@gmail.com', 'apoorvchit@gmail.com'], 'Destination recipients');
         check(str_contains($payload['html'], '&lt;Visitor &amp; Test&gt;'), 'HTML escaping');
-        check(str_contains($payload['text'], 'Staying guests: 2'), 'Overnight details');
+        check($oneNight($payload['text']), 'Overnight details');
         throw new RuntimeException('Simulated timeout');
     }, 'bookings@example.com', 1);
     check($failed['retry'] === 1, 'Failed delivery must remain retryable');
     check($firstPayload['to'] === ['jaco@nyumbagri.com', 'pravin@nyumbagri.com', 'harithjaved@gmail.com', 'apoorvchit@gmail.com'], 'Recipient routing');
     check(str_contains($firstPayload['html'], '&lt;Visitor &amp; Test&gt;'), 'Escaped visitor name');
-    check(str_contains($firstPayload['text'], 'Staying guests: 2'), 'Overnight content');
+    check($oneNight($firstPayload['text']) && str_contains($firstPayload['text'], 'Attendees: 3'), 'Overnight content');
     check($store->findByToken('test-token')['reference'] === $saved['reference'], 'Failure preserves booking');
-    $visitor = $worker->run(function ($payload) { check($payload['to'] === ['visitor@example.com'], 'Visitor recipient'); check(str_contains($payload['text'], 'jaco@nyumbagri.com'), 'Visitor contact details'); return 'visitor-id'; }, 'bookings@example.com');
+    $visitor = $worker->run(function ($payload) use ($oneNight) { check($payload['to'] === ['visitor@example.com'], 'Visitor recipient'); check(str_contains($payload['text'], 'jaco@nyumbagri.com'), 'Visitor contact details'); check($oneNight($payload['text']) && str_contains($payload['text'], 'availability'), 'Visitor overnight request'); return 'visitor-id'; }, 'bookings@example.com');
     check($visitor['accepted'] === 1, 'Separate visitor confirmation');
     check($worker->run(fn() => throw new RuntimeException('Should not retry immediately'), 'bookings@example.com')['retry'] === 0, 'Backoff');
     $db->exec('UPDATE booking_emails SET next_attempt_at = 0');

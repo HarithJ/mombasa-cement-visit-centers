@@ -58,7 +58,9 @@ try {
  assert.match(await page.locator('main').innerText(),/5 \/ 5/);
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile booking reference must wrap');
  await page.screenshot({path:join(tmpdir(),'nyumba-admin-mobile.png'),fullPage:true});
- assert.match(await page.locator('main').innerText(),/3 May 2099/);
+ // A stored multi-night booking still shows through the single overnight line.
+ assert.match(await page.locator('main').innerText(),/Overnight stay\s+Requested/);
+ assert.doesNotMatch(await page.locator('main').innerText(),/3 May 2099|Arrival|Departure|Overnight guests/);
  assert.match(await page.locator('main').innerText(),/<script>alert\(1\)<\/script>/);
  assert.equal(await page.locator('main script').count(),0);
  await page.getByRole('link',{name:'Back to bookings'}).click();

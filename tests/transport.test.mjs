@@ -34,11 +34,7 @@ try {
             await page.locator('#email').fill('visitor@example.com');
             await page.locator('#visit-date').fill('2099-05-01');
             await page.locator('#time-slot').selectOption({index:1});
-            if (stay) {
-                await page.locator('#overnight').check();
-                if (!javaScriptEnabled) await page.locator('#arrival-date').fill('2099-05-01');
-                await page.locator('#departure-date').fill('2099-05-02');
-            }
+            if (stay) await page.locator('#overnight').check();
             if (javaScriptEnabled && retain) {
                 await page.locator('#full-name').fill('');
                 await page.evaluate(()=>{const f=document.querySelector('#booking-form'); f.noValidate=true; f.submit();});
@@ -65,6 +61,7 @@ try {
             assert.ok((await page.locator('#confirmation-details').innerText()).includes(expected));
             await page.reload();
             assert.ok((await page.locator('#confirmation-details').innerText()).includes(expected), 'Refresh preserves choice');
+            assert.equal(/Overnight stay\s+Requested/.test(await page.locator('#confirmation-details').innerText()), stay, 'Overnight line only for a stay');
         }
         assert.deepEqual(errors,[]);
         await context.close();
