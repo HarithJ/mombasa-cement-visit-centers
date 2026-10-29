@@ -144,3 +144,4 @@ Tests: new `tests/interest.test.mjs` (public form, queue, admin, CSV); existing 
 
 - 2026-10-29: After UI review, the card status moved from a badge above the button to a "Visits opening soon" label on the photo's top-left corner. The button keeps "Tell us you’re interested".
 - 2026-10-29: Moved again to a plain "Visits opening soon" status line (orange clock, no pill) just above the button, bottom-left of the card, on all screen sizes.
+- 2026-10-29: On desktop (wider than 1024px) the status line sits at the far right of the button's row; on tablets and phones it stays above the button.

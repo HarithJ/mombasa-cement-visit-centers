@@ -52,7 +52,9 @@ body{background:var(--paper)}.wrap{width:min(1320px,calc(100% - 96px))}h1,h2,h3{
 input:focus-visible,select:focus-visible{outline:0;border-color:var(--green);box-shadow:0 0 0 3px #23554526}
 input[aria-invalid=true]:focus-visible,select[aria-invalid=true]:focus-visible{border-color:var(--error);box-shadow:0 0 0 3px #a6323226}
 
-/* Interest-only cards: a plain status line sits just above the button. */
-.card-status{display:flex;align-items:center;gap:8px;margin:auto 0 12px;color:#4d6a5c;font-size:12px;font-weight:600}
+/* Interest-only cards: a plain status line above the button, or on its right on desktop. */
+.card-actions{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-top:auto}
+.card-actions .book-button{margin-top:0}
+.card-status{display:flex;align-items:center;gap:8px;margin:0;color:#4d6a5c;font-size:12px;font-weight:600}
 .card-status .icon{width:15px;height:15px;color:var(--orange)}
-.card-status+.book-button{margin-top:0}
+@media(min-width:1025px){.card-actions{flex-direction:row-reverse;justify-content:space-between;align-items:center;gap:16px}}

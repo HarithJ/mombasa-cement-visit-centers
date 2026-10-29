@@ -122,8 +122,11 @@ $mode = fn(string $name) => 'data-mode="'.$name.'"'.($name === ($interestMode ? 
                     <h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
                     <?php if ($featured): ?><p class="destination-badge"><?= icon('moon') ?> Overnight stays on request</p><?php endif; ?>
-                    <?php if (InterestRegistration::interestOnly($id)): ?><p class="card-status"><?= icon('clock') ?> Visits opening soon</p><?php endif; ?>
-                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>"><?= InterestRegistration::interestOnly($id) ? 'Tell us you’re interested' : 'Let’s plan a visit' ?> <?= icon('diagonal') ?></a>
+                    <?php if (InterestRegistration::interestOnly($id)): ?>
+                    <div class="card-actions"><p class="card-status"><?= icon('clock') ?> Visits opening soon</p><a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Tell us you’re interested <?= icon('diagonal') ?></a></div>
+                    <?php else: ?>
+                    <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>
+                    <?php endif; ?>
                 </div>
             </article>
             <?php endforeach; ?>
