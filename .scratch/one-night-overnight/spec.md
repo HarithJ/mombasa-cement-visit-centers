@@ -1,6 +1,6 @@
 # One-night overnight stays at Galana Farm
 
-Status: ready-for-agent
+Status: resolved
 Type: feature
 
 ## Problem Statement
