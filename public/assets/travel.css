@@ -52,7 +52,7 @@ body{background:var(--paper)}.wrap{width:min(1320px,calc(100% - 96px))}h1,h2,h3{
 input:focus-visible,select:focus-visible{outline:0;border-color:var(--green);box-shadow:0 0 0 3px #23554526}
 input[aria-invalid=true]:focus-visible,select[aria-invalid=true]:focus-visible{border-color:var(--error);box-shadow:0 0 0 3px #a6323226}
 
-/* Interest-only places carry a status label on the photo's top-left corner. */
-.photo-status{position:absolute;z-index:4;top:16px;left:16px;display:inline-flex;align-items:center;gap:8px;padding:8px 14px 8px 11px;border-radius:40px;background:#173f35e0;color:#fffbed;font-size:11px;font-weight:650;letter-spacing:.01em;pointer-events:none;box-shadow:0 4px 14px #10231a29}
-.photo-status .icon{width:14px;height:14px;color:var(--orange)}
-@media(max-width:600px){.photo-status{top:12px;left:12px;padding:7px 12px 7px 10px;font-size:10px}}
+/* Interest-only cards: a plain status line sits just above the button. */
+.card-status{display:flex;align-items:center;gap:8px;margin:auto 0 12px;color:#4d6a5c;font-size:12px;font-weight:600}
+.card-status .icon{width:15px;height:15px;color:var(--orange)}
+.card-status+.book-button{margin-top:0}

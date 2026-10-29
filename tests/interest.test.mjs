@@ -31,11 +31,11 @@ try {
  const errors=[]; page.on('pageerror',e=>errors.push(e.message));
  await page.goto(origin);
  for(const id of ['sahajanand','feeding']) {
-  assert.equal(await page.locator(`[data-destination="${id}"] .photo-status`).innerText(),'Visits opening soon');
+  assert.equal(await page.locator(`[data-destination="${id}"] .card-status`).innerText(),'Visits opening soon');
   assert.match(await page.locator(`[data-book="${id}"]`).innerText(),/Tell us you’re interested/);
  }
  assert.match(await page.locator('[data-book="galana"]').innerText(),/Let’s plan a visit/);
- assert.equal(await page.locator('[data-destination="galana"] .photo-status').count(),0);
+ assert.equal(await page.locator('[data-destination="galana"] .card-status').count(),0);
  console.log('PASS Kibarani and Sahajanand cards invite interest; Galana Farm still invites bookings');
 
  await page.locator('[data-book="feeding"]').click();
