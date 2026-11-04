@@ -10,8 +10,6 @@ const submit = form.querySelector('[type="submit"]');
 let opener;
 let attempt = 0;
 let busy = false;
-const interestMode = () => Boolean(destinations[locationField.value]?.interestOnly);
-const [interestFrom, interestTo] = serverState.interestDates;
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Nairobi', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const validDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 const dateLabel = value => new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value));
@@ -25,25 +23,13 @@ function clearErrors() {
 function setBusy(value) {
   busy = value; submit.disabled = value;
   form.setAttribute('aria-busy', String(value));
-  document.querySelector('#submit-label').textContent = value ? 'Saving…' : interestMode() ? 'Register my interest' : 'Book my visit';
+  document.querySelector('#submit-label').textContent = value ? 'Saving…' : 'Book my visit';
   form.querySelector('.spinner').hidden = !value;
   form.querySelector('.submit-arrow').hidden = value;
   // Reset disabled controls when the dialog returns to its editable state.
   [...form.elements].forEach(input => { if (input !== submit) input.disabled = value; });
-  if (!value) { syncOvernight(); syncMode(); }
+  if (!value) syncOvernight();
   overnight.disabled = value;
-}
-// Interest-only places take a shorter form: no time slot or transport, and a preferred date within the next year.
-function syncMode() {
-  const interest = interestMode();
-  dialog.querySelectorAll('[data-mode]').forEach(part => { part.hidden = part.dataset.mode !== (interest ? 'interest' : 'booking'); });
-  form.elements.intent.value = interest ? 'interest' : '';
-  form.elements.timeSlot.disabled = interest || busy;
-  form.elements.transportRequested.disabled = interest || busy;
-  if (interest) form.elements.transportRequested.checked = false;
-  dateField.min = interest ? interestFrom : today();
-  if (interest) dateField.max = interestTo; else dateField.removeAttribute('max');
-  if (!busy) document.querySelector('#submit-label').textContent = interest ? 'Register my interest' : 'Book my visit';
 }
 function syncOvernight() {
   const isGalana = locationField.value === 'galana';
@@ -65,12 +51,11 @@ function syncDestination() {
   document.querySelector('#aside-destination').textContent = destination.name;
   document.querySelector('#booking-image').src = document.querySelector(`[data-destination="${locationField.value}"] .photo-primary`).getAttribute('src');
   syncOvernight();
-  syncMode();
+  dateField.min = today();
 }
 function showForm() {
   document.querySelector('#form-view').hidden = false;
   document.querySelector('#confirmation-view').hidden = true;
-  document.querySelector('#interest-confirmation-view').hidden = true;
   dialog.setAttribute('aria-labelledby', 'booking-title');
 }
 function openBooking(id, button) {
@@ -98,12 +83,10 @@ function validate() {
   if (email.value && (email.value.length > 254 || !email.validity.valid || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value))) error('email', 'Enter a valid email address.');
   const phone = form.elements.phone.value.trim(); const digits = phone.replace(/[\s()+-]/g, '');
   if (!/^[+\d][\d\s()+-]*$/.test(phone) || !/^\d{7,15}$/.test(digits)) error('phone', 'Enter a valid phone number (7–15 digits).');
-  if (!destinations[locationField.value]) error('location', 'Choose one of the three destinations.');
-  const interest = interestMode();
-  if (!validDate(dateField.value)) error('visitDate', interest ? 'Please choose a preferred visit date.' : 'Please choose a visit date.');
-  else if (interest && (dateField.value < interestFrom || dateField.value > interestTo)) error('visitDate', 'Choose a preferred date from tomorrow up to 12 months ahead.');
-  else if (!interest && dateField.value < today()) error('visitDate', 'Choose today or a future date.');
-  if (!interest && !destinations[locationField.value]?.slots.includes(form.elements.timeSlot.value)) error('timeSlot', 'Please select an available time.');
+  if (!destinations[locationField.value]) error('location', 'Visits can only be booked at Galana Farm.');
+  if (!validDate(dateField.value)) error('visitDate', 'Please choose a visit date.');
+  else if (dateField.value < today()) error('visitDate', 'Choose today or a future date.');
+  if (!destinations[locationField.value]?.slots.includes(form.elements.timeSlot.value)) error('timeSlot', 'Please select an available time.');
   const attendees = Number(form.elements.attendees.value);
   if (!Number.isSafeInteger(attendees) || attendees < 1) error('attendees', 'Enter a whole number of at least 1.');
   if (errors.length) { const summary = document.querySelector('#error-summary'); summary.hidden = false; summary.textContent = `Please check ${errors.length === 1 ? 'the highlighted field' : `the ${errors.length} highlighted fields`} below.`; errors[0].focus(); }
@@ -124,20 +107,15 @@ form.addEventListener('submit', event => {
   busy = true; submit.disabled = true;
   document.querySelector('#submit-label').textContent = 'Saving…';
 });
-if (serverState.openForm || serverState.confirmation || serverState.interestConfirmation) {
+if (serverState.openForm || serverState.confirmation) {
   dialog.removeAttribute('open');
-  locationField.value = serverState.input.location || serverState.confirmation?.destination || serverState.interestConfirmation?.destination || 'galana';
+  locationField.value = serverState.input.location || serverState.confirmation?.destination || 'galana';
   overnight.checked = serverState.input.overnight === 'on';
   form.elements.transportRequested.checked = serverState.input.transportRequested === 'on';
   syncDestination();
   for (const [key, value] of Object.entries(serverState.input)) if (form.elements[key] && key !== 'overnight' && key !== 'transportRequested') form.elements[key].value = value;
   dialog.showModal(); document.body.style.overflow = 'hidden';
-  if (serverState.interestConfirmation) {
-    // The server renders the interest summary; there is no reference to restore.
-    document.querySelector('#form-view').hidden = true; document.querySelector('#interest-confirmation-view').hidden = false;
-    dialog.setAttribute('aria-labelledby', 'interest-confirmation-title');
-    document.querySelector('#interest-confirmation-title').focus({ preventScroll: true });
-  } else if (serverState.confirmation) {
+  if (serverState.confirmation) {
     const booking = serverState.confirmation;
     showConfirmation({ fullName: booking.full_name, organization: booking.organization || '', email: booking.email, location: booking.destination, visitDate: booking.visit_date, timeSlot: booking.booked_time, attendees: String(booking.attendees), transportRequested: booking.transport_requested ? 'on' : '', phone: booking.phone, overnight: booking.overnight ? 'on' : '' });
   } else {

@@ -10,9 +10,9 @@ try {
         $db->exec(file_get_contents($file));
         $db->prepare('INSERT INTO schema_migrations VALUES (?)')->execute([basename($file)]);
     }
-    $db->exec("INSERT INTO bookings(reference,submission_token,full_name,phone,email,destination,visit_date,booked_time,attendees,status,created_at) VALUES ('NY-LEGACY','legacy','Legacy Visitor','0712345678','legacy@example.com','feeding','2099-05-01','11:00',1,'automatically_confirmed','2026-01-01')");
+    $db->exec("INSERT INTO bookings(reference,submission_token,full_name,phone,email,destination,visit_date,booked_time,attendees,status,created_at) VALUES ('NY-LEGACY','legacy','Legacy Visitor','0712345678','legacy@example.com','galana','2099-05-01','11:00',1,'automatically_confirmed','2026-01-01')");
     $db->exec("INSERT INTO booking_emails(booking_id,kind,payload,idempotency_key,status,attempts,first_attempt_at,next_attempt_at,provider_id,last_error) VALUES (1,'visitor','{\"text\":\"Original payload\"}','visitor/old','accepted',2,100,160,'original-id',NULL),(1,'destination','{}','booking/old','pending',1,200,260,NULL,'Email API request failed')");
-    $db->exec("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES ('NY-NOEMAIL','noemail','Old Visitor','0712345678','feeding','2099-05-01','11:00',1,'automatically_confirmed','2026-01-01')");
+    $db->exec("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES ('NY-NOEMAIL','noemail','Old Visitor','0712345678','galana','2099-05-01','11:00',1,'automatically_confirmed','2026-01-01')");
     $db->exec("INSERT INTO booking_emails(booking_id,kind,payload,idempotency_key,status,attempts,first_attempt_at,last_error) VALUES (2,'destination','{}','review/old','review',8,100,'Original review reason')");
     $before=$db->query('SELECT * FROM booking_emails ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
     putenv('FEEDBACK_EMAIL_ENABLED=1');putenv('BOOKING_SITE_URL=https://visits.example.com');

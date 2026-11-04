@@ -1,11 +1,11 @@
 # Destination photographs
 
-The original photographs live in `Sahajanand`, `galana`, and `Feeding Center`. Filenames describe the destination and subject. `config/photo-manifest.json` records previous filenames, current source filenames, and the ordered public assets.
+The original photographs live in `galana`. Filenames describe the subject. `config/photo-manifest.json` records previous filenames, current source filenames, and the ordered public assets.
 
 Run `bin/build-photos.py` with a Python environment containing Pillow after updating the manifest. It validates sources, applies EXIF orientation, trims black letterbox bars left by video stills, generates WebP assets up to 1600 pixels wide and 360/720/1024 responsive variants without upscaling, and removes stale generated WebP files. Embedded screenshot borders are retained in the source files. Served copies omit source metadata.
 
-School photographs containing people have anonymizing face blur baked into the source files and every generated size. Keep these privacy-edited sources when rebuilding; review any new school photographs and obscure children's faces before adding them to the collection.
+Review any new photographs containing people before adding them, and obscure children's faces in the source files so every generated size inherits the edit.
 
-The first image is the school entrance, farm crop rows, or prepared meals. These stable asset names are also used by admin booking details. Galleries discover the generated files in filename order.
+The first image is the farm crop rows. This stable asset name is also used by admin booking details. The gallery discovers the generated files in filename order.
 
-Current collection: 10 school, 15 Galana, and 20 feeding-centre photographs. Deleted originals are absent from the regenerated public collection. Run `node tests/photos.test.mjs` with the project's Playwright/browser environment to decode every gallery image across available versions and check counts and wraparound. Static-preview checks verify exported assets as well.
+Current collection: 15 Galana Farm photographs. The Sahajanand Special School and Kibarani Feeding center collections were removed with those destinations (see [ADR 0001](adr/0001-galana-farm-only.md)); their originals remain in git history. Run `node tests/photos.test.mjs` with the project's Playwright/browser environment to decode every gallery image and check counts and wraparound.

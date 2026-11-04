@@ -4,8 +4,7 @@ require __DIR__.'/../src/BookingEmail.php';
 require __DIR__.'/../src/FeedbackEmail.php';
 function check(bool $ok, string $message): void { if (!$ok) throw new RuntimeException($message); }
 $booking=['reference'=>'NY-TEST','full_name'=>'<Alex & Test>','phone'=>'+254700000000','email'=>'alex@example.com','destination'=>'galana','visit_date'=>'2099-05-01','booked_time'=>'09:00','attendees'=>3,'overnight'=>0,'arrival_date'=>null,'departure_date'=>null,'overnight_guests'=>null,'transport_requested'=>0];
-foreach (['feeding','sahajanand','galana'] as $destination) foreach ([0,1] as $overnight) foreach ([0,1] as $transport) {
-    if ($overnight && $destination !== 'galana') continue;
+foreach (['galana'] as $destination) foreach ([0,1] as $overnight) foreach ([0,1] as $transport) {
     $sample=array_merge($booking,['destination'=>$destination,'overnight'=>$overnight,'transport_requested'=>$transport,'arrival_date'=>$overnight?'2099-05-01':null,'departure_date'=>$overnight?'2099-05-03':null,'overnight_guests'=>$overnight?2:null]);
     foreach ([true,false] as $visitor) {
         $payload=$visitor?BookingEmail::visitorPayload($sample):BookingEmail::payload($sample);

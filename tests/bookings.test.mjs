@@ -60,8 +60,7 @@ try {
     ['fullName', '', 'full name'], ['phone', 'abc', 'phone number'],
     ['attendees', '0', 'whole number'], ['attendees', '1.5', 'whole number'],
     ['visitDate', '2000-01-01', 'future date'], ['visitDate', '2099-02-30', 'valid visit date'],
-    ['location', 'unknown', 'three destinations'], ['timeSlot', '08:00', 'time offered'],
-    ['location', 'feeding', 'not open for booking'], ['location', 'sahajanand', 'not open for booking'],
+    ['location', 'unknown', 'only be booked at Galana Farm'], ['timeSlot', '08:00', 'time offered'],
   ]) {
     await page.goto('http://127.0.0.1:8091/');
     await page.locator('[data-book="galana"]').click();
@@ -82,7 +81,7 @@ try {
     if (field !== 'fullName') assert.equal(await page.locator('#full-name').inputValue(), 'Retained Test');
     assert.equal(records().length, 2);
   }
-  console.log('PASS server rejects invalid fields, tampered destinations/slots and interest-only destinations without saving');
+  console.log('PASS server rejects invalid fields, and tampered destinations/slots without saving');
   for (const destination of ['galana']) {
     await page.goto('http://127.0.0.1:8091/'); await page.locator(`[data-book="${destination}"]`).click();
     assert.equal(await page.locator('#location').inputValue(), destination);
@@ -133,7 +132,7 @@ try {
   assert.equal(records().length, 5);
   assert.ok(records().every(record => record.status === 'automatically_confirmed' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(record.created_at)));
   const config = join(storage, 'schedule.php');
-  await writeFile(config, "<?php return ['feeding'=>['name'=>'Kibarani Feeding center','slots'=>['11:30']],'sahajanand'=>['name'=>'Sahajanand Special School','slots'=>['09:00']],'galana'=>['name'=>'Galana Farm','slots'=>['14:00']]];");
+  await writeFile(config, "<?php return ['galana'=>['name'=>'Galana Farm','slots'=>['14:00']]];");
   await stop(); server = launchServer(join(storage, 'bookings.sqlite'), config); await ready();
   await page.reload();
   assert.match(await page.locator('#confirmation-details').innerText(), /11:00/);
@@ -165,11 +164,11 @@ try {
   assert.deepEqual(runtimeErrors, []);
   console.log('PASS responsive day forms, validation, confirmation and repeated clicks at four viewport sizes');
   await page.goto('http://127.0.0.1:8091/');
-  await page.locator('[data-book="sahajanand"]').focus(); await page.keyboard.press('Enter');
+  await page.locator('[data-book="galana"]').focus(); await page.keyboard.press('Enter');
   assert.equal(await page.locator('#full-name').evaluate(el => el === document.activeElement), true);
   assert.equal(await page.locator('#location').getAttribute('type'), 'hidden');
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('[data-book="sahajanand"]').evaluate(el => el === document.activeElement), true);
+  assert.equal(await page.locator('[data-book="galana"]').evaluate(el => el === document.activeElement), true);
   await page.locator('#booking-dialog').waitFor({state:'hidden'});
   await page.locator('[data-book="galana"]').click();
   assert.equal(await page.locator('#location').inputValue(), 'galana');
@@ -178,11 +177,8 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement.closest('dialog')?.id), 'booking-dialog');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('[data-book="galana"]').evaluate(el => el === document.activeElement), true);
-  await page.locator('[data-destination="sahajanand"] .photo-toggle').click();
-  await page.waitForFunction(()=>document.querySelector('#gallery-image').getAttribute('src')?.endsWith('/01-entrance.webp'));
-  assert.equal(await page.locator('#gallery-next').isVisible(), false);
-  await page.locator('#gallery-close').click();
-  for (const id of ['galana', 'feeding']) {
+  assert.equal(await page.locator('[data-destination]').count(), 1, 'Galana Farm is the only destination');
+  for (const id of ['galana']) {
     await page.locator(`[data-destination="${id}"] .photo-toggle`).click();
     await page.locator('#photo-lightbox').waitFor({state:'visible'});
     await page.locator('#gallery-thumbnails button').first().click();
@@ -207,7 +203,7 @@ try {
   assert.equal(await touchPage.locator('#location').inputValue(), 'galana');
   await touchContext.close();
   assert.deepEqual(runtimeErrors, []);
-  console.log('PASS keyboard focus, destination-specific slots, galleries, reduced motion and real touch controls');
+  console.log('PASS keyboard focus, Galana Farm slots, gallery, reduced motion and real touch controls');
 } finally {
   await browser?.close(); await stop();
   await rm(storage, { recursive: true, force: true });

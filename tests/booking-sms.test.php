@@ -60,7 +60,6 @@ try {
     $contacts=require __DIR__.'/../config/contacts.php';
     $contacts['galana']['people'][]=['phone'=>'0706093132'];
     check(count(BookingSms::messagesFor($fixture,$contacts))===5,'Deduplicate normalized manager phones');
-    foreach (['feeding'=>5,'sahajanand'=>6] as $destination=>$count) check(count(BookingSms::messagesFor(array_merge($fixture,['destination'=>$destination])))===$count,'Destination routing');
     $now=1000; $worker=new SmsWorker($db,fn()=>$now);
     // Missing credentials leave every field untouched, not merely attempts.
     $before=$db->query('SELECT * FROM booking_sms')->fetchAll();

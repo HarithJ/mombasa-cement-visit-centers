@@ -49,9 +49,10 @@ try {
     }, 'changed@example.com');
     check($result['accepted'] === 1, 'Provider acceptance');
     check($worker->run(fn() => throw new RuntimeException('Duplicate'), 'bookings@example.com')['retry'] === 0, 'Accepted email not resent');
-    foreach (['sahajanand' => 3, 'feeding' => 2] as $destination => $count) {
-        $day = array_merge($booking, ['location'=>$destination, 'overnight'=>'', 'arrivalDate'=>null, 'departureDate'=>null, 'overnightGuests'=>null]);
-        $store->create($day, $destination);
+    // Two Galana Farm day visits: the farm's two contacts plus the managers, and four emails left to expire below.
+    foreach (['day-one' => 2, 'day-two' => 2] as $token => $count) {
+        $day = array_merge($booking, ['location'=>'galana', 'overnight'=>'', 'arrivalDate'=>null, 'departureDate'=>null, 'overnightGuests'=>null]);
+        $store->create($day, $token);
         $job = $db->query("SELECT payload FROM booking_emails WHERE kind = 'destination' ORDER BY id DESC LIMIT 1")->fetchColumn();
         $payload = json_decode($job, true);
         check(count($payload['to']) === $count + 2, 'Destination contacts plus additional notification recipients');

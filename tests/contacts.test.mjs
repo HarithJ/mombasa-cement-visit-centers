@@ -12,7 +12,7 @@ try {
  for(let i=0;i<50;i++){try{if((await fetch(origin)).ok)break;}catch{} await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({executablePath:process.env.UI_BROWSER_PATH});
  const combined=await access('src/views/v1.php').then(()=>true,()=>false);
- const expected={sahajanand:['Prafulmukhi1065@gmail.com','Maryangie237@gmail.com','Aslam.shakur1@gmail.com'],galana:['jaco@nyumbagri.com','pravin@nyumbagri.com'],feeding:['ghulamsalim@yahoo.com','karthik@nyumba.com']};
+ const expected={galana:['jaco@nyumbagri.com','pravin@nyumbagri.com']};
  for(const route of combined?['/v1','/v2','/v3']:['/']) for(const javaScriptEnabled of [true,false]) {
  const context=await browser.newContext({javaScriptEnabled,viewport:{width:390,height:844}});
  const page=await context.newPage();
@@ -24,12 +24,10 @@ try {
   await page.locator('#route-image').evaluate(image=>image.decode());
   assert.equal(await page.locator('#route-image-link').getAttribute('href'),await page.locator('#route-image').getAttribute('src'));
   assert.match(await page.locator('#route-image').getAttribute('alt'),/Not to scale/);
-  const destinationName = {sahajanand:'Sahajanand Special School',galana:'Galana Farm',feeding:'Kibarani Feeding center'}[destination];
+  const destinationName = 'Galana Farm';
   assert.equal(await page.locator('#aside-destination').textContent(),destinationName);
-  // Interest-only places have no booking confirmation or team contacts to show.
-  if (destination !== 'galana') { assert.equal(await page.locator('[data-contact-destination]:visible').count(),0); continue; }
   await page.locator('#full-name').fill('Contact Test');
-  await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill(destination === 'galana' ? 'visitor@example.com' : '');
+  await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
   assert.equal(await page.locator('#email').getAttribute('required'),null);
   await page.locator('#visit-date').fill('2099-05-01');
   await page.locator('#time-slot').selectOption('11:00');
@@ -37,7 +35,7 @@ try {
   await page.locator('[type=submit]').click();
   await page.waitForURL(/confirmation=1/);
   assert.equal(await page.locator('#aside-destination').textContent(),destinationName);
-  assert.match(await page.locator('#confirmation-details').innerText(), destination === 'galana' ? /visitor@example.com/ : /Not provided/);
+  assert.match(await page.locator('#confirmation-details').innerText(), /visitor@example.com/);
   const team=page.locator('[data-contact-destination]:visible');
   assert.equal(await team.count(),1);
   assert.equal(await team.getAttribute('data-contact-destination'),destination);
@@ -45,7 +43,7 @@ try {
   assert.equal(await team.locator('a[href^="tel:+254"]').count(),emails.length);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  }
- console.log(`PASS ${route}: all destination routes and Galana Farm booking contacts, JS=${javaScriptEnabled}`);
+ console.log(`PASS ${route}: Galana Farm route and booking contacts, JS=${javaScriptEnabled}`);
  await context.close();
  }
 } finally {await browser?.close();server.kill();await rm(storage,{recursive:true,force:true});}

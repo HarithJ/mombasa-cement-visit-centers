@@ -1,6 +1,6 @@
 # Visit Nyumba
 
-PHP-rendered visitor booking website for Sahajanand School, Galana and the Feeding Centre. The UI uses a bold outdoor-explorer identity: panoramic photography, oversized typography, deep green and tangerine, destination navigation, alternating destination stories and trip-planning forms. Day bookings use real SQLite persistence. Galana visits can include a one-night overnight request made with a single checkbox. Hosting is not selected.
+PHP-rendered visitor booking website for Galana Farm, the only destination it offers (see [ADR 0001](docs/adr/0001-galana-farm-only.md)). The UI uses a bold outdoor-explorer identity: panoramic photography, oversized typography, deep green and tangerine, a featured Galana Farm story and a trip-planning form. Day bookings use real SQLite persistence. Galana visits can include a one-night overnight request made with a single checkbox. Hosting is not selected.
 
 ## Run locally
 
@@ -17,19 +17,19 @@ Open http://127.0.0.1:8080. Serve only `public/`, never the repository root. Mig
 
 - Default database: `var/bookings.sqlite`, outside the public document root. `BOOKING_DB` overrides it with a private absolute path.
 - `BOOKING_SESSION_PATH` optionally selects a private PHP session directory. Otherwise PHP's configured session storage is used.
-- `config/destinations.php` contains centralized schedules. `BOOKING_SCHEDULE` optionally selects another private PHP config file with the same destination/slot structure.
-- Times and visit-date validation use Africa/Nairobi; creation timestamps use UTC. Feeding Centre includes 11 am; other slots are provisional and require operational review before launch.
+- `config/destinations.php` contains the Galana Farm schedule. `BOOKING_SCHEDULE` optionally selects another private PHP config file with the same structure.
+- Times and visit-date validation use Africa/Nairobi; creation timestamps use UTC. Galana Farm slots are provisional and require operational review before launch.
 - Production requires HTTPS, persistent writable private storage, restricted permissions and appropriate backups. Do not expose database files, sessions, logs or backups through the web server.
 
 ## Booking behavior
 
-Visits collect name, email address, phone, destination, date/time and positive integer attendee count including the contact. Galana can include an overnight request: a single “Stay overnight at Galana Farm” checkbox. A stay is always one night for the whole group, so the server derives arrival (the visit date), departure (the next day) and staying guests (the attendee count) and ignores any submitted values. Confirmations, emails, SMS, admin details and feedback show only that an overnight stay was requested, never stay dates or a staying-guest count. Unchecked/non-Galana requests discard all overnight fields. A valid visitor email address is required. Optional Resend emails send a visitor confirmation and notify destination contacts; see [Resend setup](docs/resend.md). No ID, accounts, approval workflow or admin screens are introduced. Successful transactional writes are followed by an on-screen registered-visit summary, hard-to-guess reference and masked phone. Registration does not imply a capacity check or accommodation allocation. CSRF/session submission tokens and redirect-after-success prevent accidental replay duplicates. Errors preserve correctable input; failed writes do not display confirmation. Day and overnight booking/confirmation work without JavaScript. Overnight requests do not allocate rooms or guarantee accommodation.
+Visits collect name, email address, phone, date/time and positive integer attendee count including the contact. A visit can include an overnight request: a single “Stay overnight at Galana Farm” checkbox. A stay is always one night for the whole group, so the server derives arrival (the visit date), departure (the next day) and staying guests (the attendee count) and ignores any submitted values. Confirmations, emails, SMS, admin details and feedback show only that an overnight stay was requested, never stay dates or a staying-guest count. Unchecked requests discard all overnight fields; bookings for any place other than Galana Farm are refused. A valid visitor email address is required. Optional Resend emails send a visitor confirmation and notify the Galana Farm team; see [Resend setup](docs/resend.md). No ID, accounts, approval workflow or admin screens are introduced. Successful transactional writes are followed by an on-screen registered-visit summary, hard-to-guess reference and masked phone. Registration does not imply a capacity check or accommodation allocation. CSRF/session submission tokens and redirect-after-success prevent accidental replay duplicates. Errors preserve correctable input; failed writes do not display confirmation. Day and overnight booking/confirmation work without JavaScript. Overnight requests do not allocate rooms or guarantee accommodation.
 
 Phone policy: 7–15 digits, optional leading +, spaces, parentheses and hyphens. Ten-digit Kenyan 01/07 numbers normalize to +254; twelve-digit 254 numbers receive +. Other numbers retain supplied +, or digits only without guessing their country.
 
 ## Content and interaction
 
-Three official Nyumba logos sit alongside responsive destination and planning navigation. Supplied photos are optimized copies, with unchanged originals: seven school, fourteen Feeding Centre and fourteen Galana images. Destination photographs cycle every five seconds, with a pause/resume control and progress rings around the gallery buttons. Destination photographs have no numbered badges. Opening a photo launches a gallery with thumbnails, previous/next buttons and arrow-key navigation. Reduced motion disables automatic cycling. Manrope uses the bundled SIL Open Font License across headings and interface text. Final contact details and operational copy remain owner handoff items; official Nyumba links are used rather than invented contact details.
+Supplied photos are optimized copies, with unchanged originals: fifteen Galana Farm images. Photographs cycle every five seconds, with a pause/resume control and progress rings around the gallery buttons. Destination photographs have no numbered badges. Opening a photo launches a gallery with thumbnails, previous/next buttons and arrow-key navigation. Reduced motion disables automatic cycling. Manrope uses the bundled SIL Open Font License across headings and interface text. Final contact details and operational copy remain owner handoff items; official Nyumba links are used rather than invented contact details.
 
 ## Development-only browser tests
 
@@ -43,13 +43,13 @@ npm run test:bookings
 
 Tickets 02 and 03 are complete; ten day and nine overnight browser groups pass. Requirement evidence is in `docs/day-booking-review.md` and `docs/overnight-booking-review.md`. This is not production deployment approval; broader release hardening remains ticket 04.
 
-## Interest registrations
+## Retired destinations
 
-Kibarani Feeding center and Sahajanand Special School are not open for booking. Their cards invite visitors to register interest instead: name, phone, optional email and organization, a preferred date from tomorrow to 12 months ahead, and attendees. The server rejects bookings for these places. Registrations are stored separately from bookings, shown on-screen without a reference, and emailed only to the group managers when booking email is enabled; nothing is sent to the visitor or destination teams. Admins see totals, monthly counts, a filterable list and a CSV export at `/admin/interest`. To reopen a place, remove it from `InterestRegistration::PLACES`.
+Sahajanand Special School and Kibarani Feeding center are no longer offered, and the interest-registration form that served them has been removed. Their earlier bookings and interest registrations stay in the database: admin lists those bookings as “Retired destination”, and migration `018-galana-only.sql` parks any of their messages still waiting to send. See [ADR 0001](docs/adr/0001-galana-farm-only.md).
 
 ## Booking location maps
 
-An expandable illustrated route sits directly above Book my visit. Each destination uses its owner-approved static artwork, with descriptive alternative text and a link to open the full image. The schematic illustrations are not to scale. Google Maps directions remain available through the existing external link; no map iframe or third-party map request is loaded. The illustrations also work without JavaScript. `config/route-illustrations.php` maps destinations to local assets, and `config/locations.php` retains the owner-supplied directions links.
+An expandable illustrated route sits directly above Book my visit. It uses owner-approved static artwork, with descriptive alternative text and a link to open the full image. The schematic illustrations are not to scale. Google Maps directions remain available through the existing external link; no map iframe or third-party map request is loaded. The illustrations also work without JavaScript. `config/route-illustrations.php` maps Galana Farm to its local asset, and `config/locations.php` retains the owner-supplied directions link.
 
 ## Booking emails
 
@@ -65,7 +65,7 @@ Optional Africa’s Talking booking SMS confirms visits to the visitor and alert
 
 ### Booking notification routing
 
-Booking emails go to the destination's contacts in `config/contacts.php`, plus `harithjaved@gmail.com`
-and `apoorvchit@gmail.com` for every destination. Booking SMS alerts go to the
-destination's contact numbers plus `+254792488382` and `+254115933896` for every destination. Visitor confirmations and feedback emails are unchanged.
+Booking emails go to the Galana Farm contacts in `config/contacts.php`, plus `harithjaved@gmail.com`
+and `apoorvchit@gmail.com`. Booking SMS alerts go to the
+Galana Farm contact numbers plus `+254792488382` and `+254115933896`. Visitor confirmations and feedback emails are unchanged.
 The existing email/SMS enablement flags still apply.

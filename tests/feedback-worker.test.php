@@ -7,7 +7,7 @@ $path = $directory.'/bookings.sqlite';
 putenv('FEEDBACK_EMAIL_ENABLED=1'); putenv('BOOKING_EMAIL_ENABLED=0'); putenv('BOOKING_SITE_URL=https://visits.example.com');
 try {
     $store = new BookingStore($path);
-    $booking = ['fullName'=>'Test Visitor','phone'=>'+254712345678','email'=>'visitor@example.com','location'=>'feeding','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>'1','overnight'=>'','arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null];
+    $booking = ['fullName'=>'Test Visitor','phone'=>'+254712345678','email'=>'visitor@example.com','location'=>'galana','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>'1','overnight'=>'','arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null];
     $store->create($booking, 'one'); $store->create($booking, 'one');
     $db = new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
     $now = strtotime('2099-05-02T06:00:00Z');

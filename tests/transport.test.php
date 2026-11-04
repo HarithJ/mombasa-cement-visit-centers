@@ -16,7 +16,7 @@ try {
         $db->exec(file_get_contents($file));
         $db->prepare('INSERT INTO schema_migrations VALUES (?)')->execute([basename($file)]);
     }
-    $db->exec("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES ('NY-OLD','old','Old booking','+254700000000','feeding','2099-05-01','11:00',1,'automatically_confirmed','2026-01-01')");
+    $db->exec("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES ('NY-OLD','old','Old booking','+254700000000','galana','2099-05-01','11:00',1,'automatically_confirmed','2026-01-01')");
     $db->exec("INSERT INTO booking_emails(booking_id,payload,idempotency_key,status,provider_id) VALUES (1,'{}','old-email','accepted','original-id')");
     $store = new BookingStore($path);
     check($store->findByToken('old')['transport_requested'] === 0, 'Migration defaults old bookings to not requested');

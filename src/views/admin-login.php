@@ -15,7 +15,7 @@
             <div class="scene-title"><span class="eyebrow">A place to welcome.</span><h1>Nyumba.</h1></div>
             <div class="sun" aria-hidden="true"></div>
             <div class="house-wrap"><img class="house" src="/assets/admin/nyumba-house.webp" width="1536" height="1024" alt="A warm, sunlit Nyumba house with a welcoming front porch" fetchpriority="high"></div>
-            <p class="scene-footer">Sahajanand <span>·</span> Galana <span>·</span> Kibarani</p>
+            <p class="scene-footer">Galana Farm</p>
         </section>
         <section class="sign-in" aria-labelledby="login-heading">
             <div class="form-wrap">

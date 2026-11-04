@@ -3,7 +3,7 @@ function feedbackEscape(string $value): string { return htmlspecialchars($value,
 $e = 'feedbackEscape';
 $assets = $assets ?? '/assets/';
 $contacts = require __DIR__.'/../../config/contacts.php';
-$destination = $invitation ? $contacts[$invitation['destination']]['name'] : '';
+$destination = $invitation ? ($contacts[$invitation['destination']]['name'] ?? 'Your Nyumba visit') : '';
 $done = !empty($invitation['submitted_at']);
 ?>
 <!doctype html>

@@ -85,29 +85,22 @@ try {
   assert.equal((await page.request.post('http://127.0.0.1:8092/', { form: replay, maxRedirects: 0 })).status(), 303);
   assert.equal(records().length, 4); assert.equal(records().at(-1).departure_date, '2099-05-02');
   console.log('PASS replay and refresh preserve one overnight request');
-  // Kibarani and Sahajanand take interest registrations only, so Galana Farm is the one bookable destination.
-  for (const destination of ['galana']) {
+  {
     await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
     await page.locator('#full-name').fill('Day Only'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#overnight').check();
-    if (destination === 'galana') await page.locator('#overnight').uncheck();
-    else {
-      await page.keyboard.press('Escape');
-      await page.locator(`[data-book="${destination}"]`).click();
-      await page.locator('#full-name').fill('Day Only'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
-      await page.locator('#visit-date').fill('2099-05-01');
-    }
-    assert.equal(await page.locator('#location').inputValue(), destination);
+    await page.locator('#overnight').uncheck();
+    assert.equal(await page.locator('#location').inputValue(), 'galana');
     assert.equal(await page.locator('#location').getAttribute('type'), 'hidden');
     assert.equal(await page.locator('#overnight').isChecked(), false);
-    await page.locator('#time-slot').selectOption(destination === 'feeding' ? '11:00' : '09:00');
+    await page.locator('#time-slot').selectOption('09:00');
     const count = records().length;
-    await page.locator('form').evaluate((form, location) => {
-      for (const [name, value] of Object.entries({ arrivalDate: 'bad stale arrival', departureDate: 'bad stale departure', overnightGuests: '999.5', ...(location === 'galana' ? {} : { overnight: 'on' }) })) {
+    await page.locator('form').evaluate(form => {
+      for (const [name, value] of Object.entries({ arrivalDate: 'bad stale arrival', departureDate: 'bad stale departure', overnightGuests: '999.5' })) {
         const input = document.createElement('input'); input.type = 'hidden'; input.name = name; input.value = value; form.append(input);
       }
       form.submit();
-    }, destination);
+    });
     await page.locator('#confirmation-view').waitFor({ state: 'visible' });
     assert.equal(records().length, count + 1);
     const saved = records().at(-1);
@@ -116,8 +109,8 @@ try {
     assert.doesNotMatch(await page.locator('#confirmation-details').innerText(), /Overnight stay|Staying guests/);
   }
   console.log('PASS unchecked day bookings discard even tampered stale overnight fields');
-  // A tampered non-Galana booking with the overnight box ticked is refused, so no overnight values reach storage.
-  for (const destination of ['feeding', 'sahajanand']) {
+  // A tampered booking for any place other than Galana Farm, overnight box ticked, is refused, so no overnight values reach storage.
+  for (const destination of ['elsewhere']) {
     await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
     const count = records().length;
     const response = page.waitForResponse(response => response.request().method() === 'POST');
@@ -132,13 +125,13 @@ try {
     }, destination);
     assert.equal((await response).status(), 422, `${destination} booking refused`);
     await page.locator('#error-summary').waitFor({ state: 'visible' });
-    assert.match(await page.locator('#error-summary').innerText(), /not open for booking/);
+    assert.match(await page.locator('#error-summary').innerText(), /only be booked at Galana Farm/);
     assert.equal(records().length, count, `${destination} stores no booking`);
   }
   assert.equal(records().filter(row => row.destination !== 'galana' && (row.overnight || row.arrival_date || row.departure_date || row.overnight_guests)).length, 0);
   console.log('PASS tampered non-Galana overnight submissions store no overnight values');
   const legacy = join(storage, 'legacy.sqlite');
-  execFileSync('php', ['-r', '$db=new PDO("sqlite:".$argv[1]);$db->exec(file_get_contents("migrations/001-day-bookings.sql"));$db->prepare("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)")->execute(json_decode($argv[2],true));', legacy, JSON.stringify(['NY-LEGACY','legacy-token','Existing Day','+254712345678','feeding','2099-05-01','11:00',2,'automatically_confirmed','2026-09-15T12:00:00Z'])]);
+  execFileSync('php', ['-r', '$db=new PDO("sqlite:".$argv[1]);$db->exec(file_get_contents("migrations/001-day-bookings.sql"));$db->prepare("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)")->execute(json_decode($argv[2],true));', legacy, JSON.stringify(['NY-LEGACY','legacy-token','Existing Day','+254712345678','galana','2099-05-01','11:00',2,'automatically_confirmed','2026-09-15T12:00:00Z'])]);
   for (let i = 0; i < 2; i++) execFileSync('php', ['bin/migrate.php'], { env: { ...process.env, BOOKING_DB: legacy } });
   const migrated = JSON.parse(execFileSync('php', ['-r', '$db=new PDO("sqlite:".$argv[1]);echo json_encode($db->query("SELECT * FROM bookings")->fetchAll(PDO::FETCH_ASSOC));', legacy], { encoding: 'utf8' }));
   assert.equal(migrated.length, 1); assert.equal(migrated[0].reference, 'NY-LEGACY');

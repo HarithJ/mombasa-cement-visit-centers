@@ -38,9 +38,7 @@ $mapLinks = require __DIR__.'/../config/locations.php';
 $routeIllustrations = require __DIR__.'/../config/route-illustrations.php';
 $photoDescriptions = require __DIR__.'/../config/photo-descriptions.php';
 $destinations = [
-    'sahajanand' => ['name' => 'Sahajanand Special School', 'category' => 'EDUCATION & COMMUNITY', 'description' => 'Meet the people behind a school built around care, connection and different ways of learning.', 'photos' => ['01-entrance.webp']],
     'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
-    'feeding' => ['name' => 'Kibarani Feeding center', 'category' => 'CARE & COMMUNITY', 'description' => 'Discover the people and daily work behind community feeding at Kibarani. A visit with care at its heart.', 'photos' => ['01-meals.webp', '02-centre-aerial.webp', '03-centre-building.webp', '06-dining-shelter.webp', '08-food-service.webp', '09-meal-collection.webp', '10-meal-queue-aerial.webp', '11-meal-service.webp', '12-meal-tables.webp', '17-serving-station.webp', '20-visitors-collecting-meals.webp']],
 ];
 foreach ($destinations as $id => &$destination) {
     $files = glob(__DIR__.'/assets/photos/'.$id.'/*.{webp,jpg,jpeg,png}', GLOB_BRACE) ?: [];
@@ -59,17 +57,14 @@ foreach ($destinations as $id => &$destination) {
     $destination['imageAlts'] = array_map(fn($path) => $photoDescriptions[$id][basename($path)] ?? $destination['name'], $destination['images']);
 }
 unset($destination);
-$formLocation = $interestConfirmation['destination'] ?? $confirmation['destination'] ?? $input['location'] ?? 'galana';
-$interestMode = InterestRegistration::interestOnly($formLocation);
-// Booking-only and interest-only parts of the dialog; scripts switch them when the destination changes.
-$mode = fn(string $name) => 'data-mode="'.$name.'"'.($name === ($interestMode ? 'interest' : 'booking') ? '' : ' hidden');
+$formLocation = isset($destinations[$confirmation['destination'] ?? $input['location'] ?? '']) ? ($confirmation['destination'] ?? $input['location']) : 'galana';
 ?>
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Explore Sahajanand Special School, Galana Farm, and the Kibarani Feeding center. Register your Nyumba day visit.">
+    <meta name="description" content="Explore Galana Farm, the Nyumba agricultural project near Malindi. Book your day visit, with an overnight stay on request.">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#173f35">
     <title>Visit Nyumba — A visit that means more</title>
@@ -82,7 +77,7 @@ $mode = fn(string $name) => 'data-mode="'.$name.'"'.($name === ($interestMode ? 
     <script src="assets/app.js" defer></script>
 </head>
 <body>
-<a class="skip-link" href="#destinations">Skip to destinations</a>
+<a class="skip-link" href="#destinations">Skip to Galana Farm</a>
 <header class="header">
     <div class="header-inner">
         <div class="brand-lockup" aria-label="Nyumba Group">
@@ -97,15 +92,15 @@ $mode = fn(string $name) => 'data-mode="'.$name.'"'.($name === ($interestMode ? 
         <div class="explorer-hero">
             <img class="explorer-landscape" src="assets/photos/galana/02-circular-fields-aerial.webp" srcset="assets/photos/galana/responsive/02-circular-fields-aerial-720.webp 720w, assets/photos/galana/responsive/02-circular-fields-aerial-1024.webp 1024w, assets/photos/galana/02-circular-fields-aerial.webp 1600w" sizes="100vw" alt="Aerial view of a large green irrigated field under a cloudy sky at Galana Farm" width="1600" height="900" fetchpriority="high">
             <div class="explorer-shade"></div>
-            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Nyumba<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><p>A little adventure.<br>A whole new perspective.</p><a class="explorer-button" href="#destinations">Explore the places <?= icon('diagonal') ?></a></div></div>
+            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Nyumba<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><p>A little adventure.<br>A whole new perspective.</p><a class="explorer-button" href="#destinations">Explore Galana Farm <?= icon('diagonal') ?></a></div></div>
         </div>
-        <div class="discovery-heading wrap"><p class="eyebrow">PICK YOUR NEXT EXPERIENCE</p><h2>Good days start<br>with <span>curiosity.</span></h2></div>
-        <div class="destinations wrap" id="destinations" aria-label="Choose a destination">
-            <?php $number = 0; foreach (['galana', 'sahajanand', 'feeding'] as $id): $destination = $destinations[$id]; $number++; $featured = $number === 1; $photoSizes = $featured ? '(max-width: 1000px) calc(100vw - 40px), 62vw' : '(max-width: 760px) calc(100vw - 40px), 46vw'; ?>
-            <article class="destination <?= $featured ? 'destination-featured' : 'destination-card' ?>" id="place-<?= e($id) ?>" data-destination="<?= e($id) ?>">
+        <div class="discovery-heading wrap"><p class="eyebrow">YOUR NEXT EXPERIENCE</p><h2>Good days start<br>with <span>curiosity.</span></h2></div>
+        <div class="destinations wrap" id="destinations" aria-label="Galana Farm">
+            <?php foreach ($destinations as $id => $destination): $photoSizes = '(max-width: 1000px) calc(100vw - 40px), 62vw'; ?>
+            <article class="destination destination-featured" id="place-<?= e($id) ?>" data-destination="<?= e($id) ?>">
                 <div class="photo-stack">
                 <div class="destination-photo <?= $destination['placeholder'] ? 'placeholder' : '' ?>"<?php if ($destination['still']): ?> data-still<?php endif; ?> data-images="<?= e(json_encode($destination['images'], JSON_THROW_ON_ERROR)) ?>" data-variants="<?= e(json_encode($destination['variants'], JSON_THROW_ON_ERROR)) ?>" data-alts="<?= e(json_encode($destination['imageAlts'] ?? [], JSON_THROW_ON_ERROR)) ?>" tabindex="0" aria-label="<?= e($destination['name']) ?> image gallery. Photos change automatically; use the photo button for the next view.">
-                    <img class="photo-primary" src="<?= e($destination['variants'][0][720] ?? $destination['images'][0]) ?>" srcset="<?= e(photoSrcset($destination['variants'][0])) ?>" sizes="<?= e($photoSizes) ?>" decoding="async" alt="<?= $destination['placeholder'] ? 'Illustrated landscape placeholder; destination photography not yet supplied' : e($destination['imageAlts'][0] ?? $destination['name']) ?>" width="800" height="900" fetchpriority="<?= $number === 1 ? 'high' : 'auto' ?>">
+                    <img class="photo-primary" src="<?= e($destination['variants'][0][720] ?? $destination['images'][0]) ?>" srcset="<?= e(photoSrcset($destination['variants'][0])) ?>" sizes="<?= e($photoSizes) ?>" decoding="async" alt="<?= $destination['placeholder'] ? 'Illustrated landscape placeholder; destination photography not yet supplied' : e($destination['imageAlts'][0] ?? $destination['name']) ?>" width="800" height="900" fetchpriority="high">
                     <?php if (!$destination['still']): ?>
                     <img class="photo-secondary" decoding="async" alt="<?= $destination['placeholder'] ? 'Alternate crop of an illustrated placeholder, not a destination photograph' : e($destination['imageAlts'][1] ?? $destination['name']) ?>" width="800" height="900">
                     <noscript>
@@ -118,36 +113,32 @@ $mode = fn(string $name) => 'data-mode="'.$name.'"'.($name === ($interestMode ? 
                 </div>
                 </div>
                 <div class="destination-info">
-                    <p class="eyebrow category"><span>0<?= $number ?> /</span> <?= e($destination['category']) ?></p>
+                    <p class="eyebrow category"><?= e($destination['category']) ?></p>
                     <h2><?= e($destination['name']) ?></h2>
                     <p class="destination-description"><?= e($destination['description']) ?></p>
-                    <?php if ($featured): ?><p class="destination-badge"><?= icon('moon') ?> Overnight stays on request</p><?php endif; ?>
-                    <?php if (InterestRegistration::interestOnly($id)): ?>
-                    <div class="card-actions"><p class="card-status"><?= icon('clock') ?> Visits opening soon</p><a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Tell us you’re interested <?= icon('diagonal') ?></a></div>
-                    <?php else: ?>
+                    <p class="destination-badge"><?= icon('moon') ?> Overnight stays on request</p>
                     <a class="book-button" data-book="<?= e($id) ?>" href="/?book=<?= e($id) ?>">Let’s plan a visit <?= icon('diagonal') ?></a>
-                    <?php endif; ?>
                 </div>
             </article>
             <?php endforeach; ?>
         </div>
     </section>
-    <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore the destinations <?= icon('diagonal') ?></a></div></section>
+    <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore Galana Farm <?= icon('diagonal') ?></a></div></section>
 </main>
 <footer class="footer wrap">
-    <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Places to visit</a><a href="/privacy">Privacy notice</a><a href="https://www.nyumba.com/nyumba-foundation/" target="_blank" rel="noopener noreferrer">Nyumba Foundation <?= icon('diagonal') ?></a></div></div>
+    <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Galana Farm</a><a href="/privacy">Privacy notice</a><a href="https://www.nyumba.com/nyumba-foundation/" target="_blank" rel="noopener noreferrer">Nyumba Foundation <?= icon('diagonal') ?></a></div></div>
     <div class="footer-bottom"><span>© <?= date('Y') ?> Nyumba Group</span><span>Visit Nyumba · Day bookings</span><a href="https://www.nyumba.com/" target="_blank" rel="noopener noreferrer">Visit nyumba.com <?= icon('diagonal') ?></a></div>
 </footer>
-<dialog id="booking-dialog" aria-labelledby="<?= $confirmation ? 'confirmation-title' : ($interestConfirmation ? 'interest-confirmation-title' : 'booking-title') ?>" <?= $openForm || $confirmation || $interestConfirmation ? 'open' : '' ?>>
+<dialog id="booking-dialog" aria-labelledby="<?= $confirmation ? 'confirmation-title' : 'booking-title' ?>" <?= $openForm || $confirmation ? 'open' : '' ?>>
     <div class="dialog-toolbar"><span class="itinerary-label">YOUR NEXT ADVENTURE <span>/ VISIT NYUMBA</span></span><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
     <div class="dialog-shell">
-        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">THE DESTINATION</p><h2 id="aside-destination"><?= e($destinations[$formLocation]['name'] ?? $destinations['galana']['name']) ?></h2><p>Something different<br>to look forward to.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
+        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">THE DESTINATION</p><h2 id="aside-destination"><?= e($destinations[$formLocation]['name']) ?></h2><p>Something different<br>to look forward to.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
         <div class="booking-main">
-            <div id="form-view" <?= $confirmation || $interestConfirmation ? 'hidden' : '' ?>>
-                <p class="eyebrow dialog-eyebrow"><span <?= $mode('booking') ?>>LET’S PLAN YOUR VISIT</span><span <?= $mode('interest') ?>>VISITS OPENING SOON</span></p><h2 id="booking-title"><span <?= $mode('booking') ?>>Make it a date.</span><span <?= $mode('interest') ?>>Tell us you’re interested.</span></h2><p class="dialog-subtitle"><span <?= $mode('booking') ?>>Your people. Your place. Your next day out.</span><span <?= $mode('interest') ?>>Let us know when you’d like to come.</span></p>
-                <div class="prototype-notice"><span class="status-dot"></span><span <?= $mode('booking') ?>><strong>Visit bookings</strong> · Your visit is registered after submission.</span><span <?= $mode('interest') ?>><strong>Not a booking</strong> · Visits here aren’t open yet. We’ll contact you if they reopen.</span></div>
+            <div id="form-view" <?= $confirmation ? 'hidden' : '' ?>>
+                <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">Make it a date.</h2><p class="dialog-subtitle">Your people. Your place. Your next day out.</p>
+                <div class="prototype-notice"><span class="status-dot"></span><span><strong>Visit bookings</strong> · Your visit is registered after submission.</span></div>
                 <form id="booking-form" method="post" action="/" novalidate>
-                    <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>"><input type="hidden" name="submissionToken" value="<?= e($token) ?>"><input type="hidden" id="intent" name="intent" value="<?= $interestMode ? 'interest' : '' ?>">
+                    <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>"><input type="hidden" name="submissionToken" value="<?= e($token) ?>">
                     <div id="error-summary" class="error-summary" role="alert" tabindex="-1" <?= $errors ? '' : 'hidden' ?>><?= e(implode(' ', $errors)) ?></div>
                     <div class="form-grid">
                         <div class="field"><label for="full-name">Full name <span aria-hidden="true">*</span></label><input id="full-name" name="fullName" value="<?= e($input['fullName'] ?? '') ?>" type="text" autocomplete="name" maxlength="120" required placeholder="e.g. Alex Mwangi" aria-describedby="full-name-error"><span class="field-error" id="full-name-error"><?= e($errors['fullName'] ?? '') ?></span></div>
@@ -158,31 +149,30 @@ $mode = fn(string $name) => 'data-mode="'.$name.'"'.($name === ($interestMode ? 
                         <?php foreach ($destinations as $id => $destination): ?><span hidden data-location-meta="<?= e($id) ?>" data-map-url="<?= e($mapLinks[$id]) ?>" data-route-image="<?= e($routeIllustrations[$id]['image']) ?>" data-route-alt="<?= e($routeIllustrations[$id]['alt']) ?>" data-name="<?= e($destination['name']) ?>"></span><?php endforeach; ?>
                         <span class="field-error" id="location-error" hidden><?= e($errors['location'] ?? '') ?></span>
 
-                        <div class="field"><label for="visit-date"><span <?= $mode('booking') ?>>Visit date</span><span <?= $mode('interest') ?>>Preferred visit date</span> <span aria-hidden="true">*</span></label><input id="visit-date" name="visitDate" value="<?= e($input['visitDate'] ?? '') ?>" type="date" required <?= $interestMode ? 'min="'.e($webState['interestDates'][0]).'" max="'.e($webState['interestDates'][1]).'"' : '' ?> aria-describedby="visit-date-error"><span class="field-error" id="visit-date-error"><?= e($errors['visitDate'] ?? '') ?></span></div>
-                        <div class="field" <?= $mode('booking') ?>><label for="time-slot">Time slot <span aria-hidden="true">*</span></label><select id="time-slot" name="timeSlot" required <?= $interestMode ? 'disabled' : '' ?> aria-describedby="time-slot-error schedule-note"><option value="">Select a time</option><?php foreach ($schedule[$formLocation]['slots'] ?? [] as $time): ?><option value="<?= e($time) ?>" <?= ($input['timeSlot'] ?? '') === $time ? 'selected' : '' ?>><?= e(date('g:i a', strtotime($time))) ?></option><?php endforeach; ?></select><span class="field-error" id="time-slot-error"><?= e($errors['timeSlot'] ?? '') ?></span></div>
-                        <p class="schedule-note full" id="schedule-note" <?= $mode('booking') ?>><?= icon('clock') ?> Africa/Nairobi · Provisional schedule; times are subject to review.</p>
+                        <div class="field"><label for="visit-date">Visit date <span aria-hidden="true">*</span></label><input id="visit-date" name="visitDate" value="<?= e($input['visitDate'] ?? '') ?>" type="date" required aria-describedby="visit-date-error"><span class="field-error" id="visit-date-error"><?= e($errors['visitDate'] ?? '') ?></span></div>
+                        <div class="field"><label for="time-slot">Time slot <span aria-hidden="true">*</span></label><select id="time-slot" name="timeSlot" required aria-describedby="time-slot-error schedule-note"><option value="">Select a time</option><?php foreach ($schedule[$formLocation]['slots'] ?? [] as $time): ?><option value="<?= e($time) ?>" <?= ($input['timeSlot'] ?? '') === $time ? 'selected' : '' ?>><?= e(date('g:i a', strtotime($time))) ?></option><?php endforeach; ?></select><span class="field-error" id="time-slot-error"><?= e($errors['timeSlot'] ?? '') ?></span></div>
+                        <p class="schedule-note full" id="schedule-note"><?= icon('clock') ?> Africa/Nairobi · Provisional schedule; times are subject to review.</p>
                         <div class="field full attendee-field"><div><label for="attendees">Number of attendees <span aria-hidden="true">*</span></label><p class="field-hint" id="attendee-hint">Include yourself in the total.</p></div><div><input id="attendees" name="attendees" type="number" min="1" step="1" value="<?= e($input['attendees'] ?? '1') ?>" required aria-describedby="attendee-hint attendees-error"><span class="field-error" id="attendees-error"><?= e($errors['attendees'] ?? '') ?></span></div></div>
                     </div>
-                    <label class="checkbox-label" <?= $mode('booking') ?>><input id="transport-requested" name="transportRequested" type="checkbox" aria-labelledby="transport-label" aria-describedby="transport-hint transport-requested-error" <?= ($input['transportRequested'] ?? '') === 'on' ? 'checked' : '' ?> <?= $interestMode ? 'disabled' : '' ?>><span class="checkbox-copy"><strong id="transport-label">I would like the company to arrange transport for my visit.</strong><span id="transport-hint">Transport is subject to availability. Our team will contact you to confirm arrangements.</span></span></label>
+                    <label class="checkbox-label"><input id="transport-requested" name="transportRequested" type="checkbox" aria-labelledby="transport-label" aria-describedby="transport-hint transport-requested-error" <?= ($input['transportRequested'] ?? '') === 'on' ? 'checked' : '' ?>><span class="checkbox-copy"><strong id="transport-label">I would like the company to arrange transport for my visit.</strong><span id="transport-hint">Transport is subject to availability. Our team will contact you to confirm arrangements.</span></span></label>
                     <span class="field-error" id="transport-requested-error"><?= e($errors['transportRequested'] ?? '') ?></span>
                     <div id="overnight-option" <?= ($input['location'] ?? '') === 'galana' ? '' : 'hidden' ?>><label class="checkbox-label"><input id="overnight" aria-describedby="overnight-error" name="overnight" type="checkbox" <?= ($input['overnight'] ?? '') === 'on' ? 'checked' : '' ?>><span class="checkbox-copy"><strong><?= icon('moon') ?> Stay overnight at Galana Farm</strong></span></label></div>
                     <span class="field-error" id="overnight-error"><?= e($errors['overnight'] ?? '') ?></span>
-                    <p class="privacy-note"><span <?= $mode('booking') ?>>Your name, email address, phone number and visit details are stored to record your visit. Booking emails and SMS may be sent to you and the destination team to coordinate your visit.</span><span <?= $mode('interest') ?>>Your details are stored to understand interest in visits and to contact you if visits reopen. They are shared only with the Nyumba Group team.</span> <a href="/privacy" target="_blank">Privacy notice</a></p>
+                    <p class="privacy-note">Your name, email address, phone number and visit details are stored to record your visit. Booking emails and SMS may be sent to you and the Galana Farm team to coordinate your visit. <a href="/privacy" target="_blank">Privacy notice</a></p>
                         <div class="destination-location">
                             <details id="inline-map">
                                 <summary>View illustrated route <span aria-hidden="true">+</span></summary>
-                                <?php $route = $routeIllustrations[$formLocation] ?? $routeIllustrations['galana']; ?>
+                                <?php $route = $routeIllustrations[$formLocation]; ?>
                                 <div id="inline-map-frame" class="inline-map-frame"><a id="route-image-link" href="<?= e($route['image']) ?>" target="_blank" rel="noopener noreferrer" aria-label="Open full-size route illustration in a new tab"><img id="route-image" src="<?= e($route['image']) ?>" alt="<?= e($route['alt']) ?>" width="1774" height="887" loading="lazy"></a><span class="route-image-hint">Illustrated route · Not to scale. Tap the image to enlarge.</span></div>
                             </details>
-                            <a id="destination-map" href="<?= e($mapLinks[$formLocation] ?? $mapLinks['galana']) ?>" target="_blank" rel="noopener noreferrer"><span><strong id="map-destination-name"><?= e($destinations[$formLocation]['name'] ?? $destinations['galana']['name']) ?></strong><span class="map-action">Open in Google Maps · new tab</span></span><?= icon('diagonal') ?></a>
+                            <a id="destination-map" href="<?= e($mapLinks[$formLocation]) ?>" target="_blank" rel="noopener noreferrer"><span><strong id="map-destination-name"><?= e($destinations[$formLocation]['name']) ?></strong><span class="map-action">Open in Google Maps · new tab</span></span><?= icon('diagonal') ?></a>
                         </div>
-                    <button class="button submit-button" type="submit"><span id="submit-label"><?= $interestMode ? 'Register my interest' : 'Book my visit' ?></span><span class="spinner" hidden></span><?= icon('arrow', 'submit-arrow') ?></button>
+                    <button class="button submit-button" type="submit"><span id="submit-label">Book my visit</span><span class="spinner" hidden></span><?= icon('arrow', 'submit-arrow') ?></button>
                     <p class="required-note">* Required fields. No ID or email address needed.</p>
 
                 </form>
             </div>
             <div id="confirmation-view" <?= $confirmation ? '' : 'hidden' ?>><div class="confirmation-icon"><?= icon('check') ?></div><p class="eyebrow">YOUR VISIT, AT A GLANCE</p><h2 id="confirmation-title" tabindex="-1">Visit registered.</h2><p class="confirmation-subtitle">Your visit has been recorded. Please keep your booking reference.</p><div class="confirmation-preview">Registration acknowledges your visit; it does not imply a capacity check.</div><div class="reference-label">BOOKING REFERENCE<strong><?= e($confirmation['reference'] ?? '') ?></strong></div><dl id="confirmation-details"><?php if ($confirmation): $rows = ['Name' => $confirmation['full_name'], 'Organization' => ($confirmation['organization'] ?? '') !== '' ? $confirmation['organization'] : 'Not provided', 'Email' => $confirmation['email'] ?? 'Not provided', 'Destination' => $schedule[$confirmation['destination']]['name'], 'Visit date' => $confirmation['visit_date'], 'Time' => $confirmation['booked_time'].' (Africa/Nairobi)', 'Attendees' => (string)$confirmation['attendees'], 'Transport' => !empty($confirmation['transport_requested']) ? 'Requested (subject to availability)' : 'Not requested', 'Phone' => '••• ••• '.substr($confirmation['phone'], -3)]; if ($confirmation['overnight']) $rows['Overnight stay'] = 'Requested'; foreach ($rows as $label => $value): ?><div><dt><?= e($label) ?></dt><dd><?= e($value) ?></dd></div><?php endforeach; endif; ?></dl><?php require __DIR__.'/../src/confirmation-contacts.php'; ?><button type="button" class="confirmation-close">Back to exploring</button></div>
-            <div id="interest-confirmation-view" <?= $interestConfirmation ? '' : 'hidden' ?>><div class="confirmation-icon"><?= icon('check') ?></div><p class="eyebrow">YOUR INTEREST, NOTED</p><h2 id="interest-confirmation-title" tabindex="-1">Thanks — we’ve noted your interest.</h2><?php if ($interestConfirmation): $place = $schedule[$interestConfirmation['destination']]['name']; ?><p class="confirmation-subtitle">Visits to <?= e($place) ?> aren’t open yet. We’ll contact you if they reopen.</p><div class="confirmation-preview">This is not a booking. Nothing has been reserved.</div><dl id="interest-details"><?php $rows = ['Name' => $interestConfirmation['full_name'], 'Organization' => $interestConfirmation['organization'] ?? '' ?: 'Not provided', 'Email' => $interestConfirmation['email'] ?? '' ?: 'Not provided', 'Destination' => $place, 'Preferred visit date' => (new DateTimeImmutable($interestConfirmation['preferred_date']))->format('j F Y'), 'Attendees' => (string)$interestConfirmation['attendees'], 'Phone' => '••• ••• '.substr($interestConfirmation['phone'], -3)]; foreach ($rows as $label => $value): ?><div><dt><?= e($label) ?></dt><dd><?= e($value) ?></dd></div><?php endforeach; ?></dl><?php endif; ?><a role="button" href="/" class="confirmation-close">Back to exploring</a></div>
         </div>
     </div>
 </dialog>

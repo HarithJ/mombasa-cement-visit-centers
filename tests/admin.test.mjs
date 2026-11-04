@@ -6,7 +6,7 @@ import {spawn,spawnSync} from 'node:child_process';
 const {chromium}=await import(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright');
 const storage=await mkdtemp(join(tmpdir(),'nyumba-admin-'));
 const hash=spawnSync('php',['-r',"echo password_hash('test-password', PASSWORD_DEFAULT);"],{encoding:'utf8'}).stdout;
-const seed=spawnSync('php',['-r', `require 'src/BookingStore.php'; $s=new BookingStore($argv[1]); for($i=0;$i<27;$i++) $s->create(['fullName'=>$i===0?'Special Visitor':'Visitor '.$i,'phone'=>'+254712345678','location'=>$i===0?'galana':'sahajanand','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>3,'overnight'=>'','arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null,'email'=>'visitor@example.com'], 'seed-'.$i);`,join(storage,'bookings.sqlite')],{encoding:'utf8',env:{...process.env,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0'}});
+const seed=spawnSync('php',['-r', `require 'src/BookingStore.php'; $s=new BookingStore($argv[1]); for($i=0;$i<27;$i++) $s->create(['fullName'=>$i===0?'Special Visitor':'Visitor '.$i,'phone'=>'+254712345678','location'=>$i===0?'galana':'retired-place','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>3,'overnight'=>'','arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null,'email'=>'visitor@example.com'], 'seed-'.$i);`,join(storage,'bookings.sqlite')],{encoding:'utf8',env:{...process.env,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0'}});
 assert.equal(seed.status,0,seed.stderr);
 const fixture=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $db->exec("UPDATE bookings SET reference='NY-AAAAAAAAAAAAAAAAAAAAAAA' || char(64+id)"); $db->exec("UPDATE bookings SET overnight=1, arrival_date='2099-05-01', departure_date='2099-05-03', overnight_guests=2 WHERE id=1"); $db->exec("UPDATE bookings SET email=NULL WHERE id=2"); $q=$db->prepare('INSERT INTO feedback_responses VALUES (?,?,?,?,?,?,?)'); $q->execute([1,'attended',5,'The farm','More signs','<script>alert(1)</script>','2026-09-24T09:00:00Z']); $q->execute([2,'not_attended',null,'','','','2026-09-24T09:00:00Z']);`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
 assert.equal(fixture.status,0,fixture.stderr);
@@ -46,6 +46,13 @@ try {
  await page.getByRole('link',{name:'Next 7 days',exact:true}).click();
  assert.equal((Date.parse(await page.getByLabel('Visit date to').inputValue())-Date.parse(await page.getByLabel('Visit date from').inputValue()))/86400000,6);
  await page.getByRole('link',{name:'All visits',exact:true}).click();
+ // Bookings kept from places no longer offered stay readable under a generic label.
+ assert.match(await page.locator('tbody').innerText(),/Retired destination/);
+ assert.deepEqual(await page.getByLabel('Destination',{exact:true}).locator('option').allTextContents(),['All destinations','Galana Farm']);
+ assert.match(await page.locator('.summary-cards').innerText(),/Galana Farm/);
+ assert.doesNotMatch(await page.locator('.summary-cards').innerText(),/Retired/);
+ const retiredCsv=await (await page.request.get(origin+'/admin/bookings.csv')).text();
+ assert.equal(retiredCsv.trim().split('\n').filter(line=>line.includes('"Retired destination"')).length,26);
  await page.getByLabel('Search reference or name').fill('Special');
  await page.getByLabel('Destination',{exact:true}).selectOption('galana');
  await page.getByRole('button',{name:'Apply filters'}).click();

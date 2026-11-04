@@ -11,7 +11,7 @@ try {
     $managers = ['harithjaved@gmail.com','apoorvchit@gmail.com'];
     $managerPhones = ['+254792488382','+254115933896'];
     $input = ['fullName'=>'Alex','phone'=>'0712345678','email'=>'visitor@example.com','location'=>'galana','visitDate'=>'2099-05-01','timeSlot'=>'09:00','attendees'=>'3','overnight'=>false,'arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null];
-    foreach (['galana','sahajanand','feeding'] as $destination) {
+    foreach (['galana'] as $destination) {
         $booking = $store->create(array_merge($input,['location'=>$destination]),$destination);
         $teamEmails = array_column($contacts[$destination]['people'],'email');
         check(BookingEmail::payload($booking)['to'] === array_values(array_unique([...$teamEmails,...$managers])), "$destination: team contacts and all three managers receive the booking email");

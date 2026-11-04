@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/PhoneNumber.php';
-require_once __DIR__.'/InterestRegistration.php';
 final class DayBooking {
     public static function validate(array $input, array $destinations): array {
         $data = [];
@@ -13,8 +12,7 @@ final class DayBooking {
         $phone = PhoneNumber::normalize($data['phone']);
         if ($phone === null) $errors['phone'] = 'Enter a phone number with 7–15 digits, optionally using +, spaces, parentheses or hyphens.';
         else $data['phone'] = $phone;
-        if (!isset($destinations[$data['location']])) $errors['location'] = 'Choose one of the three destinations.';
-        elseif (InterestRegistration::interestOnly($data['location'])) $errors['location'] = 'Visits to this destination are not open for booking yet.';
+        if (!isset($destinations[$data['location']])) $errors['location'] = 'Visits can only be booked at Galana Farm.';
         if (!in_array($data['timeSlot'], $destinations[$data['location']]['slots'] ?? [], true)) $errors['timeSlot'] = 'Choose a time offered for this destination.';
         $zone = new DateTimeZone('Africa/Nairobi');
         $date = preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/D', $data['visitDate']) ? DateTimeImmutable::createFromFormat('!Y-m-d', $data['visitDate'], $zone) : false;
