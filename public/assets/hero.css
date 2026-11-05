@@ -1,0 +1,75 @@
+/* Hero: one screen that scrolls away normally; the wasp takes off as it goes. The onion flower sits on the right; copy sits on the left. */
+:root{--hero-base:#15181d;--hero-ink:#f4f2ec;--hero-muted:#f4f2ecb3;--hero-accent:#c8d96f}
+
+/* Header floats over the hero, light on dark, and turns into light frosted glass once the hero is behind you:
+   every section after it is light. */
+.site-header{position:fixed;inset:0 0 auto;z-index:20;color:var(--hero-ink);transition:background .4s ease,backdrop-filter .4s ease,box-shadow .4s ease,color .4s ease}
+.site-header.is-solid{background:#ffffffc7;backdrop-filter:blur(16px) saturate(1.6);-webkit-backdrop-filter:blur(16px) saturate(1.6);box-shadow:0 1px 0 #1d202612;color:#1d2026}
+.site-header-inner{width:min(1440px,calc(100% - 96px));margin:auto;height:84px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.site-brand{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:650;letter-spacing:-.01em}
+.site-brand img{width:22px;height:38px;object-fit:contain}
+.site-nav{margin-left:auto;display:flex;align-items:center;gap:34px;font-size:13px;font-weight:550}
+.site-nav a{position:relative;opacity:.78;transition:opacity .2s}
+.site-nav a:hover{opacity:1}
+.site-nav .site-nav-cta{opacity:1;padding:10px 18px;border:1px solid #f4f2ec47;border-radius:999px;transition:background .25s,border-color .25s,color .25s}
+.site-nav .site-nav-cta:hover{background:var(--hero-ink);border-color:var(--hero-ink);color:var(--hero-base)}
+.site-header.is-solid .site-nav .site-nav-cta{border-color:#1d20263d}
+.site-header.is-solid .site-nav .site-nav-cta:hover{background:#1d2026;border-color:#1d2026;color:#fff}
+.site-header.is-solid a:focus-visible{outline-color:#1d2026}
+
+.hero{position:relative;background:var(--hero-base);color:var(--hero-ink)}
+.hero-stage{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;isolation:isolate}
+
+/* The still photo is the no-WebGL and reduced-motion view, and what paints before the scene is ready. */
+.hero-still{position:absolute;z-index:-2;max-width:none;width:156vh;height:auto;left:calc(69% - 70vh);top:-2vh;user-select:none;-webkit-mask-image:radial-gradient(closest-side,#000 72%,transparent);mask-image:radial-gradient(closest-side,#000 72%,transparent)}
+.hero-still.is-placed{-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 90%,transparent)}
+.hero-canvas{position:absolute;inset:0;z-index:-1;width:100%;height:100%;opacity:0;transition:opacity 1.2s cubic-bezier(.2,.7,.2,1)}
+.hero-canvas.is-ready{opacity:1}
+.hero-stage:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,var(--hero-base) 0%,#15181dd9 22%,#15181d40 44%,transparent 56%)}
+
+
+.hero-copy{position:absolute;inset:0;width:min(1440px,calc(100% - 96px));margin:auto;display:grid;align-items:center;pointer-events:none}
+.hero-beat{grid-area:1/1;max-width:min(560px,42vw);pointer-events:auto}
+
+.hero-kicker{display:flex;align-items:center;gap:12px;margin-bottom:30px;font-size:11px;font-weight:650;letter-spacing:.22em;text-transform:uppercase;color:var(--hero-muted)}
+.hero-kicker-dot{width:6px;height:6px;border-radius:50%;background:var(--hero-accent);box-shadow:0 0 0 4px #c8d96f22}
+.hero h1{display:flex;flex-direction:column;align-items:flex-start;font-weight:500;color:var(--hero-ink)}
+.hero-title-small{font-size:clamp(30px,3.3vw,58px);font-weight:300;line-height:1;letter-spacing:-.035em;white-space:nowrap;color:var(--hero-muted)}
+.hero-title-big{margin:.02em 0 0 -.05em;font-size:clamp(84px,10.4vw,184px);font-weight:650;line-height:.9;letter-spacing:-.06em;white-space:nowrap}
+.hero-lead{margin-top:30px;max-width:30em;font-size:clamp(15px,1.15vw,18px);line-height:1.6;color:var(--hero-muted)}
+.hero-actions{display:flex;align-items:center;gap:30px;margin-top:42px}
+.hero-button{display:inline-flex;align-items:center;gap:14px;height:54px;padding:0 26px 0 28px;border-radius:999px;background:var(--hero-ink);color:var(--hero-base);font-size:14px;font-weight:650;transition:transform .35s cubic-bezier(.2,.7,.2,1),background .25s}
+.hero-button .icon{width:18px;height:18px;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.hero-button:hover{background:#fff}
+.hero-button:hover .icon{transform:translateX(4px)}
+.hero-link{font-size:14px;font-weight:600;color:var(--hero-ink);padding-bottom:4px;background:linear-gradient(currentColor,currentColor) 0 100%/100% 1px no-repeat;opacity:.86;transition:opacity .2s,background-size .35s}
+.hero-link:hover{opacity:1;background-size:40% 1px}
+.hero a:focus-visible{outline:2px solid var(--hero-accent);outline-offset:6px}
+
+/* Without the script the header never turns solid, so leave it on the dark hero instead of floating over light sections. */
+html:not(.js) .site-header{position:absolute}
+
+
+@media(max-width:1100px){
+  .site-header-inner,.hero-copy{width:calc(100% - 64px)}
+  .hero-beat{max-width:46vw}
+}
+@media(max-width:760px),(max-aspect-ratio:9/10){
+  .site-header-inner,.hero-copy{width:calc(100% - 40px)}
+  .site-header-inner{height:68px}
+  .site-nav{gap:18px}
+  .site-nav a:not(.site-nav-cta){display:none}
+  .site-nav .site-nav-cta{padding:8px 15px;font-size:12px}
+  .hero-copy{align-items:end;padding-bottom:64px}
+  .hero-beat{max-width:none}
+  .hero-kicker{margin-bottom:18px;font-size:10px}
+  .hero-title-small{font-size:clamp(26px,7.6vw,40px)}
+  .hero-title-big{font-size:clamp(72px,24vw,130px)}
+  .hero-lead{margin-top:18px;font-size:15px}
+  .hero-actions{margin-top:26px;gap:22px}
+  .hero-button{height:50px;padding:0 22px}
+  .hero-still{width:182vw;left:-22vw;top:calc(32vh - 67vw)}
+  .hero-stage:before{background:linear-gradient(0deg,var(--hero-base) 0%,#15181de6 38%,#15181d33 60%,transparent 72%)}
+}
+@media(max-width:380px){.hero-title-big{font-size:22vw}.hero-actions{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.hero-canvas{transition:none}.hero-button,.hero-button .icon,.hero-link{transition:none}}
