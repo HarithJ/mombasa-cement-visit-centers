@@ -16,7 +16,7 @@ try {
   browser = await chromium.launch({ executablePath: process.env.UI_BROWSER_PATH });
   const page = await browser.newPage();
   await page.goto('http://127.0.0.1:8091');
-  await page.locator('[data-book="galana"]').click();
+  await page.locator('.hero-button').click();
   await page.locator('#full-name').fill('Alex Mwangi');
   await page.locator('#phone').fill('0712 345 678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-01-15');
@@ -46,7 +46,7 @@ try {
   const noScript = await browser.newContext({ javaScriptEnabled: false });
   const nativePage = await noScript.newPage();
   await nativePage.goto('http://127.0.0.1:8091/');
-  await nativePage.locator('[data-book="galana"]').click();
+  await nativePage.locator('.hero-button').click();
   await nativePage.locator('#full-name').fill('Sam Test', { timeout: 3000 });
   await nativePage.locator('#phone').fill('+44 20 7946 0958'); await nativePage.locator('#email').fill('visitor@example.com');
   await nativePage.locator('#visit-date').fill('2099-01-20');
@@ -63,7 +63,7 @@ try {
     ['location', 'unknown', 'only be booked at Galana Farm'], ['timeSlot', '08:00', 'time offered'],
   ]) {
     await page.goto('http://127.0.0.1:8091/');
-    await page.locator('[data-book="galana"]').click();
+    await page.locator('.hero-button').click();
     const responsePromise = page.waitForResponse(response => response.request().method() === 'POST');
     await page.locator('form').evaluate((form, change) => {
       const values = { email: 'visitor@example.com', fullName: 'Retained Test', phone: '+44 20 7946 0958', location: 'galana', visitDate: '2099-02-15', timeSlot: '11:00', attendees: '3', ...change };
@@ -83,7 +83,7 @@ try {
   }
   console.log('PASS server rejects invalid fields, and tampered destinations/slots without saving');
   for (const destination of ['galana']) {
-    await page.goto('http://127.0.0.1:8091/'); await page.locator(`[data-book="${destination}"]`).click();
+    await page.goto('http://127.0.0.1:8091/'); await page.locator('.hero-button').click();
     assert.equal(await page.locator('#location').inputValue(), destination);
     await page.locator('#full-name').fill('Day Visitor'); await page.locator('#phone').fill('+1 (202) 555-0123'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-02-15'); await page.locator('#time-slot').selectOption('14:00');
@@ -93,7 +93,7 @@ try {
   }
   assert.equal(records().length, 3);
   console.log('PASS Galana Farm day visits are saved through the preselected form');
-  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="galana"]').click();
+  await page.goto('http://127.0.0.1:8091/'); await page.locator('.hero-button').click();
   const escapedName = '<img src=x onerror="window.injected=true">';
   await page.locator('#full-name').fill(escapedName); await page.locator('#phone').fill('0712 345 678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-02-20'); await page.locator('#time-slot').selectOption('11:00');
@@ -112,7 +112,7 @@ try {
   for (const path of ['/var/bookings.sqlite', '/config/destinations.php', '/src/web.php', '/migrations/001-day-bookings.sql']) assert.equal((await page.request.get('http://127.0.0.1:8091' + path)).status(), 404);
   console.log('PASS CSRF rejection retains correctable input, submitted text is escaped, and private files are not served');
   await stop(); server = launchServer(storage); await ready();
-  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="galana"]').click();
+  await page.goto('http://127.0.0.1:8091/'); await page.locator('.hero-button').click();
   await page.locator('#full-name').fill('Retry Visitor'); await page.locator('#phone').fill('+254712345678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-03-01'); await page.locator('#time-slot').selectOption('11:00');
   rejection = page.waitForResponse(response => response.request().method() === 'POST');
@@ -136,7 +136,7 @@ try {
   await stop(); server = launchServer(join(storage, 'bookings.sqlite'), config); await ready();
   await page.reload();
   assert.match(await page.locator('#confirmation-details').innerText(), /11:00/);
-  await page.goto('http://127.0.0.1:8091/'); await page.locator('[data-book="galana"]').click();
+  await page.goto('http://127.0.0.1:8091/'); await page.locator('.hero-button').click();
   assert.match(await page.locator('#time-slot').innerText(), /2:00 pm/);
   assert.equal(records().at(-1).booked_time, '11:00');
   console.log('PASS repeated migrations retain records and schedule changes preserve booked times');
@@ -147,7 +147,7 @@ try {
     await page.setViewportSize({ width, height: 900 }); await page.goto('http://127.0.0.1:8091/');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: `test-results/day-${width}-home.png`, animations: 'disabled' });
-    await page.locator('[data-book="galana"]').click();
+    await page.locator('.hero-button').click();
     assert.equal(await page.locator('#overnight').isDisabled(), false);
     await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
     assert.equal(await page.locator('#error-summary').isVisible(), true);
@@ -163,47 +163,58 @@ try {
   }
   assert.deepEqual(runtimeErrors, []);
   console.log('PASS responsive day forms, validation, confirmation and repeated clicks at four viewport sizes');
-  await page.goto('http://127.0.0.1:8091/');
-  await page.locator('[data-book="galana"]').focus(); await page.keyboard.press('Enter');
-  assert.equal(await page.locator('#full-name').evaluate(el => el === document.activeElement), true);
+  // Every "book" link on the page leads to the form on the page, which is set up for Galana Farm.
+  await page.setViewportSize({ width: 1440, height: 900 }); await page.goto('http://127.0.0.1:8091/');
+  for (const link of await page.locator('a[href="#book"], a[href="/#book"]').all()) assert.equal(await link.evaluate(a => new URL(a.href).hash), '#book');
+  for (const id of ['day', 'getting-there', 'questions', 'book']) assert.equal(await page.locator(`.site-nav a[href="#${id}"]`).count(), 1, `the menu links to #${id}`);
+  for (const id of ['day', 'getting-there', 'questions', 'book']) assert.equal(await page.locator(`section#${id}`).count(), 1, `#${id} exists`);
+  await page.locator('.hero-button').focus(); await page.keyboard.press('Enter');
+  await page.waitForFunction(() => location.hash === '#book');
+  await page.waitForFunction(() => { const r = document.querySelector('#book').getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; });
   assert.equal(await page.locator('#location').getAttribute('type'), 'hidden');
-  await page.keyboard.press('Escape');
-  assert.equal(await page.locator('[data-book="galana"]').evaluate(el => el === document.activeElement), true);
-  await page.locator('#booking-dialog').waitFor({state:'hidden'});
-  await page.locator('[data-book="galana"]').click();
   assert.equal(await page.locator('#location').inputValue(), 'galana');
   assert.match(await page.locator('#time-slot').innerText(), /4:00 pm/);
-  await page.locator('.close-button').focus(); await page.keyboard.press('Tab');
-  assert.equal(await page.evaluate(() => document.activeElement.closest('dialog')?.id), 'booking-dialog');
-  await page.keyboard.press('Escape');
-  assert.equal(await page.locator('[data-book="galana"]').evaluate(el => el === document.activeElement), true);
-  assert.equal(await page.locator('[data-destination]').count(), 1, 'Galana Farm is the only destination');
-  for (const id of ['galana']) {
-    await page.locator(`[data-destination="${id}"] .photo-toggle`).click();
-    await page.locator('#photo-lightbox').waitFor({state:'visible'});
-    await page.locator('#gallery-thumbnails button').first().click();
-    await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('01 /'));
-    await page.locator('#gallery-next').click();
-    await page.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 /'));
-    await page.locator('#gallery-close').click();
-  }
-  await page.emulateMedia({ reducedMotion: 'reduce' }); await page.reload();
-  const stillPhoto = page.locator('[data-destination="galana"] .destination-photo');
-  await stillPhoto.hover(); await page.waitForTimeout(2700);
-  assert.equal(await stillPhoto.getAttribute('data-active-layer'), '0');
+  assert.equal(await page.locator('dialog#booking-dialog').count(), 0, 'no booking pop-up any more');
+  console.log('PASS menu and book links reach the on-page Galana Farm form by keyboard');
+  // "Book another visit" brings back an empty form in place, without leaving the page.
+  await page.locator('#full-name').fill('Second Visitor'); await page.locator('#phone').fill('0712345678');
+  await page.locator('#visit-date').fill('2099-04-02'); await page.locator('#time-slot').selectOption('11:00');
+  await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
+  await page.locator('#confirmation-view').waitFor({ state: 'visible' });
+  assert.match(page.url(), /\?confirmation=1#book$/);
+  await page.locator('.confirmation-close').click();
+  await page.locator('#form-view').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('#confirmation-view').isVisible(), false);
+  assert.equal(await page.locator('#full-name').inputValue(), '');
+  assert.equal(await page.locator('#full-name').evaluate(el => el === document.activeElement), true);
+  assert.match(page.url(), /\/#book$/);
+  assert.equal(await page.locator('#location').inputValue(), 'galana');
+  console.log('PASS "Book another visit" resets the form in place');
+  // With reduced motion nothing is animated: the day and the map are shown at once, the photos as soon as they're reached.
+  await page.emulateMedia({ reducedMotion: 'reduce' }); await page.goto('http://127.0.0.1:8091/');
+  assert.equal(await page.locator('[data-day-step]:not(.is-on)').count(), 0);
+  assert.equal(await page.locator('[data-map].is-drawn').count(), 1);
+  await page.locator('[data-scatter]').scrollIntoViewIfNeeded();
+  await page.locator('[data-scatter].is-thrown.is-landed').waitFor({ timeout: 1000 });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  // Real touch: the hero link, a photo from the pile and the viewer's controls.
   const touchContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
   const touchPage = await touchContext.newPage(); await touchPage.goto('http://127.0.0.1:8091/');
-  const toggle = touchPage.locator('[data-destination="galana"] .photo-toggle');
-  await toggle.tap();
-  await touchPage.locator('#gallery-next').tap();
-  await touchPage.waitForFunction(()=>document.querySelector('#gallery-count').textContent.includes('02 /'));
-  await touchPage.locator('#gallery-close').tap();
-  const box = await toggle.boundingBox(); assert.ok(box.width >= 44 && box.height >= 44);
-  await touchPage.locator('[data-book="galana"]').tap();
+  const topPrint = touchPage.locator('[data-print][data-full$="02-circular-fields-aerial.webp"]');
+  await topPrint.scrollIntoViewIfNeeded(); await topPrint.tap();
+  await touchPage.locator('[data-print-viewer][open]').waitFor();
+  for (const control of ['.print-viewer-next', '.print-viewer-close']) {
+    const box = await touchPage.locator(control).boundingBox(); assert.ok(box.width >= 44 && box.height >= 44, `${control} is big enough to tap`);
+  }
+  await touchPage.locator('.print-viewer-next').tap();
+  await touchPage.locator('.print-viewer-close').tap();
+  await touchPage.locator('[data-print-viewer]').waitFor({ state: 'hidden' });
+  await touchPage.evaluate(() => scrollTo(0, 0)); await touchPage.locator('.hero-button').tap();
+  await touchPage.waitForFunction(() => location.hash === '#book');
   assert.equal(await touchPage.locator('#location').inputValue(), 'galana');
   await touchContext.close();
   assert.deepEqual(runtimeErrors, []);
-  console.log('PASS keyboard focus, Galana Farm slots, gallery, reduced motion and real touch controls');
+  console.log('PASS reduced motion and real touch controls on the photos and the booking link');
 } finally {
   await browser?.close(); await stop();
   await rm(storage, { recursive: true, force: true });

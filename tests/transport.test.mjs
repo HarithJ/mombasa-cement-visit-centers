@@ -24,7 +24,7 @@ try {
         // Only Galana Farm takes bookings; cover requested, not requested, and requested with an overnight stay.
         for (const [requested, stay, retain] of [[true,false,true],[false,false,false],[true,true,false]]) {
             await page.goto(origin+route);
-            await page.locator('[data-book="galana"]').click();
+            await page.locator('.hero-button').click();
             const checkbox = page.getByRole('checkbox',{name:'I would like the company to arrange transport for my visit.',exact:true});
             assert.equal(await checkbox.isChecked(),false);
             assert.match(await page.locator('#transport-hint').innerText(),/subject to availability/);
@@ -45,8 +45,8 @@ try {
                 await checkbox.scrollIntoViewIfNeeded();
                 await page.locator('.checkbox-label').filter({has:checkbox}).screenshot({path:`test-results/transport-${route.replaceAll('/','') || 'standalone'}-mobile.png`});
                 assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth), 'No page overflow');
-                await page.locator('.close-button').click();
-                await page.locator('[data-book="galana"]').click();
+                await page.goto('about:blank'); await page.goto(origin+route);
+                await page.locator('.hero-button').click();
                 assert.equal(await checkbox.isChecked(), false, 'A new form resets a previously retained request');
                 await checkbox.check();
                 await page.locator('#full-name').fill('Transport visitor');

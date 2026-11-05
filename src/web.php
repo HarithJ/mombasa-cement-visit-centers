@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $store = new BookingStore($dbPath);
             $saved = $store->create($input, hash('sha256', $token), $uiVersion ?? 'v3', '/');
             $_SESSION['confirmationToken'] = hash('sha256', $token);
-            header('Location: /?confirmation=1', true, 303); exit;
+            header('Location: /?confirmation=1#book', true, 303); exit;
         } catch (Throwable $error) {
             error_log('Nyumba booking storage failure: '.get_class($error));
             http_response_code(503); $errors['_form'] = 'We could not save your visit. Your details are still here; please try again. No confirmation has been issued.';

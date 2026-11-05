@@ -1,0 +1,192 @@
+/* The sections after the photos: your day, getting there, questions, and booking. Light, quiet, the same type
+   as the hero; each section is a two-column spread that stacks on phones. */
+:root{--s-ink:#1d2026;--s-muted:#5f646b;--s-line:#1d202617;--s-paper:#f6f4ef;--s-green:#2f5d3a;--s-wrap:min(1240px,calc(100% - 96px))}
+/* Landing on #book (after a booking, or from a link) jumps straight there; once the page is up, menu links glide. */
+html{scroll-padding-top:96px;scroll-behavior:auto}
+html.is-settled{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html.is-settled{scroll-behavior:auto}}
+.day,.getting-there,.questions,.book{position:relative;z-index:2;color:var(--s-ink);padding:clamp(80px,10vw,150px) 0}
+.day,.questions{background:var(--s-paper)}
+.getting-there,.book{background:#fff}
+.day-inner,.getting-there-inner,.questions-inner,.book-inner{width:var(--s-wrap);margin:auto;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(40px,7vw,120px);align-items:start}
+
+.section-kicker{display:flex;align-items:center;gap:12px;margin-bottom:22px;font-size:11px;font-weight:650;letter-spacing:.22em;text-transform:uppercase;color:var(--s-muted)}
+.section-kicker span{width:6px;height:6px;border-radius:50%;background:var(--s-green);box-shadow:0 0 0 4px #2f5d3a1f}
+.section-title{font-size:clamp(38px,4.2vw,68px);font-weight:500;line-height:1.02;letter-spacing:-.045em;color:var(--s-ink)}
+.section-lead{margin-top:22px;max-width:28em;font-size:clamp(15px,1.15vw,18px);line-height:1.6;color:var(--s-muted)}
+.day-intro,.questions-intro,.book-intro{position:sticky;top:130px}
+
+/* ---------- Your day: a line that fills as you scroll, and steps that settle in as the line reaches them ---------- */
+.day-steps{position:relative;list-style:none;margin:0;padding:0 0 0 56px}
+.day-line{position:absolute;left:11px;top:14px;bottom:14px;width:2px;background:var(--s-line);border-radius:2px;overflow:hidden}
+.day-line i{position:absolute;inset:0;background:var(--s-ink);transform-origin:top;transform:scaleY(var(--day-p,1))}
+.day-step{position:relative;padding:0 0 clamp(48px,6vw,84px)}
+.day-step:last-child{padding-bottom:0}
+.day-dot{position:absolute;left:-56px;top:2px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--s-paper);border:2px solid var(--s-ink);transition:background .5s,color .5s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.day-dot .icon{width:13px;height:13px}
+.day-step.is-on .day-dot{background:var(--s-ink);color:#fff}
+.day-tag{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:var(--s-muted)}
+.day-tag span{color:var(--s-ink)}
+.day-tag em{font-style:normal;letter-spacing:.04em;text-transform:none;font-weight:600;padding:3px 10px;border-radius:999px;background:#1d20260d;color:var(--s-ink)}
+.day-step h3{margin-top:12px;font-size:clamp(26px,2.4vw,38px);font-weight:550;letter-spacing:-.035em;line-height:1.1}
+.day-text{margin-top:12px;max-width:30em;font-size:16px;line-height:1.65;color:var(--s-muted)}
+.day-photo{display:block;width:100%;max-width:520px;height:auto;aspect-ratio:16/10;object-fit:cover;margin-top:24px;border-radius:18px;background:#e6e3dc}
+.js .day-step{opacity:.18;transform:translate3d(0,26px,0);transition:opacity .7s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
+.js .day-step.is-on{opacity:1;transform:none}
+.js .day-step .day-photo{transform:scale(.96);transform-origin:0 0;transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}
+.js .day-step.is-on .day-photo{transform:none}
+
+/* ---------- Getting there ---------- */
+.routes{margin:36px 0 0;border-top:1px solid var(--s-line)}
+.routes>div{display:grid;grid-template-columns:140px 1fr;gap:20px;padding:20px 0;border-bottom:1px solid var(--s-line)}
+.routes dt{font-size:13px;font-weight:650;color:var(--s-muted);padding-top:4px}
+.routes dd{margin:0}
+.routes strong{display:block;font-size:22px;font-weight:600;letter-spacing:-.02em}
+.routes dd span{display:block;margin-top:4px;font-size:14px;color:var(--s-muted)}
+.routes-note{margin-top:18px;font-size:14px;line-height:1.6;color:var(--s-muted)}
+.getting-there-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.pill-link{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 22px;border-radius:999px;border:1px solid #1d20263d;font-size:14px;font-weight:650;color:var(--s-ink);transition:background .25s,color .25s,border-color .25s}
+.pill-link .icon{width:15px;height:15px}
+.pill-link:hover{border-color:var(--s-ink)}
+.pill-link-solid{background:var(--s-ink);border-color:var(--s-ink);color:#fff}
+.pill-link-solid:hover{background:#000}
+.map-card{position:relative;margin:0;padding:clamp(18px,2vw,28px);border-radius:28px;background:var(--s-paper)}
+.map-svg{display:block;width:100%;height:auto}
+.map-ocean{fill:#e4ebee}
+.map-coast{fill:none;stroke:#b9c4c8;stroke-width:2.5}
+.map-river{fill:none;stroke:#7aa3be;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.map-route{fill:none;stroke:var(--s-ink);stroke-linecap:round;stroke-linejoin:round}
+.map-route-farm{stroke-width:6}
+.map-route-coast{stroke-width:4;opacity:.45}
+.map-town{fill:#fff;stroke:var(--s-ink);stroke-width:4}
+.map-label{font-family:Manrope,system-ui,sans-serif;font-size:30px;font-weight:650;fill:var(--s-ink);paint-order:stroke;stroke:var(--s-paper);stroke-width:8px;stroke-linejoin:round}
+.map-label-small{font-size:26px;fill:var(--s-muted)}
+.map-label-river{font-size:24px;font-weight:600;fill:#4f7d9c;font-style:italic;letter-spacing:.02em}
+.map-label-sea{font-size:26px;font-weight:500;fill:#8a9aa1;font-style:italic;letter-spacing:.06em;stroke:#e4ebee}
+.map-label-farm{font-size:34px;font-weight:700}
+.map-farm-dot{fill:var(--s-green);stroke:#fff;stroke-width:5}
+.map-farm-pulse{fill:var(--s-green);opacity:.25;transform-box:fill-box;transform-origin:center;animation:map-pulse 2.4s ease-out infinite}
+@keyframes map-pulse{from{transform:scale(1);opacity:.35}to{transform:scale(3.4);opacity:0}}
+.map-card figcaption{position:absolute;right:22px;bottom:14px;font-size:10px;color:#8a9aa1}
+.map-card figcaption a{text-decoration:underline;text-underline-offset:2px}
+/* The routes draw themselves when the map comes into view: the coast road first, then the road in to the farm. */
+.js .map-route{stroke-dasharray:1;stroke-dashoffset:1}
+.js .is-drawn .map-route{stroke-dashoffset:0;transition:stroke-dashoffset 1.4s cubic-bezier(.5,0,.3,1)}
+.js .is-drawn .map-route-farm{transition-delay:1.1s;transition-duration:1.6s}
+.js .map-label,.js .map-town{opacity:0;transition:opacity .6s ease}
+.js .is-drawn .map-label,.js .is-drawn .map-town{opacity:1}
+.js .is-drawn .map-label-farm{transition-delay:2.4s}
+.js .map-farm-dot,.js .map-farm-pulse{opacity:0;transition:opacity .4s ease 2.5s}
+.js .is-drawn .map-farm-dot{opacity:1}
+.js .is-drawn .map-farm-pulse{opacity:.25}
+
+/* ---------- Questions ---------- */
+.team{list-style:none;margin:30px 0 0;padding:0;display:grid;gap:14px}
+.team li{display:grid;gap:2px;font-size:14px;color:var(--s-muted)}
+.team strong{font-size:15px;color:var(--s-ink)}
+.team a{width:fit-content;text-decoration:underline;text-decoration-color:#1d202640;text-underline-offset:3px}
+.team a:hover{text-decoration-color:currentColor;color:var(--s-ink)}
+.faq{border-top:1px solid var(--s-line)}
+.faq-item{border-bottom:1px solid var(--s-line)}
+.faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:26px 0;font-size:clamp(17px,1.5vw,21px);font-weight:600;letter-spacing:-.015em;cursor:pointer;list-style:none}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary:focus-visible{outline:2px solid var(--s-ink);outline-offset:6px;border-radius:4px}
+.faq-sign{position:relative;flex:none;width:34px;height:34px;border-radius:50%;border:1px solid #1d202629;transition:background .25s,border-color .25s,transform .4s cubic-bezier(.2,.8,.2,1)}
+.faq-sign:before,.faq-sign:after{content:'';position:absolute;left:50%;top:50%;width:12px;height:1.6px;margin:-.8px 0 0 -6px;background:currentColor;border-radius:2px}
+.faq-sign:after{transform:rotate(90deg);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.faq-item[open] .faq-sign{background:var(--s-ink);border-color:var(--s-ink);color:#fff}
+.faq-item[open] .faq-sign:after{transform:rotate(0)}
+.faq-item summary:hover .faq-sign{border-color:var(--s-ink)}
+.faq-answer p{max-width:36em;padding:0 50px 28px 0;font-size:16px;line-height:1.7;color:var(--s-muted)}
+.faq-item[open] .faq-answer{animation:faq-open .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes faq-open{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* ---------- Booking: the form, on the page ---------- */
+.book-facts{list-style:none;margin:32px 0 0;padding:0;display:grid;gap:14px}
+.book-facts li{display:flex;align-items:center;gap:14px;font-size:15px;font-weight:550}
+.book-facts .icon{flex:none;width:36px;height:36px;padding:9px;border-radius:50%;background:var(--s-paper);color:var(--s-ink)}
+.book-card{padding:clamp(24px,3.4vw,48px);border-radius:28px;background:var(--s-paper)}
+.book .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 18px}
+.book .field.full,.book .schedule-note.full,.book .attendee-field{grid-column:1/-1}
+.book label{display:block;margin-bottom:8px;font-size:13px;font-weight:650;line-height:1.4;color:var(--s-ink)}
+.book label>span[aria-hidden]{color:var(--s-green)}
+.book input:not([type=checkbox]),.book select{width:100%;height:52px;padding:0 16px;border:1px solid #1d20261f;border-radius:14px;background-color:#fff;font:inherit;font-size:15px;color:var(--s-ink);transition:border-color .2s,box-shadow .2s}
+.book select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231d2026' stroke-width='1.8'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
+.book input::placeholder{color:#9a9ea4}
+.book input:not([type=checkbox]):hover,.book select:hover{border-color:#1d202640}
+.book input:not([type=checkbox]):focus-visible,.book select:focus-visible{outline:none;border-color:var(--s-ink);box-shadow:0 0 0 4px #1d202614}
+.book input[aria-invalid=true],.book select[aria-invalid=true]{border-color:#b3261e;background-color:#fffafa}
+.book .field-error{display:block;margin-top:6px;font-size:13px;line-height:1.5;color:#b3261e}
+.book .field-error:empty{display:none}
+.book .schedule-note{display:flex;align-items:center;gap:8px;margin-top:-6px;font-size:13px;color:var(--s-muted)}
+.book .schedule-note .icon{width:15px;height:15px}
+.book .attendee-field{display:grid;grid-template-columns:1fr 120px;gap:18px;align-items:center;padding-top:4px}
+.book .attendee-field label{margin-bottom:2px}
+.book .field-hint{font-size:13px;color:var(--s-muted)}
+.book .attendee-field input{text-align:center}
+.book .checkbox-label{display:flex;gap:14px;align-items:flex-start;margin:16px 0 0;padding:18px 20px;border:1px solid #1d20261a;border-radius:16px;background:#fff;cursor:pointer;transition:border-color .2s}
+.book .checkbox-label:hover{border-color:#1d202640}
+.book .checkbox-label:has(input:checked){border-color:var(--s-ink)}
+.book .checkbox-label input{flex:none;width:20px;height:20px;margin:1px 0 0;accent-color:var(--s-ink)}
+.book .checkbox-copy strong{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--s-ink)}
+.book .checkbox-copy .icon{width:16px;height:16px}
+.book .checkbox-copy>span{display:block;margin-top:4px;font-size:13px;line-height:1.5;color:var(--s-muted)}
+.book .submit-button{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;height:58px;margin-top:26px;border:0;border-radius:999px;background:var(--s-ink);color:#fff;font:inherit;font-size:16px;font-weight:650;cursor:pointer;transition:background .25s}
+.book .submit-button:hover{background:#000}
+.book .submit-button .icon{width:18px;height:18px;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.book .submit-button:hover .icon{transform:translateX(4px)}
+.book .submit-button:disabled{cursor:wait;opacity:.7}
+.book .submit-button:focus-visible{outline:2px solid var(--s-ink);outline-offset:4px}
+.book .spinner{margin:0}
+.book .privacy-note{margin-top:18px;font-size:12px;line-height:1.7;color:var(--s-muted)}
+.book .privacy-note a{text-decoration:underline;text-underline-offset:2px}
+.book .required-note{margin-top:8px;font-size:12px;text-align:left;color:var(--s-muted)}
+.book .error-summary{margin-bottom:20px;padding:14px 16px;border-radius:14px;border:0;background:#fdecea;color:#b3261e;font-size:14px;line-height:1.6}
+.book #confirmation-view{padding-top:0}
+.book .confirmation-icon{width:56px;height:56px;margin-bottom:24px;border:0;background:var(--s-ink);color:#fff}
+.book #confirmation-view>.eyebrow{margin-bottom:12px;font-size:11px;letter-spacing:.2em;color:var(--s-muted)}
+.book #confirmation-view h2{font-size:clamp(32px,3vw,44px);font-weight:550;letter-spacing:-.04em}
+.book .confirmation-subtitle{margin-top:12px;font-size:15px;color:var(--s-muted)}
+.book .confirmation-preview{margin-top:20px;padding:12px 16px;border-radius:12px;background:#fff;color:var(--s-muted);font-size:13px}
+.book .reference-label{margin-top:26px;padding-bottom:22px;font-size:11px;letter-spacing:.18em;color:var(--s-muted);border-bottom:1px solid var(--s-line)}
+.book .reference-label strong{margin-top:8px;font-size:24px;letter-spacing:.04em;color:var(--s-ink)}
+.book #confirmation-details>div{grid-template-columns:130px 1fr;font-size:14px;padding:12px 0;border-bottom:1px solid var(--s-line)}
+.book .visit-contacts{margin-top:28px;font-size:14px;color:var(--s-muted)}
+.book .visit-contacts h3{font-size:17px;font-weight:600;color:var(--s-ink)}
+.book .visit-contacts h4{margin-top:14px;font-size:14px;color:var(--s-ink)}
+.book .visit-contacts ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
+.book .visit-contacts li{display:grid;gap:2px}
+.book .visit-contacts a{text-decoration:underline;text-underline-offset:2px}
+.book .confirmation-close{display:inline-flex;align-items:center;margin:28px 0 0;height:50px;padding:0 24px;border-radius:999px;border:1px solid #1d20263d;font-size:14px;font-weight:650;color:var(--s-ink)}
+.book .confirmation-close:hover{border-color:var(--s-ink)}
+
+@media(max-width:1100px){:root{--s-wrap:calc(100% - 64px)}}
+@media(max-width:900px){
+  .day-inner,.getting-there-inner,.questions-inner,.book-inner{grid-template-columns:1fr;gap:44px}
+  .day-intro,.questions-intro,.book-intro{position:static}
+}
+@media(max-width:760px){
+  html{scroll-padding-top:76px}
+  :root{--s-wrap:calc(100% - 40px)}
+  .day,.getting-there,.questions,.book{padding:84px 0}
+  .day-steps{padding-left:44px}
+  .day-dot{left:-44px}
+  .day-text,.faq-answer p{font-size:15px}
+  .routes>div{grid-template-columns:1fr;gap:4px}
+  .map-card{border-radius:22px;padding:14px}
+  .map-label{font-size:44px;stroke-width:10px}.map-label-small{font-size:38px}.map-label-river{font-size:36px}.map-label-sea{font-size:36px}.map-label-farm{font-size:48px}
+  .map-card figcaption{right:16px;bottom:8px}
+  .book-card{padding:22px 18px;border-radius:22px;margin-inline:-6px}
+  .book .form-grid{grid-template-columns:1fr;gap:18px}
+  .book .attendee-field{grid-template-columns:1fr 96px}
+  .faq-answer p{padding-right:0}
+  .team li{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  .js .day-step,.js .day-step .day-photo{opacity:1;transform:none;transition:none}
+  .js .map-route{stroke-dashoffset:0;transition:none!important}
+  .js .map-label,.js .map-town,.js .map-farm-dot{opacity:1;transition:none!important}
+  .map-farm-pulse{animation:none;opacity:0!important}
+  .faq-item[open] .faq-answer{animation:none}
+  .day-dot,.faq-sign,.faq-sign:after,.pill-link{transition:none}
+}

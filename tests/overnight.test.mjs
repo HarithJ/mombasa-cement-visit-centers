@@ -18,7 +18,7 @@ try {
     assert.doesNotMatch(await target.locator('#overnight-option').innerText(), /preferred dates|staying guests/i);
   };
   const oneNight = text => { assert.match(text, /Overnight stay\s+Requested/); assert.doesNotMatch(text, /Staying guests|Arrival|Departure|–/); };
-  await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
+  await page.goto('http://127.0.0.1:8092/'); await page.locator('.hero-button').click();
   await page.locator('#full-name').fill('Overnight Visitor'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#time-slot').selectOption('09:00');
   await page.locator('#attendees').fill('4'); await page.locator('#overnight').check();
@@ -33,7 +33,7 @@ try {
   assert.equal(records()[0].departure_date, '2099-05-02');
   assert.equal(records()[0].overnight_guests, 4);
   console.log('PASS a ticked checkbox is the whole request and stores one night for the group');
-  await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
+  await page.goto('http://127.0.0.1:8092/'); await page.locator('.hero-button').click();
   await page.locator('form').evaluate(form => {
     const values = { email: 'visitor@example.com', fullName: 'Tampered Overnight', phone: '0712345678', location: 'galana', visitDate: '2099-12-31', timeSlot: '11:00', attendees: '6', overnight: 'on', arrivalDate: '2099-04-30', departureDate: '2100-02-15', overnightGuests: '99' };
     for (const [key, value] of Object.entries(values)) {
@@ -51,7 +51,7 @@ try {
   assert.equal(tampered.arrival_date, '2099-12-31'); assert.equal(tampered.departure_date, '2100-01-01'); assert.equal(tampered.overnight_guests, 6);
   console.log('PASS submitted dates and guest counts are ignored; departure is the next calendar day');
   for (const [value, message] of [['invalid', 'whether you would like']]) {
-    await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
+    await page.goto('http://127.0.0.1:8092/'); await page.locator('.hero-button').click();
     const response = page.waitForResponse(response => response.request().method() === 'POST');
     await page.locator('form').evaluate((form, value) => {
       for (const [key, v] of Object.entries({ email: 'visitor@example.com', fullName: 'Retained Overnight', phone: '0712345678', location: 'galana', visitDate: '2099-05-01', timeSlot: '09:00', attendees: '4', overnight: value })) {
@@ -74,7 +74,7 @@ try {
   await page.locator('#confirmation-view').waitFor({ state: 'visible' });
   assert.equal(records().length, 3);
   console.log('PASS an invalid overnight value preserves entries without saving and a correction saves exactly once');
-  await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
+  await page.goto('http://127.0.0.1:8092/'); await page.locator('.hero-button').click();
   await page.locator('#full-name').fill('Replay Night'); await page.locator('#phone').fill('+44 20 7946 0958'); await page.locator('#email').fill('visitor@example.com');
   await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#time-slot').selectOption('11:00');
   await page.locator('#attendees').fill('4'); await page.locator('#overnight').check();
@@ -86,7 +86,7 @@ try {
   assert.equal(records().length, 4); assert.equal(records().at(-1).departure_date, '2099-05-02');
   console.log('PASS replay and refresh preserve one overnight request');
   {
-    await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
+    await page.goto('http://127.0.0.1:8092/'); await page.locator('.hero-button').click();
     await page.locator('#full-name').fill('Day Only'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-05-01'); await page.locator('#overnight').check();
     await page.locator('#overnight').uncheck();
@@ -111,7 +111,7 @@ try {
   console.log('PASS unchecked day bookings discard even tampered stale overnight fields');
   // A tampered booking for any place other than Galana Farm, overnight box ticked, is refused, so no overnight values reach storage.
   for (const destination of ['elsewhere']) {
-    await page.goto('http://127.0.0.1:8092/'); await page.locator('[data-book="galana"]').click();
+    await page.goto('http://127.0.0.1:8092/'); await page.locator('.hero-button').click();
     const count = records().length;
     const response = page.waitForResponse(response => response.request().method() === 'POST');
     await page.locator('form').evaluate((form, location) => {
@@ -155,16 +155,20 @@ try {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 }); await page.goto('http://127.0.0.1:8092/');
-    await page.locator('[data-book="galana"]').click();
+    await page.locator('.hero-button').click();
     await page.locator('#full-name').fill('Visual Overnight'); await page.locator('#phone').fill('0712345678'); await page.locator('#email').fill('visitor@example.com');
     await page.locator('#visit-date').fill('2099-07-01'); await page.locator('#time-slot').selectOption('14:00');
     await page.locator('#attendees').fill('4'); await page.locator('#overnight').check();
     await page.locator('#full-name').fill('');
     await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
     assert.equal(await page.locator('#full-name').getAttribute('aria-invalid'), 'true');
-    const closeBox = await page.locator('.close-button').boundingBox();
-    const shellBox = await page.locator('.dialog-shell').boundingBox();
-    assert.ok(closeBox.y + closeBox.height <= shellBox.y, 'close control never overlays scrolling form fields');
+    assert.equal(await page.locator('#error-summary').isVisible(), true);
+    assert.equal(await page.locator('#full-name').evaluate(el => el === document.activeElement), true, 'the first problem gets focus');
+    // The page scrolls smoothly up to the field; once it settles, the fixed header must not cover it.
+    await page.waitForFunction(() => {
+      const top = document.querySelector('#full-name').getBoundingClientRect().top, header = document.querySelector('.site-header').getBoundingClientRect().bottom;
+      return top >= header && top < innerHeight;
+    }, null, { timeout: 3000 });
     await page.screenshot({ path: `test-results/overnight-${width}-validation.png`, animations: 'disabled' });
     await page.locator('#full-name').fill('Visual Overnight');
     await page.locator('#booking-title').scrollIntoViewIfNeeded();
