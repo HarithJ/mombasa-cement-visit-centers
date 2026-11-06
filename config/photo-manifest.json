@@ -103,5 +103,12 @@
     "destination": "galana",
     "description": "irrigated-plots",
     "asset": "09-irrigated-plots.webp"
+  },
+  {
+    "original": "galana/galana-sunset.jpeg",
+    "source": "galana/galana-sunset.jpeg",
+    "destination": "galana",
+    "description": "sunset",
+    "asset": "16-sunset.webp"
   }
 ]

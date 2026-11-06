@@ -11,7 +11,7 @@ let browser;
 try {
  for(let i=0;i<50;i++){try{if((await fetch(origin)).ok)break;}catch{} await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({executablePath:process.env.UI_BROWSER_PATH});
- const emails=['jaco@nyumbagri.com','pravin@nyumbagri.com'];
+ const emails=['jangabriel@nyumbagri.com','pravin.kerai@nyumbagri.com','giles@nyumba.com'];
  for(const javaScriptEnabled of [true,false]) {
   const context=await browser.newContext({javaScriptEnabled,viewport:{width:390,height:844}});
   const page=await context.newPage();

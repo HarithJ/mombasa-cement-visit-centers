@@ -115,12 +115,13 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
         ['04-farm-sprayer.webp', 'Heading out to spray', 50.2, 75.0, 21.0, 22.5, 50.4, 71.1, 38.9, 2],
         ['08-harvesting-aerial.webp', 'Harvest, straight down', 41.4, 70.4, 21.0, 79.2, 34.1, 67.3, 38.9, 3],
         ['12-maize-fields.webp', 'Maize, row after row', 35.8, 58.1, 21.0, 87.9, 23.7, 56.9, 38.9, 4],
-        ['02-circular-fields-aerial.webp', 'A pivot circle under the clouds', 50.0, 50.0, 30.0, -2.0, 50.0, 50.0, 55.5, 10],
+        ['02-circular-fields-aerial.webp', 'A pivot circle under the clouds', 50.0, 50.0, 30.0, -2.0, 50.0, 50.0, 55.5, 11],
         ['05-farmland-aerial.webp', 'Fields and dams from the air', 35.7, 42.6, 21.0, 127.1, 23.5, 43.7, 38.9, 5],
         ['01-farm.webp', 'Rows to the horizon', 41.0, 30.0, 21.0, 116.5, 33.3, 33.1, 38.9, 6],
         ['09-irrigated-plots.webp', 'Irrigated plots', 49.8, 25.0, 21.0, 149.6, 49.6, 28.9, 38.9, 7],
         ['07-green-fields.webp', 'Where the green begins', 58.6, 29.6, 21.0, -174.1, 65.9, 32.7, 38.9, 8],
         ['15-tractor-in-field.webp', 'Working the soil', 64.2, 41.9, 21.0, -122.3, 76.3, 43.1, 38.9, 9],
+        ['16-sunset.webp', 'Sunset on the water', 70.5, 52.0, 21.0, 7.0, 78.0, 50.0, 38.9, 10],
     ];
     ?>
     <section class="scatter" id="photos" aria-labelledby="scatter-title">
@@ -295,7 +296,7 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
                         <p class="schedule-note full" id="schedule-note"><?= icon('clock') ?> Kenya time · The schedule is provisional and may change.</p>
                         <div class="field full attendee-field"><div><label for="attendees">Number of people <span aria-hidden="true">*</span></label><p class="field-hint" id="attendee-hint">Include yourself in the total.</p></div><div><input id="attendees" name="attendees" type="number" min="1" step="1" value="<?= e($input['attendees'] ?? '1') ?>" required aria-describedby="attendee-hint attendees-error"><span class="field-error" id="attendees-error"><?= e($errors['attendees'] ?? '') ?></span></div></div>
                     </div>
-                    <label class="checkbox-label"><input id="transport-requested" name="transportRequested" type="checkbox" aria-labelledby="transport-label" aria-describedby="transport-hint transport-requested-error" <?= ($input['transportRequested'] ?? '') === 'on' ? 'checked' : '' ?>><span class="checkbox-copy"><strong id="transport-label">I would like the company to arrange transport for my visit.</strong><span id="transport-hint">Transport is subject to availability. Our team will contact you to confirm arrangements.</span></span></label>
+                    <label class="checkbox-label"><input id="transport-requested" name="transportRequested" type="checkbox" aria-labelledby="transport-label" aria-describedby="transport-hint transport-requested-error" <?= ($input['transportRequested'] ?? '') === 'on' ? 'checked' : '' ?>><span class="checkbox-copy"><strong id="transport-label">Arrange transport for my visit</strong><span id="transport-hint">Transport is subject to availability. Our team will contact you to confirm arrangements.</span></span></label>
                     <span class="field-error" id="transport-requested-error"><?= e($errors['transportRequested'] ?? '') ?></span>
                     <div id="overnight-option"><label class="checkbox-label"><input id="overnight" aria-describedby="overnight-error overnight-hint" name="overnight" type="checkbox" <?= ($input['overnight'] ?? '') === 'on' ? 'checked' : '' ?>><span class="checkbox-copy"><strong><?= icon('moon') ?> Stay overnight at Galana Farm</strong><span id="overnight-hint">One night for your whole group, subject to availability.</span></span></label></div>
                     <span class="field-error" id="overnight-error"><?= e($errors['overnight'] ?? '') ?></span>
@@ -310,8 +311,8 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
     </section>
 </main>
 <footer class="footer wrap">
-    <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#book">Plan a visit</a><a href="/privacy">Privacy notice</a><a href="https://www.nyumba.com/nyumba-foundation/" target="_blank" rel="noopener noreferrer">Nyumba Foundation <?= icon('diagonal') ?></a></div></div>
-    <div class="footer-bottom"><span>© <?= date('Y') ?> Nyumba Group</span><span>Visit Nyumba · Day bookings</span><a href="https://www.nyumba.com/" target="_blank" rel="noopener noreferrer">Visit nyumba.com <?= icon('diagonal') ?></a></div>
+    <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#book">Plan a visit</a><a href="/privacy">Privacy notice</a></div></div>
+    <div class="footer-bottom"><span>© <?= date('Y') ?> Nyumba Group</span><span>Visit Nyumba · Day bookings</span></div>
 </footer>
 </body>
 </html>
