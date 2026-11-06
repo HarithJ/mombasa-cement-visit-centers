@@ -12,7 +12,7 @@ try {
  for(let i=0;i<50;i++){try{if((await fetch(origin)).ok)break;}catch{} await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({executablePath:process.env.UI_BROWSER_PATH});
  const combined=await access('src/views/v1.php').then(()=>true,()=>false);
- const expected={galana:['jaco@nyumbagri.com','pravin@nyumbagri.com']};
+ const expected={galana:['jangabriel@nyumbagri.com','pravin.kerai@nyumbagri.com','giles@nyumba.com']};
  for(const route of combined?['/v1','/v2','/v3']:['/']) for(const javaScriptEnabled of [true,false]) {
  const context=await browser.newContext({javaScriptEnabled,viewport:{width:390,height:844}});
  const page=await context.newPage();

@@ -25,7 +25,7 @@ try {
         for (const [requested, stay, retain] of [[true,false,true],[false,false,false],[true,true,false]]) {
             await page.goto(origin+route);
             await page.locator('[data-book="galana"]').click();
-            const checkbox = page.getByRole('checkbox',{name:'I would like the company to arrange transport for my visit.',exact:true});
+            const checkbox = page.getByRole('checkbox',{name:'Arrange transport for my visit',exact:true});
             assert.equal(await checkbox.isChecked(),false);
             assert.match(await page.locator('#transport-hint').innerText(),/subject to availability/);
             if (requested) await checkbox.check();

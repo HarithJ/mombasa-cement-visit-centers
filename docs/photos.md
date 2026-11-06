@@ -8,4 +8,4 @@ Review any new photographs containing people before adding them, and obscure chi
 
 The first image is the farm crop rows. This stable asset name is also used by admin booking details. The gallery discovers the generated files in filename order.
 
-Current collection: 15 Galana Farm photographs. The Sahajanand Special School and Kibarani Feeding center collections were removed with those destinations (see [ADR 0001](adr/0001-galana-farm-only.md)); their originals remain in git history. Run `node tests/photos.test.mjs` with the project's Playwright/browser environment to decode every gallery image and check counts and wraparound.
+Current collection: 16 Galana Farm photographs. The Sahajanand Special School and Kibarani Feeding center collections were removed with those destinations (see [ADR 0001](adr/0001-galana-farm-only.md)); their originals remain in git history. Run `node tests/photos.test.mjs` with the project's Playwright/browser environment to decode every gallery image and check counts and wraparound.
