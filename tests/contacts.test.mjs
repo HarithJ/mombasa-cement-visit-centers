@@ -16,16 +16,14 @@ try {
   const context=await browser.newContext({javaScriptEnabled,viewport:{width:390,height:844}});
   const page=await context.newPage();
   await page.goto(`${origin}/`);
-  // Getting there: the drawn map with its credit, drive times, Google Maps and the owner's route drawing.
+  // Getting there: the drawn map with its credit, drive times and Google Maps (no separate route drawing).
   const there=page.locator('#getting-there');
   assert.equal(await there.locator('svg.map-svg').count(),1);
   assert.match(await there.locator('.map-card figcaption').innerText(),/OpenStreetMap contributors/);
   assert.match(await there.locator('.routes').innerText(),/Malindi[\s\S]*Mombasa/);
   assert.equal(await there.locator('iframe').count(),0,'no third-party map embed');
   assert.match(await there.getByRole('link',{name:/Google Maps/}).getAttribute('href'),/^https:\/\/(www\.)?google\.[a-z.]+\/maps|^https:\/\/maps\.app\.goo\.gl\//);
-  const drawing=await there.getByRole('link',{name:/route drawing/}).getAttribute('href');
-  assert.match(drawing,/\/routes\/galana\.png$/);
-  assert.equal((await page.request.get(origin+drawing)).status(),200);
+  assert.equal(await there.getByRole('link',{name:/route drawing/}).count(),0);
   // Questions: the team to call or email about changes.
   const team=page.locator('#questions');
   assert.deepEqual(await team.locator('a[href^="mailto:"]').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),emails.map(e=>'mailto:'+e));
@@ -47,7 +45,7 @@ try {
   assert.deepEqual(await contacts.locator('a[href^="mailto:"]').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),emails.map(e=>'mailto:'+e));
   assert.equal(await contacts.locator('a[href^="tel:+254"]').count(),emails.length);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-  console.log(`PASS Galana Farm map, route drawing, team contacts and confirmation contacts, JS=${javaScriptEnabled}`);
+  console.log(`PASS Galana Farm map, Google Maps link, team contacts and confirmation contacts, JS=${javaScriptEnabled}`);
   await context.close();
  }
 } finally {await browser?.close();server.kill();await rm(storage,{recursive:true,force:true});}

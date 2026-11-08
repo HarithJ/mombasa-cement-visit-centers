@@ -1,10 +1,10 @@
 /* Hero: one screen that scrolls away normally; the wasp takes off as it goes. The onion flower sits on the right; copy sits on the left. */
-:root{--hero-base:#15181d;--hero-ink:#f4f2ec;--hero-muted:#f4f2ecb3;--hero-accent:#c8d96f}
+:root{--hero-base:#16303d;--hero-ink:#f4f2ec;--hero-muted:#f4f2ecb3;--hero-accent:#c8d96f}
 
 /* Header floats over the hero, light on dark, and turns into light frosted glass once the hero is behind you:
    every section after it is light. */
 .site-header{position:fixed;inset:0 0 auto;z-index:20;color:var(--hero-ink);transition:background .4s ease,backdrop-filter .4s ease,box-shadow .4s ease,color .4s ease}
-.site-header.is-solid{background:#ffffffc7;backdrop-filter:blur(16px) saturate(1.6);-webkit-backdrop-filter:blur(16px) saturate(1.6);box-shadow:0 1px 0 #1d202612;color:#1d2026}
+.site-header.is-solid{background:#eef2f1c7;backdrop-filter:blur(16px) saturate(1.6);-webkit-backdrop-filter:blur(16px) saturate(1.6);box-shadow:0 1px 0 #16303d14;color:#16303d}
 .site-header-inner{width:min(1440px,calc(100% - 96px));margin:auto;height:84px;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .site-brand{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:650;letter-spacing:-.01em}
 .site-brand img{width:22px;height:38px;object-fit:contain}
@@ -13,9 +13,13 @@
 .site-nav a:hover{opacity:1}
 .site-nav .site-nav-cta{opacity:1;padding:10px 18px;border:1px solid #f4f2ec47;border-radius:999px;transition:background .25s,border-color .25s,color .25s}
 .site-nav .site-nav-cta:hover{background:var(--hero-ink);border-color:var(--hero-ink);color:var(--hero-base)}
-.site-header.is-solid .site-nav .site-nav-cta{border-color:#1d20263d}
-.site-header.is-solid .site-nav .site-nav-cta:hover{background:#1d2026;border-color:#1d2026;color:#fff}
-.site-header.is-solid a:focus-visible{outline-color:#1d2026}
+.site-header.is-solid .site-nav .site-nav-cta{border-color:#16303d3d}
+.site-header.is-solid .site-nav .site-nav-cta:hover{background:#16303d;border-color:#16303d;color:#fff}
+.site-header.is-solid a:focus-visible{outline-color:#16303d}
+.site-header.is-solid.is-dark{background:#16303dc7;box-shadow:0 1px 0 #f4f2ec14;color:var(--hero-ink)}
+.site-header.is-solid.is-dark .site-nav .site-nav-cta{border-color:#f4f2ec47}
+.site-header.is-solid.is-dark .site-nav .site-nav-cta:hover{background:var(--hero-ink);border-color:var(--hero-ink);color:var(--hero-base)}
+.site-header.is-solid.is-dark a:focus-visible{outline-color:var(--hero-accent)}
 
 .hero{position:relative;background:var(--hero-base);color:var(--hero-ink)}
 .hero-stage{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;isolation:isolate}
@@ -25,7 +29,7 @@
 .hero-still.is-placed{-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 90%,transparent)}
 .hero-canvas{position:absolute;inset:0;z-index:-1;width:100%;height:100%;opacity:0;transition:opacity 1.2s cubic-bezier(.2,.7,.2,1)}
 .hero-canvas.is-ready{opacity:1}
-.hero-stage:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,var(--hero-base) 0%,#15181dd9 22%,#15181d40 44%,transparent 56%)}
+.hero-stage:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,var(--hero-base) 0%,#16303dd9 22%,#16303d40 44%,transparent 56%)}
 
 
 .hero-copy{position:absolute;inset:0;width:min(1440px,calc(100% - 96px));margin:auto;display:grid;align-items:center;pointer-events:none}
@@ -69,7 +73,7 @@ html:not(.js) .site-header{position:absolute}
   .hero-actions{margin-top:26px;gap:22px}
   .hero-button{height:50px;padding:0 22px}
   .hero-still{width:182vw;left:-22vw;top:calc(32vh - 67vw)}
-  .hero-stage:before{background:linear-gradient(0deg,var(--hero-base) 0%,#15181de6 38%,#15181d33 60%,transparent 72%)}
+  .hero-stage:before{background:linear-gradient(0deg,var(--hero-base) 0%,#16303de6 38%,#16303d33 60%,transparent 72%)}
 }
 @media(max-width:380px){.hero-title-big{font-size:22vw}.hero-actions{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.hero-canvas{transition:none}.hero-button,.hero-button .icon,.hero-link{transition:none}}

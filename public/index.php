@@ -35,7 +35,6 @@ function icon(string $name, string $class = ''): string {
     return '<svg class="icon '.e($class).'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$paths[$name].'</svg>';
 }
 $mapLinks = require __DIR__.'/../config/locations.php';
-$routeIllustrations = require __DIR__.'/../config/route-illustrations.php';
 $photoDescriptions = require __DIR__.'/../config/photo-descriptions.php';
 $destinations = [
     'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
@@ -137,33 +136,28 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
                 <span class="print-paper"><img src="<?= e($variants[720] ?? $path) ?>" srcset="<?= e(photoSrcset($variants)) ?>" sizes="(max-width: 760px) <?= round($mw * 0.94) ?>vw, min(<?= round($w * 0.93) ?>vw, <?= round($w * 13.44) ?>px)" width="<?= $size[0] ?>" height="<?= $size[1] ?>" alt="<?= e($photoDescriptions['galana'][$file] ?? $caption) ?>" loading="lazy" decoding="async" fetchpriority="low" draggable="false"></span>
             </a>
             <?php endforeach; ?>
-            <?php // A pencil note beside the pile. Each layout has its own drawing, in that table's own units
-            // (1750x1000 wide, 1000x1250 on phones), and the arrow stops just short of the photos. ?>
+            <?php // A pencil note above the top right of the pile. The o's of "look" are a pair of eyes looking down at the photos
+            // (and, with a mouse, after the pointer), and one arrow curves down to the pile, stopping just short of it. Each
+            // layout has its own drawing, in that table's own units (1750x1000 wide, 1000x1250 on phones). ?>
             <svg class="doodle doodle-wide" viewBox="0 0 1750 1000" aria-hidden="true" focusable="false">
-                <defs>
-                    <mask id="doodle-wide-words" maskUnits="userSpaceOnUse"><rect class="doodle-wipe" x="20" y="500" width="400" height="180" fill="#fff"/></mask>
-                    <mask id="doodle-wide-trail" maskUnits="userSpaceOnUse"><path class="doodle-ink" style="--d:1.1s;--t:.7s" pathLength="1" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" d="M250 545 C 220 450, 330 385, 450 440"/></mask>
-                </defs>
-                <text class="doodle-words" mask="url(#doodle-wide-words)" x="40" y="640" transform="rotate(-4 40 640)" font-size="86">Have a look</text>
-                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path class="doodle-ink" style="--d:.75s;--t:.35s" pathLength="1" stroke-width="3.5" d="M48 670 C 140 658, 240 656, 362 648"/>
-                    <path class="doodle-ink" style="--d:.95s;--t:.3s" pathLength="1" stroke-width="3.5" d="M80 690 C 170 682, 250 680, 330 676"/>
-                    <path mask="url(#doodle-wide-trail)" stroke-width="4" stroke-dasharray="2 14" d="M250 545 C 220 450, 330 385, 450 440"/>
-                    <path class="doodle-ink" style="--d:1.75s;--t:.2s" pathLength="1" stroke-width="4" d="M418 442 C 429 441, 440 440, 450 440 C 444 431, 438 422, 432 413"/>
+                <defs><mask id="doodle-wide-words" maskUnits="userSpaceOnUse"><rect class="doodle-wipe" x="1293" y="190" width="300" height="130" fill="#fff"/></mask></defs>
+                <g transform="rotate(-9 1307 290)">
+                    <g class="doodle-words" mask="url(#doodle-wide-words)" font-size="60"><text x="1307" y="290" textLength="180.7" lengthAdjust="spacingAndGlyphs">Have a l</text><text x="1548" y="290">k</text></g>
+                    <g class="doodle-eye" data-eye data-rest="-4 5" data-reach="6"><path class="doodle-ink" style="--d:0.55s;--t:.25s" pathLength="1" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" d="M1491 275 A 13 15 0 1 1 1517 274 A 13 15 0 1 1 1493 270"/><circle class="doodle-pupil" cx="1504" cy="274" r="4.5" fill="currentColor" style="transform:translate(-4px,5px)"/></g>
+                    <g class="doodle-eye" data-eye data-rest="-4 5" data-reach="6"><path class="doodle-ink" style="--d:0.62s;--t:.25s" pathLength="1" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" d="M1519 275 A 13 15 0 1 1 1545 274 A 13 15 0 1 1 1521 270"/><circle class="doodle-pupil" cx="1532" cy="274" r="4.5" fill="currentColor" style="transform:translate(-4px,5px)"/></g>
                 </g>
+                <path class="doodle-ink" style="--d:.8s;--t:.6s" pathLength="1" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" d="M1340 312 C 1348 368, 1330 410, 1288 424"/>
+                <path class="doodle-ink" style="--d:1.4s;--t:.2s" pathLength="1" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" d="M1303 407 C 1298 413, 1293 419, 1288 424 C 1295 425, 1302 427, 1310 428"/>
             </svg>
             <svg class="doodle doodle-tall" viewBox="0 0 1000 1250" aria-hidden="true" focusable="false">
-                <defs>
-                    <mask id="doodle-tall-words" maskUnits="userSpaceOnUse"><rect class="doodle-wipe" x="0" y="-30" width="460" height="200" fill="#fff"/></mask>
-                    <mask id="doodle-tall-trail" maskUnits="userSpaceOnUse"><path class="doodle-ink" style="--d:1.1s;--t:.7s" pathLength="1" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round" d="M40 200 C 0 290, 10 420, 70 470"/></mask>
-                </defs>
-                <text class="doodle-words" mask="url(#doodle-tall-words)" x="24" y="118" transform="rotate(-4 24 118)" font-size="100">Have a look</text>
-                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path class="doodle-ink" style="--d:.75s;--t:.35s" pathLength="1" stroke-width="6" d="M30 150 C 120 140, 220 136, 330 128"/>
-                    <path class="doodle-ink" style="--d:.95s;--t:.3s" pathLength="1" stroke-width="6" d="M60 172 C 140 165, 220 162, 290 158"/>
-                    <path mask="url(#doodle-tall-trail)" stroke-width="7" stroke-dasharray="3 24" d="M40 200 C 0 290, 10 420, 70 470"/>
-                    <path class="doodle-ink" style="--d:1.75s;--t:.2s" pathLength="1" stroke-width="7" d="M25 460 C 40 463, 55 467, 70 470 C 64 456, 58 442, 52 428"/>
+                <defs><mask id="doodle-tall-words" maskUnits="userSpaceOnUse"><rect class="doodle-wipe" x="595" y="20" width="400" height="150" fill="#fff"/></mask></defs>
+                <g transform="rotate(-9 610 126)">
+                    <g class="doodle-words" mask="url(#doodle-tall-words)" font-size="84"><text x="610" y="126" textLength="253" lengthAdjust="spacingAndGlyphs">Have a l</text><text x="946" y="126">k</text></g>
+                    <g class="doodle-eye" data-eye data-rest="-5 7" data-reach="8"><path class="doodle-ink" style="--d:0.55s;--t:.25s" pathLength="1" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" d="M867 104 A 18 21 0 1 1 903 103 A 18 21 0 1 1 869 99"/><circle class="doodle-pupil" cx="885" cy="103" r="6.5" fill="currentColor" style="transform:translate(-5px,7px)"/></g>
+                    <g class="doodle-eye" data-eye data-rest="-5 7" data-reach="8"><path class="doodle-ink" style="--d:0.62s;--t:.25s" pathLength="1" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" d="M906 104 A 18 21 0 1 1 942 103 A 18 21 0 1 1 908 99"/><circle class="doodle-pupil" cx="924" cy="103" r="6.5" fill="currentColor" style="transform:translate(-5px,7px)"/></g>
                 </g>
+                <path class="doodle-ink" style="--d:.8s;--t:.6s" pathLength="1" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" d="M736 152 C 744 198, 730 240, 702 254"/>
+                <path class="doodle-ink" style="--d:1.4s;--t:.2s" pathLength="1" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M722 226 C 715 236, 709 245, 702 254 C 713 254, 724 255, 736 255"/>
             </svg>
         </div>
         <dialog class="print-viewer" data-print-viewer aria-label="Photo viewer">
@@ -178,39 +172,63 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
         </dialog>
     </section>
     <?php
-    // A visit, start to finish. Only what the farm offers: start times from the schedule, lunch, sunset,
-    // and the one-night stay that is requested with the booking.
+    // A visit, start to finish, as five prints laid out in a row with a pencilled trail between them. Only what the
+    // farm offers: start times from the schedule, lunch, sunset, and the one-night stay requested with the booking.
+    // Each step: label, title, text, what's on the print (a photo, or a drawing), alt text, tilt in degrees.
     $day = [
-        ['Arrive', 'Meet the team', 'Pick a start time between 9 am and 4 pm when you book. The Galana team meets you when you arrive.', '14-tractor.webp', 'A tractor on the farm, ready for the day'],
-        ['Explore', 'Tour the farm', 'See onions, maize and more growing across 300,000 acres along the Galana River, and the pivots that water them.', '06-field-irrigation.webp', 'Irrigation running across a field at Galana'],
-        ['Lunch', 'Lunch on the farm', 'Sit down for lunch at Galana, then carry on exploring in the afternoon.', null, null],
-        ['Sunset', 'Stay for sunset', 'As the day cools, the light turns gold over the irrigated fields.', '11-irrigation-at-sunset.webp', 'Irrigation over the fields at sunset'],
-        ['Overnight', 'Stay the night', 'Tick “Stay overnight” when you book. It’s one night for your whole group, subject to availability, and the team will confirm.', null, null],
+        ['Arrive', 'Meet the team', 'Pick a start time between 9 am and 4 pm when you book. The Galana team meets you when you arrive.', '14-tractor.webp', 'A tractor on the farm, ready for the day', -3],
+        ['Explore', 'Tour the farm', 'See onions, maize and more growing across 300,000 acres along the Galana River, and the pivots that water them.', '06-field-irrigation.webp', 'Irrigation running across a field at Galana', 2],
+        ['Lunch', 'Lunch on the farm', 'Sit down for lunch at Galana, then carry on exploring in the afternoon.', 'lunch', null, 1],
+        ['Sunset', 'Stay for sunset', 'As the day cools, the light turns gold over the irrigated fields.', '11-irrigation-at-sunset.webp', 'Irrigation over the fields at sunset', 2],
+        ['Overnight', 'Stay the night', 'Tick “Stay overnight” when you book. It’s one night for your whole group, subject to availability, and the team will confirm.', 'night', null, -2.5],
     ];
     $visitContacts = require __DIR__.'/../config/contacts.php';
     $team = $visitContacts['galana']['people'];
+    // Pencil drawings for the two steps without a photo. Each stroke draws itself in turn (--d) when its step arrives.
+    $drawings = [
+        'lunch' => '<path style="--d:.15s" d="M58 34v32M68 34v32M78 34v32M57 66c1 11 21 11 22 0M68 76c-1 18 1 36 0 54"/>'
+            .'<path style="--d:.35s" d="M152 53c27 1 44 17 43 40s-21 39-45 38-43-18-42-41 19-37 44-37"/>'
+            .'<path style="--d:.55s" d="M151 70c15 0 25 10 25 23s-11 22-25 22-26-10-25-23 11-22 25-22"/>'
+            .'<path style="--d:.75s" d="M226 36c17 12 19 37 4 50v46M226 36c-2 18-3 34 4 50"/>'
+            .'<path style="--d:.95s" d="M214 24l3-10M226 21l1-11M238 26l5-9"/>',
+        'night' => '<path style="--d:.15s" d="M160 40c-26 4-41 28-33 52s36 33 57 18c-23 3-41-14-40-36 0-15 7-28 16-34Z"/>'
+            .'<path style="--d:.45s" d="M62 46v16M54 54h16M228 38v14M221 45h14M86 92v12M80 98h12"/>'
+            .'<path style="--d:.7s" d="M14 140c30-9 56-10 84-4s56 7 86 1 50-6 62 0"/>',
+    ];
     ?>
-    <section class="day" id="day" aria-labelledby="day-title">
-        <div class="day-inner">
-            <div class="day-intro">
-                <p class="section-kicker"><span aria-hidden="true"></span>A day at Galana</p>
-                <h2 class="section-title" id="day-title">Your day at Galana.</h2>
-                <p class="section-lead">From the first hello to the last light over the fields, here’s how a visit goes.</p>
+    <section class="day" id="day" aria-labelledby="day-title" data-day>
+        <div class="day-wrap">
+            <div class="day-head">
+                <div class="day-intro">
+                    <p class="section-kicker"><span aria-hidden="true"></span>A day at Galana</p>
+                    <h2 class="section-title" id="day-title">Your day at Galana.</h2>
+                    <p class="section-lead">From the first hello to the last light over the fields, here’s how a visit goes.</p>
+                </div>
+                <p class="day-note" data-day-note><span>free to visit,</span> <span>start any time 9 to 4</span></p>
             </div>
-            <ol class="day-steps" data-day>
-                <li class="day-line" aria-hidden="true"><i data-day-fill></i></li>
-                <?php foreach ($day as $n => [$tag, $title, $text, $photo, $alt]): ?>
-                <li class="day-step<?= $photo ? ' has-photo' : '' ?>" data-day-step>
-                    <span class="day-dot" aria-hidden="true"><?= $tag === 'Lunch' ? icon('sun') : ($tag === 'Overnight' ? icon('moon') : '') ?></span>
-                    <p class="day-tag"><span><?= str_pad((string)($n + 1), 2, '0', STR_PAD_LEFT) ?></span> <?= e($tag) ?><?php if ($tag === 'Overnight'): ?> <em>Optional</em><?php endif; ?></p>
-                    <h3><?= e($title) ?></h3>
-                    <p class="day-text"><?= e($text) ?></p>
-                    <?php if ($photo): $path = 'assets/photos/galana/'.$photo; $v = photoVariants($path); ?>
-                    <img class="day-photo" src="<?= e($v[720] ?? $path) ?>" srcset="<?= e(photoSrcset($v)) ?>" sizes="(max-width: 760px) calc(100vw - 72px), 520px" alt="<?= e($alt) ?>" width="1600" height="900" loading="lazy" decoding="async">
-                    <?php endif; ?>
-                </li>
-                <?php endforeach; ?>
-            </ol>
+            <div class="day-row">
+                <svg class="day-trail" data-day-trail aria-hidden="true" focusable="false">
+                    <defs><mask id="day-trail-reveal" maskUnits="userSpaceOnUse"><path class="day-trail-reveal" data-day-trail-reveal pathLength="1"/></mask></defs>
+                    <path class="day-trail-dots" data-day-trail-dots mask="url(#day-trail-reveal)"/>
+                </svg>
+                <ol class="day-steps" data-day-steps tabindex="0" aria-label="Your day, step by step">
+                    <?php foreach ($day as $n => [$label, $title, $text, $print, $alt, $tilt]): ?>
+                    <li class="day-step" data-day-step style="--tilt:<?= $tilt ?>deg">
+                        <p class="day-label"><span class="day-num"><?= str_pad((string)($n + 1), 2, '0', STR_PAD_LEFT) ?></span> · <?= e($label) ?><?php if ($print === 'night'): ?> <span class="day-optional">(optional)</span><?php endif; ?></p>
+                        <figure class="day-print<?= isset($drawings[$print]) ? ' day-print-'.$print : '' ?>" data-day-print>
+                            <?php if (isset($drawings[$print])): ?>
+                            <svg class="day-drawing" viewBox="0 0 260 160" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1"><?= str_replace('<path ', '<path pathLength="1" ', $drawings[$print]) ?></g></svg>
+                            <?php else: $path = 'assets/photos/galana/'.$print; $v = photoVariants($path); ?>
+                            <img src="<?= e($v[720] ?? $path) ?>" srcset="<?= e(photoSrcset($v)) ?>" sizes="(max-width: 900px) 72vw, 260px" alt="<?= e($alt) ?>" width="1600" height="1064" loading="lazy" decoding="async">
+                            <?php endif; ?>
+                        </figure>
+                        <h3><?= e($title) ?></h3>
+                        <p class="day-text"><?= e($text) ?></p>
+                    </li>
+                    <?php endforeach; ?>
+                </ol>
+            </div>
+            <p class="day-swipe" aria-hidden="true">swipe for the rest of the day →</p>
         </div>
     </section>
     <section class="getting-there" id="getting-there" aria-labelledby="getting-there-title" data-map>
@@ -226,7 +244,6 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
                 <p class="routes-note">Times are estimates and depend on the road. Not driving? Ask for transport when you book.</p>
                 <div class="getting-there-links">
                     <a class="pill-link pill-link-solid" href="<?= e($mapLinks['galana']) ?>" target="_blank" rel="noopener noreferrer">Open in Google Maps <?= icon('diagonal') ?></a>
-                    <a class="pill-link" href="<?= e($routeIllustrations['galana']['image']) ?>" target="_blank" rel="noopener noreferrer">See the route drawing <?= icon('diagonal') ?></a>
                 </div>
             </div>
             <figure class="map-card">
@@ -272,12 +289,36 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
                 <p class="section-kicker"><span aria-hidden="true"></span>Plan your visit</p>
                 <h2 class="section-title" id="booking-title">Book your day at Galana.</h2>
                 <p class="section-lead">It takes a minute, and you’ll get a booking reference straight away.</p>
-                <ul class="book-facts">
-                    <li><?= icon('check') ?> Free to visit</li>
-                    <li><?= icon('clock') ?> Start between 9 am and 4 pm</li>
-                    <li><?= icon('people') ?> Groups and families welcome</li>
-                    <li><?= icon('moon') ?> Transport and overnight stays on request</li>
-                </ul>
+                <?php
+                // The facts, as a paper ticket with a tear-off stub. The stub holds the booking reference: dots until
+                // you book, then your own, in groups of six; the stamp changes from Free to Booked.
+                $passRef = $confirmation ? strtoupper((string)$confirmation['reference']) : '';
+                $passCode = str_starts_with($passRef, 'NY-') ? str_split(substr($passRef, 3), 6) : array_fill(0, 4, '······');
+                ?>
+                <div class="pass<?= $passRef !== '' ? ' is-booked' : '' ?>" data-pass>
+                    <div class="pass-main">
+                        <p class="pass-head">Day visit · Galana Farm</p>
+                        <ul class="pass-facts">
+                            <li><span class="pass-key">Entry</span><strong>Free to visit</strong></li>
+                            <li><span class="pass-key">Start</span><strong>Between 9 am and 4 pm</strong></li>
+                            <li><span class="pass-key">Who</span><strong>Groups and families welcome</strong></li>
+                            <li><span class="pass-key">On request</span><strong>Transport and overnight stays</strong></li>
+                        </ul>
+                    </div>
+                    <div class="pass-stub">
+                        <span class="pass-key">Ref</span>
+                        <span class="pass-code"<?= $passRef !== '' ? ' aria-label="Booking reference '.e($passRef).'"' : ' aria-hidden="true"' ?>><span>NY-</span><?php foreach ($passCode as $part): ?><span><?= e($part) ?></span><?php endforeach ?></span>
+                        <span class="pass-note" aria-hidden="true"><?= $passRef !== '' ? 'that’s yours' : 'yours in a minute' ?></span>
+                        <span class="pass-bars" aria-hidden="true"></span>
+                    </div>
+                    <svg class="pass-stamp" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+                        <defs><path id="pass-ring" d="M60 60m-41 0a41 41 0 1 1 82 0a41 41 0 1 1-82 0"/></defs>
+                        <circle cx="60" cy="60" r="55" fill="none" stroke="currentColor" stroke-width="3"/>
+                        <circle cx="60" cy="60" r="30" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                        <text class="pass-stamp-ring"><textPath href="#pass-ring" textLength="252" lengthAdjust="spacing">GALANA FARM · DAY VISIT · KENYA ·</textPath></text>
+                        <text class="pass-stamp-word" x="60" y="66" text-anchor="middle" textLength="<?= $passRef !== '' ? 50 : 40 ?>" lengthAdjust="spacingAndGlyphs"><?= $passRef !== '' ? 'BOOKED' : 'FREE' ?></text>
+                    </svg>
+                </div>
             </div>
             <div class="book-card">
             <div id="form-view" <?= $confirmation ? 'hidden' : '' ?>>

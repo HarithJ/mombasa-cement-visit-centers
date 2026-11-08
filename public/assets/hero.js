@@ -22,7 +22,7 @@
   const WASP_SIZE = [WASP_RECT[2] - WASP_RECT[0], WASP_RECT[3] - WASP_RECT[1]];
   const WASP_HINGE_LOCAL = [0.3564, 0.5703];
   const WASP_HINGE = [WASP_RECT[0] + WASP_HINGE_LOCAL[0] * WASP_SIZE[0], WASP_RECT[1] + WASP_HINGE_LOCAL[1] * WASP_SIZE[1]];
-  const BASE = [0.082, 0.094, 0.114];
+  const BASE = [0.086, 0.188, 0.239]; // --c-dark, #16303d
   // The blurred background to the flower's right, as the wasp sees it from far off.
   const HAZE = [0.17, 0.18, 0.22];
 
@@ -65,7 +65,10 @@
     // Solid as soon as the next section reaches the header.
     const next = hero.nextElementSibling || hero;
     header.classList.toggle('is-solid', next.getBoundingClientRect().top <= header.offsetHeight);
+    // Dark glass once the dark booking band (and the footer after it) reaches the middle of the header.
+    header.classList.toggle('is-dark', !!dark && dark.getBoundingClientRect().top <= header.offsetHeight / 2);
   }
+  const dark = document.querySelector('.book');
   addEventListener('scroll', updateHeader, { passive: true });
   updateHeader();
 

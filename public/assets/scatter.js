@@ -231,4 +231,31 @@
   viewer.addEventListener('wheel', hold, { passive: false });
   viewer.addEventListener('touchmove', hold, { passive: false });
   addEventListener('resize', () => { if (viewer.open && !busy) place(prints[current]); });
+  // ---------- the note's eyes ----------
+  // At rest they look down at the photos. With a mouse they follow the pointer, as far as an eye allows.
+  const eyes = [...table.querySelectorAll('[data-eye]')];
+  const rest = () => eyes.forEach(eye => {
+    const [x, y] = eye.dataset.rest.split(' ');
+    eye.querySelector('.doodle-pupil').style.transform = `translate(${x}px,${y}px)`;
+  });
+  if (eyes.length && !reduced.matches && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    let px = 0, py = 0, queued = false;
+    const look = () => {
+      queued = false;
+      for (const eye of eyes) {
+        const pupil = eye.querySelector('.doodle-pupil'), m = eye.getScreenCTM();
+        if (!m || !eye.getBoundingClientRect().width) continue;       // this layout's note is hidden
+        const at = new DOMPoint(px, py).matrixTransform(m.inverse());
+        let dx = at.x - pupil.cx.baseVal.value, dy = at.y - pupil.cy.baseVal.value;
+        const d = Math.hypot(dx, dy), reach = Number(eye.dataset.reach);
+        if (d > reach) { dx *= reach / d; dy *= reach / d; }
+        pupil.style.transform = `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px)`;
+      }
+    };
+    addEventListener('pointermove', event => {
+      px = event.clientX; py = event.clientY;
+      if (!queued) { queued = true; requestAnimationFrame(look); }
+    }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', rest);
+  }
 })();
