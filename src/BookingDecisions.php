@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/BookingStore.php';
+require_once __DIR__.'/BookingStatus.php';
 require_once __DIR__.'/BookingEmail.php';
 require_once __DIR__.'/BookingSms.php';
 require_once __DIR__.'/Feedback.php';
@@ -29,19 +30,19 @@ final class BookingDecisions {
     public function __construct(private PDO $db) {}
 
     // Decisions are allowed until the end of the visit day (23:59 Nairobi), inclusive.
-    public static function open(array $booking, int $now): bool {
+    public static function decidable(array $booking, int $now): bool {
         return $now < (new DateTimeImmutable($booking['visit_date'].' 00:00:00', new DateTimeZone('Africa/Nairobi')))->modify('+1 day')->getTimestamp();
     }
 
     public function decide(int $bookingId, array $user, string $decision, ?string $reason, string $mode, int $now): array {
-        if (!in_array($decision, ['confirmed', 'rejected'], true)) throw new InvalidArgumentException('Unknown decision');
+        if (!in_array($decision, BookingStatus::DECISIONS, true)) throw new InvalidArgumentException('Unknown decision');
         if (!in_array($mode, ['first', 'change'], true)) throw new InvalidArgumentException('Unknown mode');
         $this->db->exec('BEGIN IMMEDIATE');
         try {
             $booking = $this->booking($bookingId) ?? throw new InvalidArgumentException('Unknown booking');
             $previous = $booking['status'];
             $error = null; $errors = [];
-            if (!self::open($booking, $now)) $error = 'closed';
+            if (!self::decidable($booking, $now)) $error = 'closed';
             elseif ($mode === 'first' ? $previous !== 'pending' : ($previous === 'pending' || $previous === $decision)) $error = 'conflict';
             elseif ($decision === 'rejected') {
                 $reason = trim($reason ?? '');

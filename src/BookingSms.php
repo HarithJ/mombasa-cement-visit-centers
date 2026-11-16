@@ -2,12 +2,10 @@
 declare(strict_types=1);
 require_once __DIR__.'/PhoneNumber.php';
 require_once __DIR__.'/UserStore.php';
+require_once __DIR__.'/VisitScenario.php';
 final class BookingSms {
     public static function enabled(): bool { return getenv('BOOKING_SMS_ENABLED') === '1'; }
 
-    public static function scenario(array $booking): string {
-        return (!empty($booking['overnight']) ? 'overnight' : 'day').(!empty($booking['transport_requested']) ? '_transport' : '');
-    }
     private static function formatDate(string $date): string {
         return (new DateTimeImmutable($date, new DateTimeZone('Africa/Nairobi')))->format('j M Y');
     }
@@ -26,7 +24,7 @@ final class BookingSms {
     }
     public static function visitorMessage(array $booking): string {
         $requests = ['day' => '', 'day_transport' => ', with transport', 'overnight' => ' and stay overnight', 'overnight_transport' => ', with transport and an overnight stay'];
-        return strtr("Hi {name}, thanks for your request to visit {destination} on {date} at {time}{requests}. It isn't confirmed yet; we'll let you know shortly. Ref {reference}.", self::values($booking) + ['{requests}' => $requests[self::scenario($booking)]]);
+        return strtr("Hi {name}, thanks for your request to visit {destination} on {date} at {time}{requests}. It isn't confirmed yet; we'll let you know shortly. Ref {reference}.", self::values($booking) + ['{requests}' => $requests[VisitScenario::key($booking)]]);
     }
     public static function adminMessage(array $booking): string {
         $requests = (!empty($booking['transport_requested']) ? ', transport' : '').(!empty($booking['overnight']) ? ', overnight' : '');
@@ -44,7 +42,7 @@ final class BookingSms {
     public static function decisionMessage(array $booking, array $decider, string $decision, bool $changed): string {
         if ($decision === 'confirmed') {
             $requests = ['day' => '', 'day_transport' => ', including transport', 'overnight' => ', including your overnight stay', 'overnight_transport' => ', including transport and your overnight stay'];
-            return strtr('Hi {name}, your visit to {destination} on {date} at {time} is confirmed{requests}. We look forward to welcoming you! Ref {reference}.', self::values($booking) + ['{requests}' => $requests[self::scenario($booking)]]);
+            return strtr('Hi {name}, your visit to {destination} on {date} at {time} is confirmed{requests}. We look forward to welcoming you! Ref {reference}.', self::values($booking) + ['{requests}' => $requests[VisitScenario::key($booking)]]);
         }
         return strtr('Hi {name}, sorry, we {cannot} your visit to {destination} on {date}. Please contact {decider} on {deciderPhone} or {deciderEmail}. Ref {reference}.', self::values($booking) + ['{cannot}' => $changed ? 'can no longer host' : "can't confirm", '{decider}' => $decider['name'], '{deciderPhone}' => $decider['phone'], '{deciderEmail}' => $decider['email']]);
     }

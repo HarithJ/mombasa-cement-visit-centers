@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/SiteUrl.php';
 // Single-use, expiring links tied to a user. Only token hashes are stored, and a token is
 // refused once the user is inactive or their credential_version has moved on.
 final class AuthTokens {
@@ -20,10 +21,7 @@ final class AuthTokens {
         return self::site().self::PATHS[$purpose].'?token='.$token;
     }
     public static function site(): string {
-        $site = rtrim(getenv('BOOKING_SITE_URL') ?: '', '/');
-        $url = parse_url($site);
-        if (!$url || ($url['scheme'] ?? '') !== 'https' || empty($url['host']) || isset($url['user']) || isset($url['pass']) || isset($url['query']) || isset($url['fragment']) || !empty($url['path'])) throw new RuntimeException('Configure a canonical HTTPS BOOKING_SITE_URL');
-        return $site;
+        return SiteUrl::canonical();
     }
     // How many links of this purpose the user was sent after $since.
     public static function issuedSince(PDO $db, int $userId, string $purpose, int $since): int {

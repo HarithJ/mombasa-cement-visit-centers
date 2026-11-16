@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 final class EmailTemplate {
+    // The first word of a person's name, for greetings ("Hi Ada,").
+    public static function firstName(string $name): string {
+        return preg_split('/\s+/', trim($name))[0];
+    }
     public static function escape(string $value): string {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }

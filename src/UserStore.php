@@ -10,10 +10,7 @@ final class UserError extends RuntimeException {
 final class UserStore {
     public function __construct(private PDO $db) {}
     public static function open(string $path): self {
-        new BookingStore($path);
-        $db = new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
-        $db->exec('PRAGMA busy_timeout = 5000');
-        return new self($db);
+        return new self(BookingStore::connect($path));
     }
     public function list(): array {
         return $this->db->query('SELECT * FROM users ORDER BY name COLLATE NOCASE, id')->fetchAll();
@@ -42,8 +39,8 @@ final class UserStore {
         $user = $this->validate(array_merge(array_intersect_key($current, array_flip(['name', 'email', 'phone', 'role'])), $input), $id);
         if ($current['role'] === 'admin' && $user['role'] !== 'admin' && $this->isLastActiveAdmin($current)) throw new UserError(['role' => self::LAST_ADMIN]);
         $emailChanged = strcasecmp($user['email'], $current['email']) !== 0;
-        $this->db->prepare('UPDATE users SET name = ?, email = ?, phone = ?, role = ?, credential_version = credential_version + ?, updated_at = ? WHERE id = ?')
-            ->execute([$user['name'], $user['email'], $user['phone'], $user['role'], $emailChanged ? 1 : 0, gmdate('Y-m-d\TH:i:s\Z'), $id]);
+        $this->db->prepare('UPDATE users SET name = ?, email = ?, phone = ?, role = ?, credential_version = credential_version + ?, session_version = session_version + ?, updated_at = ? WHERE id = ?')
+            ->execute([$user['name'], $user['email'], $user['phone'], $user['role'], $emailChanged ? 1 : 0, $emailChanged ? 1 : 0, gmdate('Y-m-d\TH:i:s\Z'), $id]);
         return $this->find($id);
     }
     // Signs the user out everywhere and stops their unused links. $actorId is the signed-in user doing it (null from the server command).
@@ -51,7 +48,7 @@ final class UserStore {
         $current = $this->existing($id);
         if ($actorId === $id) throw new UserError(['active' => "You can't deactivate your own account."]);
         if ($this->isLastActiveAdmin($current)) throw new UserError(['active' => self::LAST_ADMIN]);
-        $this->db->prepare('UPDATE users SET active = 0, credential_version = credential_version + 1, updated_at = ? WHERE id = ? AND active = 1')->execute([gmdate('Y-m-d\TH:i:s\Z'), $id]);
+        $this->db->prepare('UPDATE users SET active = 0, credential_version = credential_version + 1, session_version = session_version + 1, updated_at = ? WHERE id = ? AND active = 1')->execute([gmdate('Y-m-d\TH:i:s\Z'), $id]);
         return $this->find($id);
     }
     public function reactivate(int $id): array {

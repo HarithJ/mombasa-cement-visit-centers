@@ -10,6 +10,10 @@ final class PhoneNumber {
         if (str_starts_with($phone, '+') || preg_match('/^254\d{9}$/D', $digits)) return '+'.$digits;
         return $digits;
     }
+    // A phone number as a tel: link target: digits and a leading plus only.
+    public static function tel(string $phone): string {
+        return preg_replace('/[^+0-9]/', '', $phone);
+    }
     public static function smsRoutable(string $phone): bool {
         return preg_match('/^\+[1-9][0-9]{6,14}$/D', $phone) === 1;
     }

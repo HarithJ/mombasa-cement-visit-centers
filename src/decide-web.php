@@ -4,6 +4,7 @@ declare(strict_types=1);
 // booking; the decision is made by the POSTed form, as the link's user, through BookingDecisions.
 require_once __DIR__.'/BookingDecisions.php';
 require_once __DIR__.'/DecisionLinks.php';
+require_once __DIR__.'/HttpsRequest.php';
 header('Cache-Control: no-store, private');
 header('Referrer-Policy: no-referrer');
 header('X-Content-Type-Options: nosniff');
@@ -11,7 +12,7 @@ header("Content-Security-Policy: default-src 'self'; style-src 'self'; script-sr
 ini_set('session.use_strict_mode', '1');
 session_cache_limiter(''); // keep the Cache-Control header above
 if ($sessionPath = getenv('BOOKING_SESSION_PATH')) session_save_path($sessionPath);
-session_set_cookie_params(['httponly' => true, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'samesite' => 'Lax', 'path' => '/']);
+session_set_cookie_params(['httponly' => true, 'secure' => HttpsRequest::secure(), 'samesite' => 'Lax', 'path' => '/']);
 session_start();
 $_SESSION['decisionCsrf'] ??= bin2hex(random_bytes(32));
 $csrf = $_SESSION['decisionCsrf'];
@@ -21,9 +22,7 @@ $token = is_string($_GET['token'] ?? null) ? $_GET['token'] : '';
 $page = 'invalid'; $link = null; $booking = null; $latest = null; $errors = []; $reason = ''; $done = null; $open = false;
 try {
     $path = getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite';
-    new BookingStore($path);
-    $db = new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
-    $db->exec('PRAGMA busy_timeout = 5000');
+    $db = BookingStore::connect($path);
     $decisions = new BookingDecisions($db);
     $link = DecisionLinks::find($db, $token);
     if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'], true)) { http_response_code(405); $link = null; }
@@ -40,7 +39,7 @@ try {
             $reason = is_string($_POST['reason'] ?? null) ? $_POST['reason'] : '';
             if (!is_string($_POST['csrf'] ?? null) || !hash_equals($csrf, $_POST['csrf'])) {
                 http_response_code(403); $errors['_form'] = 'This page has expired. Please try again.';
-            } elseif (!in_array($decision, ['confirmed', 'rejected'], true)) {
+            } elseif (!in_array($decision, BookingStatus::DECISIONS, true)) {
                 http_response_code(400); $errors['_form'] = 'Please try again.';
             } else {
                 $result = $decisions->decide((int)$booking['id'], $link['user'], $decision, $reason, 'first', $now);
@@ -53,7 +52,7 @@ try {
                 else http_response_code(409);
             }
         }
-        $open = BookingDecisions::open($booking, $now);
+        $open = BookingDecisions::decidable($booking, $now);
         if ($page !== 'done' && ($booking['status'] !== 'pending' || !$open)) $page = 'status';
         if ($page === 'status') $latest = $decisions->history((int)$booking['id'])[0] ?? null;
     }
