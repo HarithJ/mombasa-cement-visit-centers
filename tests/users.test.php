@@ -2,6 +2,7 @@
 declare(strict_types=1);
 // Staff accounts: the UserStore module and its server command, bin/users.php.
 require __DIR__.'/../src/UserStore.php';
+require __DIR__.'/../src/SignIn.php';
 function check(bool $ok, string $message): void { if (!$ok) throw new RuntimeException($message); }
 function rejects(callable $action, string $field, string $message): void {
     try { $action(); } catch (UserError $error) {
@@ -9,6 +10,10 @@ function rejects(callable $action, string $field, string $message): void {
         return;
     }
     throw new RuntimeException("Expected '$message' for $field");
+}
+// Sends the queued account emails through the worker with a mock provider and returns them.
+function sentEmails(string $path): array {
+    return json_decode(shell_exec(escapeshellarg(PHP_BINARY).' '.escapeshellarg(__DIR__.'/helpers/account-emails.php').' '.escapeshellarg($path).' '.time()), true, 512, JSON_THROW_ON_ERROR);
 }
 $directory = sys_get_temp_dir().'/nyumba-users-'.bin2hex(random_bytes(8));
 mkdir($directory, 0700);
@@ -71,17 +76,37 @@ try {
     // The server command, on its own fresh database.
     $cliPath = $directory.'/cli.sqlite';
     $cli = function (string ...$args) use ($cliPath): array {
-        $process = proc_open([PHP_BINARY, __DIR__.'/../bin/users.php', ...$args], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, ['BOOKING_DB' => $cliPath, 'PATH' => getenv('PATH')]);
+        $process = proc_open([PHP_BINARY, __DIR__.'/../bin/users.php', ...$args], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, ['BOOKING_DB' => $cliPath, 'BOOKING_SITE_URL' => 'https://visits.example.com', 'PATH' => getenv('PATH')]);
         $out = stream_get_contents($pipes[1]); $err = stream_get_contents($pipes[2]);
         return [proc_close($process), $out, $err];
     };
+    $cliUsers = UserStore::open($cliPath);
     [$status, $out] = $cli('list');
     check($status === 0 && str_contains($out, 'No users yet.'), 'An empty list says so');
+    [$status, , $err] = $cli('add', '--name=Cleo Admin', '--email=cleo@example.test', '--phone=0712 000001', '--role=admin');
+    check($status === 1 && str_contains($err, 'No active admin to name in the welcome email. Add --no-welcome, or --by=ADMIN_EMAIL.') && !$cliUsers->list(), 'The first admin needs --no-welcome: '.$err);
     [$status, $out, $err] = $cli('add', '--name=Cleo Admin', '--email=cleo@example.test', '--phone=0712 000001', '--role=admin', '--no-welcome');
     check($status === 0 && str_contains($out, 'Cleo Admin added.') && $err === '', 'add creates a user: '.$out.$err);
-    [$status, $out] = $cli('add', '--name=Dan Team', '--email=dan@example.test', '--phone=0712000002', '--role=team');
-    check($status === 0 && str_contains($out, 'Dan Team added.') && str_contains($out, 'No welcome email was sent'), 'add without --no-welcome says no welcome email was sent yet');
-    $cliUsers = UserStore::open($cliPath);
+    check(sentEmails($cliPath) === [], '--no-welcome sends nothing');
+    $before = time();
+    [$status, $out, $err] = $cli('add', '--name=Dan Team', '--email=dan@example.test', '--phone=0712000002', '--role=team');
+    check($status === 0 && str_contains($out, "Dan Team added. We've sent them a welcome email."), 'add without --no-welcome sends the welcome email: '.$out.$err);
+    $welcome = sentEmails($cliPath);
+    check(count($welcome) === 1 && $welcome[0]['to'] === ['dan@example.test'] && $welcome[0]['subject'] === "You've been added to Visit Nyumba admin", 'The welcome email goes to the new user');
+    check(str_contains($welcome[0]['text'], 'Hi Dan, Cleo Admin has given you access to the Visit Nyumba admin panel, where you can see bookings and accept or reject visits to Galana Farm.'), 'The welcome names the admin who added them: '.$welcome[0]['text']);
+    check(str_contains($welcome[0]['text'], "From now on you'll get an email with Accept and Reject buttons whenever someone books a visit."), 'The welcome explains booking emails');
+    check(str_contains($welcome[0]['text'], 'After that, sign in with "Email me a sign-in link", or set a password with "Forgot password?".'), 'The welcome explains later sign-ins');
+    check(str_contains($welcome[0]['html'], '>Sign in &rarr;</a>') && str_contains($welcome[0]['html'], 'Cleo Admin has given you access'), 'The HTML welcome has the Sign in button');
+    check((bool)preg_match('#Sign in:\nhttps://visits\.example\.com/admin/login/link\?token=([a-f0-9]{64})#', $welcome[0]['text'], $match), 'The welcome has a sign-in link: '.$welcome[0]['text']);
+    $signIn = SignIn::open($cliPath);
+    check($signIn->withLink($match[1], $before + 172800 + 5) === null, 'The welcome link expires after 48 hours');
+    check(($signIn->withLink($match[1], $before + 172000)['email'] ?? null) === 'dan@example.test', 'The welcome link signs the new user in within 48 hours');
+    check($signIn->withLink($match[1], $before + 172000) === null, 'The welcome link works once');
+    [$status, , $err] = $cli('add', '--name=Fay', '--email=fay@example.test', '--phone=0712000009', '--role=team', '--by=dan@example.test');
+    check($status === 1 && str_contains($err, 'dan@example.test is not an active admin.') && !$cliUsers->findByEmail('fay@example.test'), '--by must name an active admin: '.$err);
+    [$status, $out] = $cli('add', '--name=Fay', '--email=fay@example.test', '--phone=0712000009', '--role=admin', '--by=cleo@example.test');
+    check($status === 0 && str_contains(sentEmails($cliPath)[0]['text'] ?? '', 'Hi Fay, Cleo Admin has given'), '--by picks the admin named in the welcome');
+    $cliUsers->deactivate((int)$cliUsers->findByEmail('fay@example.test')['id']);
     foreach ($cliUsers->list() as $user) check(!str_contains($out, $user['password_hash']), 'No password hash is printed');
     [$status, $out] = $cli('list');
     check($status === 0 && str_contains($out, 'Cleo Admin') && str_contains($out, 'cleo@example.test') && str_contains($out, '+254712000001') && str_contains($out, 'Admin') && str_contains($out, 'Active'), 'list shows each user: '.$out);

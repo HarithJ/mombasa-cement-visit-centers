@@ -54,6 +54,7 @@ if (!$signInPath && !$authenticated) adminRedirect('/admin/login');
 $postedEmail = is_string($_POST['email'] ?? null) ? trim(substr($_POST['email'], 0, 254)) : '';
 // An unknown, used or expired link gets one page that never says which.
 function adminExpiredLink(): string { http_response_code(410); return 'expired'; }
+if ($path === '/admin/users' || str_starts_with($path, '/admin/users/')) { require __DIR__.'/admin-users.php'; return; }
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!is_string($_POST['csrf'] ?? null) || !hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
