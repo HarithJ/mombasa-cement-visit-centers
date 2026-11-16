@@ -1,6 +1,6 @@
 # Visit approval and staff accounts
 
-Status: ready-for-agent
+Status: resolved
 Type: feature
 
 ## Problem Statement
