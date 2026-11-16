@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/FeedbackEmail.php';
+require_once __DIR__.'/SiteUrl.php';
 final class Feedback {
     public static function enabled(): bool { return getenv('FEEDBACK_EMAIL_ENABLED') === '1'; }
     public static function schedule(PDO $db, array $booking, string $version, string $basePath): void {
         if (!self::enabled() || !filter_var($booking['email'] ?? '', FILTER_VALIDATE_EMAIL)) return;
-        $site = rtrim(getenv('BOOKING_SITE_URL') ?: '', '/');
-        $url = parse_url($site);
-        if (!$url || ($url['scheme'] ?? '') !== 'https' || empty($url['host']) || isset($url['user']) || isset($url['pass']) || isset($url['query']) || isset($url['fragment']) || !empty($url['path'])) throw new RuntimeException('Configure a canonical HTTPS BOOKING_SITE_URL');
+        $site = SiteUrl::canonical();
         $hour = getenv('FEEDBACK_SEND_HOUR');
         $hour = $hour === false ? '9' : $hour;
         if (!preg_match('/^(?:[0-9]|1[0-9]|2[0-3])$/D', $hour)) throw new RuntimeException('FEEDBACK_SEND_HOUR must be 0 to 23');

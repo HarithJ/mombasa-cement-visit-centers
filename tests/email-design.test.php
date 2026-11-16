@@ -3,18 +3,19 @@ declare(strict_types=1);
 require __DIR__.'/../src/BookingEmail.php';
 require __DIR__.'/../src/FeedbackEmail.php';
 function check(bool $ok, string $message): void { if (!$ok) throw new RuntimeException($message); }
+$user=['id'=>7,'name'=>'Tom Team','email'=>'tom@example.test'];
 $booking=['reference'=>'NY-TEST','full_name'=>'<Alex & Test>','phone'=>'+254700000000','email'=>'alex@example.com','destination'=>'galana','visit_date'=>'2099-05-01','booked_time'=>'09:00','attendees'=>3,'overnight'=>0,'arrival_date'=>null,'departure_date'=>null,'overnight_guests'=>null,'transport_requested'=>0];
 foreach (['galana'] as $destination) foreach ([0,1] as $overnight) foreach ([0,1] as $transport) {
     $sample=array_merge($booking,['destination'=>$destination,'overnight'=>$overnight,'transport_requested'=>$transport,'arrival_date'=>$overnight?'2099-05-01':null,'departure_date'=>$overnight?'2099-05-03':null,'overnight_guests'=>$overnight?2:null]);
     foreach ([true,false] as $visitor) {
-        $payload=$visitor?BookingEmail::visitorPayload($sample):BookingEmail::payload($sample);
+        $payload=$visitor?BookingEmail::visitorPayload($sample):BookingEmail::requestPayload($sample,$user,'https://example.com/decide?token=accept-sample','https://example.com/decide?token=reject-sample');
         check(str_contains($payload['html'],'&lt;Alex &amp; Test&gt;') && !str_contains($payload['html'],'<Alex'), 'Names are escaped in HTML');
         check(str_contains($payload['text'],'<Alex & Test>'), 'Plain text preserves names');
         check(str_contains($payload['html'],'NYUMBA') && str_contains($payload['html'],'role="presentation"'), 'Branded email layout');
         foreach (['NY-TEST','1 May 2099','9:00 am EAT'] as $detail) check(str_contains($payload['html'],$detail) && str_contains($payload['text'],$detail),'Details in both alternatives');
         check(str_contains($payload['text'],'Overnight stay: Requested (subject to availability)')===(bool)$overnight,'Overnight request only when requested');
         check(!str_contains($payload['text'],'3 May 2099') && !str_contains($payload['text'],'Staying guests') && !str_contains($payload['text'],'2 guests'),'No overnight dates or staying-guest count');
-        check(str_contains($payload['text'],'overnight stay')===(bool)$overnight,'Day messages do not mention an overnight stay');
+        check(str_contains(strtolower(str_replace('No transport or overnight stay was requested.','',$payload['text'])),'overnight')===(bool)$overnight,'Day messages do not mention an overnight stay');
         if ($overnight) check(str_contains($payload['text'],'availability'),'Accommodation remains subject to availability');
         check(str_contains($payload['text'],'Transport: Requested (subject to availability)')===(bool)$transport,'Transport request clear');
         check(!str_contains($payload['html'],'<script') && !str_contains($payload['html'],'<img'), 'Email needs no JavaScript or external images');
@@ -26,18 +27,19 @@ foreach (['galana'] as $destination) foreach ([0,1] as $overnight) foreach ([0,1
         } else {
             check(str_contains($payload['text'],'a total of 3 people'),'Manager receives total');
             check(str_contains($payload['html'],'href="tel:+254700000000"'),'Manager can call visitor');
-            check(in_array('harithjaved@gmail.com',$payload['to'],true),'Additional manager email retained');
+            check($payload['to']===['tom@example.test'] && str_contains($payload['text'],'Hi Tom,'),'Each user gets their own copy');
+            check(str_contains($payload['html'],'href="https://example.com/decide?token=accept-sample"') && str_contains($payload['html'],'href="https://example.com/decide?token=reject-sample"'),'Accept and Reject buttons');
         }
     }
 }
-$solo=BookingEmail::payload(array_merge($booking,['attendees'=>1,'email'=>null]));
+$solo=BookingEmail::requestPayload(array_merge($booking,['attendees'=>1,'email'=>null]),$user,'https://example.com/a','https://example.com/r');
 check(str_contains($solo['text'],'a total of 1 person.') && str_contains($solo['text'],'Email: Not provided'),'Solo count and optional email');
 $link='https://example.com/feedback?token=sample&source=email';
 $feedback=FeedbackEmail::payload($booking,$link);
 check(str_contains($feedback['html'],'href="https://example.com/feedback?token=sample&amp;source=email"'),'Feedback CTA preserves private link');
 check(str_contains($feedback['text'],$link) && str_contains($feedback['text'],"If you didn't attend"),'Text version includes action and non-attendance');
 check(str_contains($feedback['html'],'&lt;Alex &amp; Test&gt;'),'Feedback greeting escaped');
-check(str_contains($feedback['text'],'Visit date: 1 May 2099') && !str_contains($feedback['text'],'Overnight stay'),'Day feedback shows only the visit date');
+check(str_contains($feedback['text'],'Visit date: Fri 1 May 2099') && !str_contains($feedback['text'],'Overnight stay'),'Day feedback shows only the visit date');
 $overnightFeedback=FeedbackEmail::payload(array_merge($booking,['overnight'=>1,'arrival_date'=>'2099-05-01','departure_date'=>'2099-05-03','overnight_guests'=>2]),$link);
-check(str_contains($overnightFeedback['text'],'1 May 2099 · Overnight stay') && !str_contains($overnightFeedback['text'],'3 May 2099'),'Overnight feedback shows the visit date and a note, no stay range');
+check(str_contains($overnightFeedback['text'],'Fri 1 May 2099 · Overnight stay') && !str_contains($overnightFeedback['text'],'3 May 2099'),'Overnight feedback shows the visit date and a note, no stay range');
 echo "PASS email design: all scenarios, conversational copy, escaped HTML, text alternatives, routing, contact links and feedback CTA\n";

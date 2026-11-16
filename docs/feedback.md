@@ -1,6 +1,6 @@
 # Post-visit feedback
 
-Every new eligible booking contact is invited regardless of attendance. Invitations are due at 09:00 Africa/Nairobi the morning after a day visit, or the morning after departure for Galana overnight stays. Each booking receives one invitation, not one per attendee. Visitors can rate an attended visit or select “I didn’t attend.” Optional comments are limited to 2,000 characters each. Submitted responses cannot be edited or overwritten.
+Every confirmed booking contact with an email address is invited regardless of attendance; pending bookings get no invitation (it is created when the booking is confirmed). Invitations are due at 09:00 Africa/Nairobi the morning after a day visit, or the morning after departure for Galana overnight stays. Each booking receives one invitation, not one per attendee. Visitors can rate an attended visit or select “I didn’t attend.” Optional comments are limited to 2,000 characters each. Submitted responses cannot be edited or overwritten.
 
 ## Configuration
 

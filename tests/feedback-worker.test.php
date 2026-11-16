@@ -1,15 +1,26 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/../src/EmailWorker.php';
+require_once __DIR__.'/../src/UserStore.php';
 function verify(bool $value, string $message): void { if (!$value) throw new RuntimeException($message); }
+// Feedback invitations are created when a booking is confirmed; this stands in for that decision.
+function bookConfirmed(BookingStore $store, PDO $db, array $input, string $token): array {
+    $saved = $store->create($input, $token);
+    if ($saved['status'] === 'pending') {
+        $db->prepare("UPDATE bookings SET status = 'confirmed' WHERE id = ?")->execute([$saved['id']]);
+        Feedback::schedule($db, $saved, 'v1', '/v1');
+    }
+    return $saved;
+}
 $directory = sys_get_temp_dir().'/feedback-worker-'.bin2hex(random_bytes(8));
 $path = $directory.'/bookings.sqlite';
 putenv('FEEDBACK_EMAIL_ENABLED=1'); putenv('BOOKING_EMAIL_ENABLED=0'); putenv('BOOKING_SITE_URL=https://visits.example.com');
 try {
     $store = new BookingStore($path);
     $booking = ['fullName'=>'Test Visitor','phone'=>'+254712345678','email'=>'visitor@example.com','location'=>'galana','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>'1','overnight'=>'','arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null];
-    $store->create($booking, 'one'); $store->create($booking, 'one');
+    UserStore::open($path)->add(['name'=>'Tom Team','email'=>'tom@example.test','phone'=>'0711000002','role'=>'team']);
     $db = new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+    bookConfirmed($store, $db, $booking, 'one'); bookConfirmed($store, $db, $booking, 'one');
     $now = strtotime('2099-05-02T06:00:00Z');
     $worker = new EmailWorker($db, fn()=>$now);
     $other = new EmailWorker(new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]), fn()=>$now);
@@ -20,7 +31,7 @@ try {
     }, 'test@example.com');
     verify($result['accepted']===1 && $nested['accepted']===0 && $nested['retry']===0, 'Workers must not claim an active lease');
     // Operational fixture: a visitor completed feedback before the first mail attempt.
-    $saved = $store->create($booking, 'two');
+    $saved = bookConfirmed($store, $db, $booking, 'two');
     $payload = json_decode($db->query("SELECT payload FROM booking_emails WHERE booking_id = ".(int)$saved['id'])->fetchColumn(), true);
     preg_match('/token=([a-f0-9]{64})/', $payload['text'], $match);
     $feedback = new Feedback($db);
@@ -29,7 +40,7 @@ try {
     verify($suppressed['suppressed']===1 && $suppressed['retry']===0, 'Suppress unattempted completed feedback');
     // Both message types remain independent when feedback is paused.
     putenv('BOOKING_EMAIL_ENABLED=1');
-    $store->create($booking, 'three');
+    bookConfirmed($store, $db, $booking, 'three');
     putenv('FEEDBACK_EMAIL_ENABLED=0');
     $messages=[];
     $sent = $worker->run(function($payload) use (&$messages) {$messages[]=$payload; return 'immediate';}, 'test@example.com');
@@ -37,7 +48,7 @@ try {
     putenv('FEEDBACK_EMAIL_ENABLED=1');
     verify($worker->run(fn()=>'feedback-three', 'test@example.com')['accepted']===1, 'Resume pending invitation');
     putenv('FEEDBACK_EMAIL_ENABLED=0');
-    $store->create($booking, 'disabled');
+    bookConfirmed($store, $db, $booking, 'disabled');
     putenv('FEEDBACK_EMAIL_ENABLED=1'); putenv('BOOKING_EMAIL_ENABLED=0');
     verify($worker->run(fn()=>throw new RuntimeException('Historical invitation'), 'test@example.com')['retry']===0, 'Do not backfill bookings made while disabled');
     // Response integrity at the existing private-storage boundary.
@@ -45,14 +56,14 @@ try {
     verify($stored['rating']===null, 'Non-attendance discards tampered rating');
     $feedback->submit($match[1], ['attendance'=>'attended','rating'=>'1','comments'=>'Overwrite']);
     verify($db->query('SELECT * FROM feedback_responses WHERE booking_id = '.(int)$saved['id'])->fetch(PDO::FETCH_ASSOC)===$stored, 'Duplicate submission cannot change answers');
-    $new=$store->create($booking,'isolated');
+    $new=bookConfirmed($store, $db, $booking, 'isolated');
     $payload=json_decode($db->query('SELECT payload FROM booking_emails WHERE booking_id = '.(int)$new['id'])->fetchColumn(),true);
     preg_match('/token=([a-f0-9]{64})/', $payload['text'], $second);
     verify($feedback->find($second[1])['submitted_at']===null, 'Another invitation cannot retrieve the first response');
     $feedback->submit($second[1], ['attendance'=>'attended','rating'=>'4','booking_id'=>(string)$saved['id']]);
     verify($db->query('SELECT * FROM feedback_responses WHERE booking_id = '.(int)$saved['id'])->fetch(PDO::FETCH_ASSOC)===$stored, 'Posted booking ID cannot redirect a response');
     // Simulate lease takeover while an old delivery callback is still returning.
-    $store->create($booking,'takeover');
+    bookConfirmed($store, $db, $booking, 'takeover');
     $takeover=new EmailWorker(new PDO('sqlite:'.$path,null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]),fn()=>$now+61);
     $taken=null;
     $late=$worker->run(function()use($takeover,&$taken){$taken=$takeover->run(fn()=>'new-owner','test@example.com');throw new RuntimeException('Late old failure');},'test@example.com');
