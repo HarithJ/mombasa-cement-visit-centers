@@ -2,11 +2,12 @@
 declare(strict_types=1);
 require __DIR__.'/../src/BookingStore.php';
 require __DIR__.'/../src/DayBooking.php';
+require_once __DIR__.'/../src/UserStore.php';
 function check(bool $ok, string $message): void { if (!$ok) throw new RuntimeException($message); }
 $directory = sys_get_temp_dir().'/nyumba-transport-'.bin2hex(random_bytes(8));
 mkdir($directory, 0700);
 $path = $directory.'/bookings.sqlite';
-putenv('BOOKING_EMAIL_ENABLED=1');
+putenv('BOOKING_EMAIL_ENABLED=1'); putenv('BOOKING_SITE_URL=https://example.com');
 putenv('FEEDBACK_EMAIL_ENABLED=0');
 try {
     $db = new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
@@ -19,6 +20,7 @@ try {
     $db->exec("INSERT INTO bookings(reference,submission_token,full_name,phone,destination,visit_date,booked_time,attendees,status,created_at) VALUES ('NY-OLD','old','Old booking','+254700000000','galana','2099-05-01','11:00',1,'automatically_confirmed','2026-01-01')");
     $db->exec("INSERT INTO booking_emails(booking_id,payload,idempotency_key,status,provider_id) VALUES (1,'{}','old-email','accepted','original-id')");
     $store = new BookingStore($path);
+    UserStore::open($path)->add(['name' => 'Tom Team', 'email' => 'tom@example.test', 'phone' => '0711000002', 'role' => 'team']);
     check($store->findByToken('old')['transport_requested'] === 0, 'Migration defaults old bookings to not requested');
     check($db->query('SELECT provider_id FROM booking_emails')->fetchColumn() === 'original-id', 'Migration preserves existing email state');
     $schedule = require __DIR__.'/../config/destinations.php';
@@ -42,7 +44,7 @@ try {
         foreach ($messages as $json) {
             $payload = json_decode($json, true);
             $line = 'Transport: '.($expected ? 'Requested (subject to availability)' : 'Not requested');
-            check(str_contains($payload['text'], $line) && str_contains(html_entity_decode(strip_tags($payload['html']), ENT_QUOTES, 'UTF-8'), $line), 'Visitor and destination emails include the choice');
+            check(str_contains($payload['text'], $line) && str_contains(html_entity_decode(strip_tags($payload['html']), ENT_QUOTES, 'UTF-8'), $line), 'Visitor and team emails include the choice');
         }
     }
     foreach (['yes', ['on'], 1] as $invalid) {

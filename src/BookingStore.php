@@ -2,7 +2,8 @@
 declare(strict_types=1);
 require_once __DIR__.'/BookingEmail.php';
 require_once __DIR__.'/BookingSms.php';
-require_once __DIR__.'/Feedback.php';
+require_once __DIR__.'/DecisionLinks.php';
+require_once __DIR__.'/UserStore.php';
 final class BookingStore {
     private PDO $db;
     public function __construct(string $path) {
@@ -28,20 +29,24 @@ final class BookingStore {
             } catch (Throwable $error) { $this->db->rollBack(); throw $error; }
         }
     }
-    public function create(array $booking, string $token, string $version = 'v1', string $basePath = '/v1'): array {
+    // A new booking waits for a decision; its feedback invitation is only created once it is confirmed.
+    public function create(array $booking, string $token): array {
         $this->db->beginTransaction();
         try {
             $query = $this->db->prepare('INSERT INTO bookings(reference, submission_token, full_name, phone, destination, visit_date, booked_time, attendees, status, created_at, overnight, arrival_date, departure_date, overnight_guests, email, transport_requested, organization) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(submission_token) DO NOTHING');
-            $query->execute(['NY-'.strtoupper(bin2hex(random_bytes(12))), $token, $booking['fullName'], $booking['phone'], $booking['location'], $booking['visitDate'], $booking['timeSlot'], $booking['attendees'], 'automatically_confirmed', gmdate('Y-m-d\TH:i:s\Z'), $booking['overnight'] === 'on' ? 1 : 0, $booking['arrivalDate'], $booking['departureDate'], $booking['overnightGuests'], $booking['email'] === '' ? null : $booking['email'], ($booking['transportRequested'] ?? '') === 'on' ? 1 : 0, ($booking['organization'] ?? '') === '' ? null : $booking['organization']]);
+            $query->execute(['NY-'.strtoupper(bin2hex(random_bytes(12))), $token, $booking['fullName'], $booking['phone'], $booking['location'], $booking['visitDate'], $booking['timeSlot'], $booking['attendees'], 'pending', gmdate('Y-m-d\TH:i:s\Z'), $booking['overnight'] === 'on' ? 1 : 0, $booking['arrivalDate'], $booking['departureDate'], $booking['overnightGuests'], $booking['email'] === '' ? null : $booking['email'], ($booking['transportRequested'] ?? '') === 'on' ? 1 : 0, ($booking['organization'] ?? '') === '' ? null : $booking['organization']]);
             $created = $query->rowCount() === 1;
             $saved = $this->findByToken($token);
             if (!$saved) throw new RuntimeException('Booking not saved');
             if ($created && BookingEmail::configured()) {
-                $this->db->prepare('INSERT INTO booking_emails(booking_id, payload, idempotency_key) VALUES (?, ?, ?)')->execute([$saved['id'], json_encode(BookingEmail::payload($saved), JSON_THROW_ON_ERROR), 'booking/'.$saved['reference']]);
+                $request = $this->db->prepare("INSERT INTO booking_emails(booking_id, user_id, kind, payload, idempotency_key) VALUES (?, ?, 'decision_request', ?, ?)");
+                foreach ((new UserStore($this->db))->activeUsers() as $user) {
+                    $links = DecisionLinks::issue($this->db, $saved, $user);
+                    $request->execute([$saved['id'], $user['id'], json_encode(BookingEmail::requestPayload($saved, $user, $links['accept'], $links['reject']), JSON_THROW_ON_ERROR), 'decision-request/'.$saved['reference'].'/'.$user['id']]);
+                }
                 if ($saved['email']) $this->db->prepare("INSERT INTO booking_emails(booking_id, kind, payload, idempotency_key) VALUES (?, 'visitor', ?, ?)")->execute([$saved['id'], json_encode(BookingEmail::visitorPayload($saved), JSON_THROW_ON_ERROR), 'visitor/'.$saved['reference']]);
             }
             if ($created) BookingSms::enqueue($this->db, $saved);
-            if ($created) Feedback::schedule($this->db, $saved, $version, $basePath);
             $this->db->commit();
             return $saved;
         } catch (Throwable $error) { $this->db->rollBack(); throw $error; }

@@ -5,20 +5,25 @@ final class EmailTemplate {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
     public static function date(string $value): string {
-        return (new DateTimeImmutable($value, new DateTimeZone('Africa/Nairobi')))->format('j F Y');
+        return (new DateTimeImmutable($value, new DateTimeZone('Africa/Nairobi')))->format('D j M Y');
     }
     public static function text(array $content): string {
         $lines = $content['paragraphs'];
         $lines[] = '';
         foreach ($content['details'] as $label => $value) $lines[] = $label.': '.$value;
         foreach ($content['notes'] as $note) { $lines[] = ''; $lines[] = $note; }
-        if (!empty($content['action'])) { $lines[] = ''; $lines[] = $content['action']['label'].':'; $lines[] = $content['action']['url']; }
+        foreach (self::actions($content) as $action) { $lines[] = ''; $lines[] = $action['label'].':'; $lines[] = $action['url']; }
         if (!empty($content['contacts'])) {
             $lines[] = ''; $lines[] = $content['contactHeading'];
             foreach ($content['contacts'] as $person) $lines[] = ($person['name'] !== '' ? $person['name'].' — ' : '').$person['phone'].' · '.$person['email'];
         }
         $lines[] = ''; $lines[] = 'Warm regards,'; $lines[] = 'The Nyumba team';
         return implode("\n", $lines);
+    }
+    // Buttons in order: 'actions' is a list of {label, url, secondary?}; a lone 'action' still works.
+    // Secondary actions show as a plain link under the buttons.
+    private static function actions(array $content): array {
+        return $content['actions'] ?? (empty($content['action']) ? [] : [$content['action']]);
     }
     public static function html(array $content): string {
         $e = self::escape(...);
@@ -30,9 +35,14 @@ final class EmailTemplate {
         }
         $body .= '</table>';
         foreach ($content['notes'] as $note) $body .= '<p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#31483e;overflow-wrap:anywhere;word-break:break-word;">'.$e($note).'</p>';
-        if (!empty($content['action'])) {
-            $action = $content['action'];
-            $body .= '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:26px 0;"><tr><td bgcolor="#173f35" style="background:#173f35;border-radius:4px;mso-padding-alt:16px 24px;"><a href="'.$e($action['url']).'" style="display:inline-block;padding:16px 24px;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;">'.$e($action['label']).' &rarr;</a></td></tr></table>';
+        $actions = self::actions($content);
+        $buttons = '';
+        foreach (array_filter($actions, fn($action) => empty($action['secondary'])) as $action) {
+            $buttons .= '<td bgcolor="#173f35" style="background:#173f35;border-radius:4px;mso-padding-alt:16px 24px;"><a href="'.$e($action['url']).'" style="display:inline-block;padding:16px 24px;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;">'.$e($action['label']).' &rarr;</a></td><td width="12" style="width:12px;font-size:0;line-height:0;">&nbsp;</td>';
+        }
+        if ($buttons !== '') $body .= '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:26px 0;"><tr>'.$buttons.'</tr></table>';
+        foreach (array_filter($actions, fn($action) => !empty($action['secondary'])) as $action) {
+            $body .= '<p style="margin:0 0 18px;font-size:15px;line-height:1.7;"><a href="'.$e($action['url']).'" style="color:#245e48;font-weight:bold;">'.$e($action['label']).'</a></p>';
         }
         if (!empty($content['contacts'])) {
             $body .= '<h2 style="margin:30px 0 12px;font-size:18px;color:#173f35;">'.$e($content['contactHeading']).'</h2>';

@@ -10,7 +10,8 @@ $booking = ['reference'=>'NY-PREVIEW-2026','full_name'=>'Alex Mwangi','phone'=>'
 $items = [];
 foreach (['galana'] as $destination) foreach ([0,1] as $overnight) foreach ([0,1] as $transport) {
     $sample = array_merge($booking,['destination'=>$destination,'overnight'=>$overnight,'transport_requested'=>$transport,'arrival_date'=>$overnight?'2026-10-10':null,'departure_date'=>$overnight?'2026-10-12':null,'overnight_guests'=>$overnight?5:null]);
-    foreach (['visitor'=>BookingEmail::visitorPayload($sample),'manager'=>BookingEmail::payload($sample)] as $audience=>$payload) {
+    $user = ['id'=>1,'name'=>'Sam Example','email'=>'sam@example.com'];
+    foreach (['visitor'=>BookingEmail::visitorPayload($sample),'team'=>BookingEmail::requestPayload($sample,$user,'https://example.com/decide?token=preview-accept','https://example.com/decide?token=preview-reject')] as $audience=>$payload) {
         $name = $destination.'-'.($overnight?'overnight':'day').'-'.($transport?'transport':'own-travel').'-'.$audience;
         file_put_contents($directory.'/'.$name.'.html',$payload['html']);
         file_put_contents($directory.'/'.$name.'.txt',$payload['text']);

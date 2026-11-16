@@ -1,8 +1,8 @@
 # Booking SMS through Africa’s Talking
 
-When `BOOKING_SMS_ENABLED=1`, a new booking queues a conversational confirmation to its visitor and a notification to every configured contact for its destination. The four day/overnight and transport/no-transport scenarios have complete templates in `BookingSms`. Visitor messages address the visitor as “you”; manager messages always include the total attendee count (including the contact), visitor phone, and applicable overnight guest count. All dates/times use Africa/Nairobi. Transport and accommodation are requests subject to availability.
+When `BOOKING_SMS_ENABLED=1`, a new booking queues a “request received, not confirmed yet” SMS to its visitor and a short “new visit request” SMS to every active **admin** user, on the phone number on their account (`booking_sms.audience = 'manager'`). Templates are in `BookingSms`; the admin SMS includes the total attendee count and any transport or overnight request. All dates/times use Africa/Nairobi. Transport and accommodation are requests subject to availability.
 
-The existing destination contact configuration supplies manager numbers. Numbers are normalized using the same helper as booking validation. Duplicate normalized manager numbers are collapsed. Ambiguous numbers do not block a valid booking; their SMS is held in `review`. A visitor who is also a configured manager receives the two different audience messages.
+Admin numbers come from the users table (`bin/users.php`), not `config/contacts.php`. Numbers are normalized using the same helper as booking validation. Duplicate admin numbers are collapsed. Ambiguous numbers do not block a valid booking; their SMS is held in `review`. A visitor who is also a configured manager receives the two different audience messages.
 
 ## Server setup
 

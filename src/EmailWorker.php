@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/BookingStore.php';
+require_once __DIR__.'/Feedback.php';
 final class EmailWorker {
     private Closure $clock;
     // $table is booking_emails or account_emails; account emails (sign-in and reset links) always send.
