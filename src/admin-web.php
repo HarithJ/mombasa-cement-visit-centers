@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/AdminAuth.php';
 require_once __DIR__.'/SignIn.php';
 require_once __DIR__.'/BookingStore.php';
+require_once __DIR__.'/BookingDecisions.php';
 require_once __DIR__.'/Schedule.php';
 header('Cache-Control: no-store, private');
 header('X-Robots-Tag: noindex, nofollow');
@@ -23,23 +24,27 @@ $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 $now = $adminNow ?? time();
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $error = ''; $rows = []; $page = 1; $filters = []; $booking = null;
+// Decision panel state on a booking's page: the open confirmation step, and a rejected reason to show again.
+$decisionForm = null; $reason = ''; $reasonError = ''; $decisionHistory = [];
 // Set when a sign-in page (login, link sent, forgot, reset, expired) is shown instead of the workspace.
 $authView = null; $sentTo = ''; $resetToken = '';
 $dbPath = getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite';
 $destinations = array_map(fn($destination) => $destination['name'], Schedule::load());
 // Bookings kept from destinations no longer offered stay listed under a generic label.
+const ADMIN_STATUSES = ['pending' => 'Awaiting confirmation', 'confirmed' => 'Confirmed', 'rejected' => 'Rejected'];
 function adminPlace(array $destinations, string $key): string { return $destinations[$key] ?? 'Retired destination'; }
-foreach (['q', 'destination', 'from', 'to'] as $key) {
+foreach (['q', 'destination', 'status', 'from', 'to'] as $key) {
     $filters[$key] = is_string($_GET[$key] ?? '') ? trim($_GET[$key] ?? '') : '';
     if (isset($_GET[$key]) && !is_string($_GET[$key])) $error = 'Please check the filters.';
 }
-if (strlen($filters['q']) > 200 || ($filters['destination'] !== '' && !isset($destinations[$filters['destination']]))) $error = 'Please check the filters.';
+if (strlen($filters['q']) > 200 || ($filters['status'] !== '' && !isset(ADMIN_STATUSES[$filters['status']])) || ($filters['destination'] !== '' && !isset($destinations[$filters['destination']]))) $error = 'Please check the filters.';
 foreach (['from', 'to'] as $key) {
     $date = preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/D', $filters[$key]) ? DateTimeImmutable::createFromFormat('!Y-m-d', $filters[$key]) : false;
     if ($filters[$key] !== '' && (!$date || $date->format('Y-m-d') !== $filters[$key])) $error = 'Enter valid visit dates.';
 }
 if ($filters['from'] && $filters['to'] && $filters['from'] > $filters['to']) $error = 'The end date must be on or after the start date.';
 function adminListUrl(array $filters, int $page, string $base = '/admin'): string { return $base.'?'.http_build_query(array_filter($filters, fn($value) => $value !== '') + ['page' => $page]); }
+$page = filter_var($_GET['page'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 1000000]]) ?: 1;
 
 function ae(mixed $value): string { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function adminRedirect(string $target): never { header('Location: '.$target, true, 303); exit; }
@@ -89,6 +94,19 @@ try {
                     adminRedirect('/admin');
                 }
             } catch (UserError $invalid) { http_response_code(422); [$authView, $error] = ['reset', $invalid->errors['password']]; }
+        } elseif (preg_match('#^/admin/bookings/([1-9][0-9]{0,17})/decision$#D', $path, $match)) {
+            // The form says which status it was shown for, so a decision made meanwhile by someone else is a conflict, not an overwrite.
+            [$decision, $from] = [$_POST['decision'] ?? null, $_POST['from'] ?? null];
+            if (!in_array($decision, ['confirmed', 'rejected'], true) || !is_string($from) || !isset(ADMIN_STATUSES[$from])) { http_response_code(400); echo 'Please check the form. <a href="/admin">Back to bookings</a>'; return; }
+            if (!(new BookingStore($dbPath))->adminBooking((int)$match[1])) { http_response_code(404); echo 'Booking not found. <a href="/admin">Back to bookings</a>'; return; }
+            $reason = is_string($_POST['reason'] ?? null) ? $_POST['reason'] : '';
+            $result = adminDecisions($dbPath)->decide((int)$match[1], $currentUser, $decision, $reason, $from === 'pending' ? 'first' : 'change', $now);
+            $detailUrl = adminListUrl($filters, $page, '/admin/bookings/'.$match[1]);
+            if ($result['ok']) { $_SESSION['notice'] = $decision === 'confirmed' ? 'Visit confirmed. The visitor and the team have been told.' : 'Visit rejected. The visitor and the team have been told.'; adminRedirect($detailUrl); }
+            if ($result['error'] === 'conflict') { $_SESSION['alert'] = "Someone else decided this visit while you were looking at it. Here's the latest status."; adminRedirect($detailUrl); }
+            if ($result['error'] !== 'invalid') adminRedirect($detailUrl);
+            http_response_code(422);
+            [$decisionForm, $reasonError, $path] = ['rejected', $result['errors']['reason'], '/admin/bookings/'.$match[1]];
         } else { http_response_code(405); exit; }
     } elseif ($path === '/admin/login') {
         if ($authenticated) adminRedirect('/admin');
@@ -104,16 +122,18 @@ try {
         $authView = $signIn->resetUser($resetToken, $now) ? 'reset' : adminExpiredLink();
     }
     if (!$authView) {
-        $notice = $_SESSION['notice'] ?? ''; unset($_SESSION['notice']);
+        $notice = $_SESSION['notice'] ?? ''; $alert = $_SESSION['alert'] ?? ''; unset($_SESSION['notice'], $_SESSION['alert']);
         $detail = preg_match('#^/admin/bookings/([1-9][0-9]{0,17})$#D', $path, $match);
         if (!$detail && !in_array($path, ['/admin', '/admin/', '/admin/bookings.csv'], true)) { http_response_code(404); echo 'Page not found.'; return; }
         $store = new BookingStore($dbPath);
-        $page = filter_var($_GET['page'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 1000000]]) ?: 1;
         if ($error) http_response_code(400);
         elseif ($path === '/admin/bookings.csv') { adminBookingsCsv($store->adminBookingsExport($filters), $destinations, $now); return; }
         elseif ($detail) {
             $booking = $store->adminBooking((int)$match[1]);
             if (!$booking) { http_response_code(404); echo 'Booking not found. <a href="/admin">Back to bookings</a>'; return; }
+            $booking['id'] = (int)$match[1];
+            $decisionHistory = adminDecisions($dbPath)->history($booking['id']);
+            $decisionForm ??= in_array($_GET['decide'] ?? null, ['confirmed', 'rejected'], true) && $_GET['decide'] !== $booking['status'] ? $_GET['decide'] : null;
         } else {
             $rows = $store->adminBookings($page, $filters);
             $bookingTotals = $store->bookingTotals($filters, (new DateTimeImmutable('@'.$now))->setTimezone(new DateTimeZone('Africa/Nairobi'))->format('Y-m-d'));
@@ -138,6 +158,13 @@ function adminBookingsCsv(array $rows, array $destinations, int $now): void {
     ]), ',', '"', '');
     fclose($out);
 }
+function adminDecisions(string $dbPath): BookingDecisions {
+    $db = new PDO('sqlite:'.$dbPath, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+    $db->exec('PRAGMA busy_timeout = 5000');
+    return new BookingDecisions($db);
+}
+// A stored UTC time as Nairobi [date, time], e.g. ['30 Apr 2099', '12:00 PM'].
+function adminDecidedAt(string $value): array { $at = (new DateTimeImmutable($value, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Africa/Nairobi')); return [$at->format('j M Y'), $at->format('g:i A')]; }
 function adminCount(int $count, string $one, string $many): string { return '<strong>'.$count.'</strong> '.($count === 1 ? $one : $many); }
 function adminTimestamp(string $value): string { return (new DateTimeImmutable($value, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Africa/Nairobi'))->format('j M Y, g:i A'); }
 require __DIR__.'/views/admin.php';

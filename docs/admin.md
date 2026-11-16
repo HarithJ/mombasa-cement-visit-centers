@@ -1,6 +1,6 @@
 # Administration
 
-The PHP deployment provides `/admin` with sign-in-only, read-only access to bookings and feedback. All destinations and public designs in a deployment share its configured database. Separate deployments do not aggregate records. GitHub Pages remains a static visitor-design preview and has no admin interface.
+The PHP deployment provides `/admin`, a signed-in workspace for bookings, their decisions and feedback. All destinations and public designs in a deployment share its configured database. Separate deployments do not aggregate records. GitHub Pages remains a static visitor-design preview and has no admin interface.
 
 ## Accounts and sign-in
 
@@ -22,10 +22,25 @@ Five failed password sign-ins per direct peer address in a 15-minute window bloc
 
 ## What staff can see
 
-The list shows 25 bookings per page, newest scheduled visit date first. Search reference/name, filter destination and inclusive visit dates, and open details. For overnight bookings the visit-date filter means arrival, not every day of the stay. Detail pages show contact information, overnight dates and guest count, and submitted feedback. Missing historical emails are labelled explicitly. Feedback attendance is a visitor's answer, not staff check-in.
+The list shows 25 bookings per page, newest scheduled visit date first. Search reference/name, filter destination, status (All, Awaiting confirmation, Confirmed, Rejected) and inclusive visit dates, and open details. Filters carry through pagination, the CSV download and the link back from a booking. For overnight bookings the visit-date filter means arrival, not every day of the stay. Detail pages show contact information, overnight dates and guest count, and submitted feedback. Missing historical emails are labelled explicitly. Feedback attendance is a visitor's answer, not staff check-in.
 
-Times display in Kenya local time. No booking editing, cancellation, check-in, data export, email resend, or feedback moderation is included. Browsing never triggers emails. Private pages are not cacheable and do not include external assets or private invitation links.
+## Deciding visits
+
+Each booking page has a **Decision** panel. Any signed-in user can decide, and the decision is recorded under their account:
+
+- **Awaiting confirmation:** Confirm visit or Reject visit.
+- **Confirmed / Rejected:** Change to rejected or Change to confirmed. A booking never goes back to awaiting confirmation.
+
+Every decision has a confirmation step before it is saved, and rejecting needs a reason (at most 500 characters) that only the team sees. Saving sends the same messages as the email Accept/Reject buttons: the visitor gets an email (if they gave one) and an SMS, every other active user gets a team email, and the feedback invitation is scheduled or cancelled. Messages go through the usual queues (`BOOKING_EMAIL_ENABLED`, `BOOKING_SMS_ENABLED`).
+
+If someone else decides the visit while the page is open, nothing is overwritten: the page says so and shows the latest status. Decisions can be made or changed until 23:59 Kenya time on the visit date; after that the panel has no buttons.
+
+The panel's history lists every decision, newest first, with who made it, when and any rejection reason. Bookings made before visit approval was introduced say so instead.
+
+Admin pages run no JavaScript; every form is a plain POST with a CSRF token.
+
+Times display in Kenya local time. No booking editing, cancellation, check-in, email resend, or feedback moderation is included. Browsing never triggers emails. Private pages are not cacheable and do not include external assets or private invitation links.
 
 ## Verification
 
-Run `npm run test:admin` using the same Playwright and browser configuration as the existing integration tests. Tests start an isolated PHP server and database, use fictional visitors, and exercise sign-in with seeded fictional users, filtering, details, feedback, logout, CSRF, rate limiting, session expiry, and deactivation. `npm run test:sign-in` covers sign-in links, password reset and expired links. A temporary test router supplies a controlled clock; there is no public clock-control endpoint or production test-mode environment switch. No real emails are sent.
+Run `npm run test:admin` using the same Playwright and browser configuration as the existing integration tests. Tests start an isolated PHP server and database, use fictional visitors, and exercise sign-in with seeded fictional users, filtering, details, feedback, logout, CSRF, rate limiting, session expiry, and deactivation; `tests/admin-decisions.test.mjs` covers the status column and filter, confirming, rejecting, changing, reason rules, the visit-day cutoff, conflicts, history and queued messages. `npm run test:sign-in` covers sign-in links, password reset and expired links. A temporary test router supplies a controlled clock; there is no public clock-control endpoint or production test-mode environment switch. No real emails are sent.

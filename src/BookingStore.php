@@ -58,7 +58,7 @@ final class BookingStore {
     }
     private function bookingWhere(array $filters): array {
         $where = []; $params = [];
-        foreach (['destination' => 'destination = ?', 'from' => 'visit_date >= ?', 'to' => 'visit_date <= ?'] as $key => $clause) {
+        foreach (['destination' => 'destination = ?', 'status' => 'status = ?', 'from' => 'visit_date >= ?', 'to' => 'visit_date <= ?'] as $key => $clause) {
             if (!empty($filters[$key])) { $where[] = $clause; $params[] = $filters[$key]; }
         }
         if (($filters['q'] ?? '') !== '') {
@@ -69,7 +69,7 @@ final class BookingStore {
     }
     public function adminBookings(int $page, array $filters = []): array {
         [$where, $params] = $this->bookingWhere($filters);
-        $query = $this->db->prepare('SELECT id, reference, full_name, destination, visit_date, booked_time, attendees, EXISTS(SELECT 1 FROM feedback_responses WHERE booking_id = bookings.id) AS has_feedback, (SELECT attendance FROM feedback_responses WHERE booking_id = bookings.id) AS feedback_attendance FROM bookings'.$where.' ORDER BY visit_date DESC, id DESC LIMIT 26 OFFSET ?');
+        $query = $this->db->prepare('SELECT id, reference, full_name, destination, visit_date, booked_time, attendees, status, EXISTS(SELECT 1 FROM feedback_responses WHERE booking_id = bookings.id) AS has_feedback, (SELECT attendance FROM feedback_responses WHERE booking_id = bookings.id) AS feedback_attendance FROM bookings'.$where.' ORDER BY visit_date DESC, id DESC LIMIT 26 OFFSET ?');
         foreach ($params as $index => $value) $query->bindValue($index + 1, $value);
         $query->bindValue(count($params) + 1, ($page - 1) * 25, PDO::PARAM_INT);
         $query->execute();
