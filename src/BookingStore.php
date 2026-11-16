@@ -95,18 +95,4 @@ final class BookingStore {
         $query->execute([$id]);
         return $query->fetch() ?: null;
     }
-    public function adminLogin(string $address, string $username, string $password, int $now): bool {
-        $this->db->exec('BEGIN IMMEDIATE');
-        try {
-            $this->db->prepare('DELETE FROM admin_login_attempts WHERE started_at <= ?')->execute([$now - 900]);
-            $query = $this->db->prepare('SELECT failures FROM admin_login_attempts WHERE address = ?');
-            $query->execute([$address]);
-            $failures = (int)$query->fetchColumn();
-            $valid = $failures < 5 && password_verify($password, getenv('ADMIN_PASSWORD_HASH')) && hash_equals(getenv('ADMIN_USERNAME'), $username);
-            if ($valid) $this->db->prepare('DELETE FROM admin_login_attempts WHERE address = ?')->execute([$address]);
-            elseif ($failures < 5) $this->db->prepare('INSERT INTO admin_login_attempts(address, failures, started_at) VALUES (?, 1, ?) ON CONFLICT(address) DO UPDATE SET failures = failures + 1')->execute([$address, $now]);
-            $this->db->exec('COMMIT');
-            return $valid;
-        } catch (Throwable $error) { $this->db->exec('ROLLBACK'); throw $error; }
-    }
 }

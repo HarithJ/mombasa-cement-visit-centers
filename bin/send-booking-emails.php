@@ -4,7 +4,6 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__.'/../src/ResendClient.php';
 require __DIR__.'/../src/EmailWorker.php';
 try {
-    if (!BookingEmail::configured() && !Feedback::enabled()) throw new RuntimeException('Enable booking or feedback email delivery');
     $key = getenv('RESEND_API_KEY') ?: '';
     if ($key === '') throw new RuntimeException('RESEND_API_KEY is required');
     if (!extension_loaded('curl')) throw new RuntimeException('PHP cURL is required');
@@ -13,7 +12,11 @@ try {
     $db = new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     $db->exec('PRAGMA busy_timeout = 5000');
     $client = new ResendClient($key);
-    $result = (new EmailWorker($db))->run([$client, 'send'], getenv('RESEND_FROM') ?: '');
+    // Sign-in and reset links always send; booking and feedback emails follow their own switches.
+    $result = (new EmailWorker($db, null, 'account_emails'))->run([$client, 'send'], getenv('RESEND_FROM') ?: '');
+    if (BookingEmail::configured() || Feedback::enabled()) {
+        foreach ((new EmailWorker($db))->run([$client, 'send'], getenv('RESEND_FROM') ?: '') as $key => $count) $result[$key] += $count;
+    }
     echo json_encode($result, JSON_THROW_ON_ERROR)."\n";
     exit($result['retry'] || $result['review'] ? 1 : 0);
 } catch (Throwable $error) {

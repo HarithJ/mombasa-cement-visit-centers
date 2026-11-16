@@ -1,4 +1,4 @@
-<?php if ($path === '/admin/login') { require __DIR__.'/admin-login.php'; return; } ?>
+<?php if ($authView) { require __DIR__.'/admin-login.php'; return; } ?>
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nyumba · Administration</title>
 <link rel="icon" href="/assets/nyumba-group.svg" type="image/svg+xml">
@@ -6,6 +6,7 @@
 <header><a class="brand" href="/admin"><img src="/assets/nyumba-group.svg" alt="Nyumba Group" width="42" height="55"><span>NYUMBA GROUP<small>Visit administration</small></span></a><?php if ($authenticated): ?><form action="/admin/logout" method="post"><input type="hidden" name="csrf" value="<?=ae($_SESSION['csrf'])?>"><button>Sign out</button></form><?php endif; ?></header>
 <main>
 <?php if ($error): ?><p class="error" role="alert"><?=ae($error)?></p><?php endif; ?>
+<?php if ($notice ?? ''): ?><p class="notice" role="status"><?=ae($notice)?></p><?php endif; ?>
 <?php if ($booking): ?>
 <a href="<?=ae(adminListUrl($filters,$page))?>">Back to bookings</a>
 <?php $photoNames = ['galana'=>'01-farm']; $place = adminPlace($destinations, $booking['destination']); ?>
