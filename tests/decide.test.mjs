@@ -8,7 +8,7 @@ const {chromium}=await import(process.env.PLAYWRIGHT_MODULE_PATH||'playwright');
 const storage=await mkdtemp(join(tmpdir(),'nyumba-decide-'));
 const database=join(storage,'bookings.sqlite');
 const port=8131, origin=`http://127.0.0.1:${port}`;
-const env={...process.env,BOOKING_DB:database,BOOKING_SESSION_PATH:storage,BOOKING_EMAIL_ENABLED:'1',BOOKING_SMS_ENABLED:'1',FEEDBACK_EMAIL_ENABLED:'1',BOOKING_SITE_URL:'https://visits.example.com'};
+const env={...process.env,BOOKING_DB:database,BOOKING_SESSION_PATH:storage,BOOKING_EMAIL_ENABLED:'1',BOOKING_SMS_ENABLED:'1',FEEDBACK_EMAIL_ENABLED:'1',BOOKING_SITE_URL:'https://visits.example.com',ADMIN_TRUSTED_PROXIES:'127.0.0.1'};
 const php=(code,...args)=>{const result=spawnSync('php',['-r',code,database,...args],{env,encoding:'utf8'}); assert.equal(result.status,0,result.stderr); return result.stdout;};
 const query=(sql,...params)=>JSON.parse(php(`$db=new PDO('sqlite:'.$argv[1]); $q=$db->prepare($argv[2]); $q->execute(array_slice($argv,3)); echo json_encode($q->fetchAll(PDO::FETCH_ASSOC));`,sql,...params));
 const seedUser=(name,email)=>{const result=spawnSync('php',['tests/helpers/seed-user.php',database,name,email,'team','test-password'],{env,encoding:'utf8'}); assert.equal(result.status,0,result.stderr); return Number(result.stdout);};
@@ -44,10 +44,15 @@ try {
  const response=await page.goto(first.links[priya].accept);
  assert.equal(response.headers()['cache-control'],'no-store, private');
  assert.equal(response.headers()['referrer-policy'],'no-referrer');
+ // Behind the trusted proxy, the session cookie is Secure when the proxy says the request was HTTPS.
+ for(const [proto,secure] of [['https',true],['http',false]]) {
+  const cookie=(await fetch(first.links[priya].accept,{headers:{'X-Forwarded-Proto':proto}})).headers.get('set-cookie');
+  assert.equal(/;\s*secure/i.test(cookie),secure,`Secure cookie over ${proto}: ${cookie}`);
+ }
  assert.equal(await page.title(),`Visit ${first.reference} · Galana Farm`);
  assert.equal(await page.locator('h1').innerText(),'Accept this visit?');
  const summary=await page.locator('.summary').innerText();
- for(const text of ['Vera Visitor (Acme School)','Fri 1 May 2099 at 10:00 am · 3 people','Transport: Requested','Phone 0712345678 · Email vera@example.test']) assert.ok(summary.includes(text),text);
+ for(const text of ['Vera Visitor (Acme School)','Fri 1 May 2099 at 10:00 am EAT · 3 people','Transport: Requested','Phone 0712345678 · Email vera@example.test']) assert.ok(summary.includes(text),text);
  assert.ok(!summary.includes('Overnight stay'));
  assert.ok((await page.locator('main').innerText()).includes("Vera Visitor will be told by email and SMS that their visit is confirmed. The rest of the team will be told you accepted it."));
  assert.equal(status(first.id),'pending'); assert.deepEqual(history(first.id),[]);

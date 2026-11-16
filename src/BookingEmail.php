@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/EmailTemplate.php';
+require_once __DIR__.'/PhoneNumber.php';
+require_once __DIR__.'/VisitScenario.php';
 // The emails sent when a visit is requested: the visitor's "request received" and each user's "please confirm".
 final class BookingEmail {
     public static function configured(): bool { return getenv('BOOKING_EMAIL_ENABLED') === '1'; }
@@ -36,17 +38,17 @@ final class BookingEmail {
         $content = [
             'title' => 'A new visit to confirm.', 'eyebrow' => 'Needs a decision', 'preheader' => $facts['preheader'],
             'paragraphs' => [
-                'Hi '.explode(' ', trim($user['name']))[0].',',
+                'Hi '.EmailTemplate::firstName($user['name']).',',
                 $booking['full_name'].' has asked to visit '.$facts['place'].' on '.$facts['date'].' at '.$facts['time'].' for a total of '.$facts['people'].'.',
                 $scenarioLines[$facts['scenario']],
                 'Please accept or reject the visit. The first person to decide settles it, and everyone else is told.',
             ],
-            'details' => $facts['details'] + ['Visitor' => $booking['full_name'], 'Organization' => ($booking['organization'] ?? '') ?: 'Not provided', 'Phone' => $booking['phone'], 'Email' => $booking['email'] ?: 'Not provided'],
+            'details' => self::visitorDetails($booking, $facts),
             'notes' => ["These buttons are personal to you; please don't forward this email. They work until 23:59 on ".$facts['date'].'. You can also decide from the admin panel.'],
             'actions' => [
                 ['label' => 'Accept visit', 'url' => $acceptUrl],
                 ['label' => 'Reject visit', 'url' => $rejectUrl],
-                ['label' => 'Call the visitor', 'url' => 'tel:'.preg_replace('/[^+0-9]/', '', $booking['phone']), 'secondary' => true],
+                ['label' => 'Call the visitor', 'url' => 'tel:'.PhoneNumber::tel($booking['phone']), 'secondary' => true],
             ],
             'footer' => 'Please keep your booking reference: '.$booking['reference'],
         ];
@@ -81,7 +83,7 @@ final class BookingEmail {
         $content = [
             'title' => $changed ? 'We can no longer host your visit on this date.' : "We can't host your visit on this date.", 'eyebrow' => 'Visit not confirmed', 'preheader' => $facts['preheader'],
             'paragraphs' => ['Hi '.$booking['full_name'].',', $changed ? "Sorry, we're no longer able to host your visit to $visit, which we'd confirmed earlier." : "Sorry, we're unable to confirm your visit to $visit.", 'Please contact '.$decider['name'].' to talk about it or find another date:'],
-            'contacts' => [['name' => $decider['name'], 'phone' => $decider['phone'], 'tel' => preg_replace('/[^+0-9]/', '', $decider['phone']), 'email' => $decider['email']]],
+            'contacts' => [['name' => $decider['name'], 'phone' => $decider['phone'], 'tel' => PhoneNumber::tel($decider['phone']), 'email' => $decider['email']]],
             'contactsFirst' => true,
             'details' => ['Booking reference' => $ref, 'Visit date' => $facts['date'], 'Time' => $facts['time'], 'Attendees' => (string)$booking['attendees'], 'Status' => 'Not confirmed'], 'notes' => [],
             'footer' => 'Please quote your booking reference: '.$ref,
@@ -100,7 +102,7 @@ final class BookingEmail {
         $content = [
             'title' => $by.'.', 'eyebrow' => $confirmed ? 'Visit confirmed' : 'Visit rejected', 'preheader' => $facts['preheader'],
             'paragraphs' => [$first.' '.($confirmed ? "$visitor has been told by email and SMS. No action needed." : "The visitor has been asked to contact $who.")],
-            'details' => $facts['details'] + ['Visitor' => $visitor, 'Organization' => ($booking['organization'] ?? '') ?: 'Not provided', 'Phone' => $booking['phone'], 'Email' => $booking['email'] ?: 'Not provided'],
+            'details' => self::visitorDetails($booking, $facts),
             'notes' => $confirmed ? [] : ['Reason: '.$reason],
             'actions' => [['label' => 'View in admin panel', 'url' => $adminUrl, 'secondary' => true]],
             'footer' => 'Please keep your booking reference: '.$booking['reference'],
@@ -118,9 +120,14 @@ final class BookingEmail {
         return [
             'team' => $team, 'place' => $team['name'], 'date' => $date, 'time' => $time, 'details' => $details,
             'people' => $booking['attendees'].' '.((int)$booking['attendees'] === 1 ? 'person' : 'people'),
-            'scenario' => (!empty($booking['overnight']) ? 'overnight' : 'day').(!empty($booking['transport_requested']) ? '_transport' : ''),
+            'scenario' => VisitScenario::key($booking),
             'preheader' => $team['name'].' · '.$date.' · '.$time.' · '.$booking['reference'],
         ];
+    }
+
+    // The visit details plus who the visitor is and how to reach them, for the team's emails.
+    private static function visitorDetails(array $booking, array $facts): array {
+        return $facts['details'] + ['Visitor' => $booking['full_name'], 'Organization' => ($booking['organization'] ?? '') ?: 'Not provided', 'Phone' => $booking['phone'], 'Email' => $booking['email'] ?: 'Not provided'];
     }
 
     private static function payload(array $to, string $subject, array $content): array {

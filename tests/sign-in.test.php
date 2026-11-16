@@ -3,6 +3,7 @@ declare(strict_types=1);
 // Staff sign-in: passwords, sign-in links, password resets and the shared single-use token helper.
 require __DIR__.'/../src/SignIn.php';
 require __DIR__.'/../src/EmailWorker.php';
+require_once __DIR__.'/../src/DecisionLinks.php';
 function check(bool $ok, string $message): void { if (!$ok) throw new RuntimeException($message); }
 function throttled(callable $action): bool { try { $action(); return false; } catch (TooManyAttempts) { return true; } }
 putenv('BOOKING_SITE_URL=https://visits.example.com');
@@ -91,9 +92,11 @@ try {
     $rejected('twelve chars', 'twelve charz', "The passwords don't match.");
     $signIn->requestLink('ada@new.example.test', $now);
     $unusedLink = $tokenFrom($deliver($now)[0], '/admin/login/link');
-    $before = $users->find($ada['id']);
+    $visit = (new BookingStore($path))->create(['fullName' => 'Vera Visitor', 'phone' => '0712345678', 'email' => '', 'location' => 'galana', 'visitDate' => '2099-05-01', 'timeSlot' => '10:00', 'attendees' => '3', 'overnight' => false, 'arrivalDate' => null, 'departureDate' => null, 'overnightGuests' => null, 'organization' => '', 'transportRequested' => false], 'reset-visit');
+    $decisionLinks = DecisionLinks::issue($db, $visit, $users->find($ada['id']));
     $saved = $signIn->resetPassword($reset, 'twelve chars', 'twelve chars', $now + 10);
-    check($saved['id'] === $ada['id'] && $saved['credential_version'] > $before['credential_version'], 'Saving a password moves the credential counter on, ending other sessions');
+    check($saved['id'] === $ada['id'], 'Saving a password returns the user');
+    foreach ($decisionLinks as $url) check(DecisionLinks::find($db, substr($url, -64)) !== null, "Saving a password keeps the user's Accept/Reject links working");
     check($signIn->withPassword('10.0.0.9', 'ada@new.example.test', 'twelve chars', $now + 20)['id'] === $ada['id'], 'The new password works');
     check($signIn->withPassword('10.0.0.9', 'ada@new.example.test', 'correct horse battery', $now + 20) === null, 'The old password no longer works');
     check($signIn->resetPassword($reset, 'another password', 'another password', $now + 30) === null, 'A reset link works once');

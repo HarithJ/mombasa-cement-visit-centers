@@ -18,14 +18,11 @@ final class AccountEmail {
         $intro = $adminName.' has given you access to the Visit Nyumba admin panel, where you can see bookings and accept or reject visits to Galana Farm.';
         $content = [
             'eyebrow' => 'Visit Nyumba admin', 'title' => 'Welcome to Visit Nyumba admin', 'preheader' => $intro,
-            'paragraphs' => ['Hi '.self::firstName($user).', '.$intro, "From now on you'll get an email with Accept and Reject buttons whenever someone books a visit."],
+            'paragraphs' => ['Hi '.EmailTemplate::firstName($user['name']).', '.$intro, "From now on you'll get an email with Accept and Reject buttons whenever someone books a visit."],
             'details' => [], 'notes' => ['After that, sign in with "Email me a sign-in link", or set a password with "Forgot password?".'],
             'action' => ['label' => 'Sign in', 'url' => $link], 'footer' => '',
         ];
         return ['to' => [$user['email']], 'subject' => "You've been added to Visit Nyumba admin", 'text' => EmailTemplate::text($content), 'html' => EmailTemplate::html($content)];
-    }
-    public static function firstName(array $user): string {
-        return preg_split('/\s+/', trim($user['name']))[0];
     }
     // $kind is login, reset or welcome; $key makes the send idempotent.
     public static function queue(PDO $db, array $user, string $kind, array $payload, string $key): void {
@@ -35,7 +32,7 @@ final class AccountEmail {
     private static function build(array $user, string $subject, string $title, string $body, array $action, string $footer): array {
         $content = [
             'eyebrow' => 'Visit Nyumba admin', 'title' => $title, 'preheader' => ucfirst($body),
-            'paragraphs' => ['Hi '.self::firstName($user).', '.$body], 'details' => [], 'notes' => [],
+            'paragraphs' => ['Hi '.EmailTemplate::firstName($user['name']).', '.$body], 'details' => [], 'notes' => [],
             'action' => $action, 'footer' => $footer,
         ];
         return ['to' => [$user['email']], 'subject' => $subject, 'text' => EmailTemplate::text($content), 'html' => EmailTemplate::html($content)];

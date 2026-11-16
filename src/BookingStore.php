@@ -6,6 +6,13 @@ require_once __DIR__.'/DecisionLinks.php';
 require_once __DIR__.'/UserStore.php';
 final class BookingStore {
     private PDO $db;
+    // A separate connection to the migrated database at $path, for modules that take a PDO.
+    public static function connect(string $path): PDO {
+        new self($path);
+        $db = new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+        $db->exec('PRAGMA busy_timeout = 5000');
+        return $db;
+    }
     public function __construct(string $path) {
         $directory = dirname($path);
         if (!is_dir($directory) && !mkdir($directory, 0700, true) && !is_dir($directory)) throw new RuntimeException('Storage unavailable');

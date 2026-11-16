@@ -72,7 +72,14 @@ try {
  assert.equal(sent.length,1); assert.deepEqual(sent[0].to,['ada@example.test']);
  const link=linkIn(sent[0],'/admin/login/link');
  const [linkContext,linkPage]=await fresh();
+ // Opening the link only asks to sign in, so a mail scanner fetching it doesn't use it up.
+ for(let i=0;i<2;i++) {
+  assert.equal((await linkPage.goto(link)).status(),200);
+  assert.equal(await linkPage.getByRole('heading',{name:'Sign in.'}).count(),1,'Opening the link shows a Sign in page');
+  assert.equal(await signedIn((await fresh())[1]),false);
+ }
  await linkPage.goto(link);
+ await linkPage.getByRole('button',{name:'Sign in',exact:true}).click();
  assert.equal(await linkPage.getByRole('heading',{name:'Bookings',exact:true}).count(),1,'The emailed link signs in');
  assert.doesNotMatch(linkPage.url(),/token/);
  const [reuseContext,reusePage]=await fresh();
@@ -127,6 +134,7 @@ try {
 
  // Every form needs the session's CSRF token, including the public sign-in forms.
  for(const path of ['/admin/login','/admin/login/link','/admin/forgot','/admin/reset']) assert.equal((await context.request.post(origin+path,{form:{email:'ada@example.test',csrf:'bad'}})).status(),403);
+ assert.equal((await context.request.post(origin+'/admin/login/link',{form:{token:'a'.repeat(64),csrf:'bad'}})).status(),403);
  const cookie=(await resetContext.cookies()).find(c=>c.name==='nyumba_admin');
  assert.equal(cookie.path,'/admin'); assert.equal(cookie.httpOnly,true); assert.equal(cookie.sameSite,'Lax');
  console.log('PASS CSRF on every sign-in form and an /admin-scoped cookie');

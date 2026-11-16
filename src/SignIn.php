@@ -8,10 +8,7 @@ final class TooManyAttempts extends RuntimeException {}
 final class SignIn {
     public function __construct(private PDO $db) {}
     public static function open(string $path): self {
-        new BookingStore($path);
-        $db = new PDO('sqlite:'.$path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
-        $db->exec('PRAGMA busy_timeout = 5000');
-        return new self($db);
+        return new self(BookingStore::connect($path));
     }
     // Five failures per direct peer address in 15 minutes block further attempts, right or wrong.
     public function withPassword(string $address, string $email, string $password, int $now): ?array {
@@ -35,6 +32,11 @@ final class SignIn {
     public function requestLink(string $email, int $now): void {
         $this->sendLink($email, 'login', $now);
     }
+    // The user a login or welcome link is for, while it is still valid. Opening a link only checks it,
+    // so mail scanners that fetch links don't use them up; signing in is a separate POST.
+    public function linkUser(string $token, int $now): ?array {
+        return AuthTokens::find($this->db, $token, ['login', 'welcome'], $now);
+    }
     // Signs in with a login or welcome link, once.
     public function withLink(string $token, int $now): ?array {
         return AuthTokens::consume($this->db, $token, ['login', 'welcome'], $now);
@@ -47,7 +49,8 @@ final class SignIn {
     public function resetUser(string $token, int $now): ?array {
         return AuthTokens::find($this->db, $token, ['reset'], $now);
     }
-    // Saves a new password with a reset link (once) and ends the user's other sessions and links.
+    // Saves a new password with a reset link (once), ends the user's other sessions and stops their other
+    // unused sign-in and reset links. Their Accept/Reject links keep working.
     // Returns null when the link is no longer valid.
     public function resetPassword(string $token, string $password, string $confirm, int $now): ?array {
         $this->db->exec('BEGIN IMMEDIATE');
@@ -56,8 +59,9 @@ final class SignIn {
             if (mb_strlen($password) < 12) throw new UserError(['password' => 'Use at least 12 characters.']);
             if (!hash_equals($password, $confirm)) throw new UserError(['password' => "The passwords don't match."]);
             $user = AuthTokens::consume($this->db, $token, ['reset'], $now);
-            $this->db->prepare('UPDATE users SET password_hash = ?, credential_version = credential_version + 1, updated_at = ? WHERE id = ?')
+            $this->db->prepare('UPDATE users SET password_hash = ?, session_version = session_version + 1, updated_at = ? WHERE id = ?')
                 ->execute([password_hash($password, PASSWORD_DEFAULT), gmdate('Y-m-d\TH:i:s\Z', $now), $user['id']]);
+            $this->db->prepare('UPDATE auth_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL')->execute([$now, $user['id']]);
             $this->db->exec('COMMIT');
         } catch (Throwable $error) { $this->db->exec('ROLLBACK'); throw $error; }
         return (new UserStore($this->db))->find($user['id']);

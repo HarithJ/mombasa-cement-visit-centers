@@ -29,7 +29,7 @@ $adminLink = $booking ? '/admin/bookings/'.$booking['id'] : '/admin';
 <?php endif; ?>
 <?php else: ?>
 <?php if ($page === 'status'): ?>
-<h1><?= $e(['confirmed' => 'Already confirmed.', 'rejected' => 'Already rejected.', 'pending' => 'Still awaiting a decision.'][$booking['status']]) ?></h1>
+<h1><?= $e(BookingStatus::LINK_HEADINGS[$booking['status']]) ?></h1>
 <?php if ($booking['status'] !== 'pending' && $latest): $at = (new DateTimeImmutable($latest['decided_at']))->setTimezone($nairobi); ?>
 <p><?= $e(($booking['status'] === 'confirmed' ? 'Confirmed' : 'Rejected').' by '.$latest['user_name'].' on '.$at->format('j M').' at '.$at->format('H:i').'.') ?></p>
 <?php endif; ?>
@@ -43,7 +43,7 @@ $adminLink = $booking ? '/admin/bookings/'.$booking['id'] : '/admin';
 <?php endif; ?>
 <ul class="summary">
 <li><strong><?= $e($visitor.(($booking['organization'] ?? '') !== '' ? ' ('.$booking['organization'].')' : '')) ?></strong></li>
-<li><?= $e((new DateTimeImmutable($booking['visit_date'], $nairobi))->format('D j M Y').' at '.(new DateTimeImmutable($booking['booked_time'], $nairobi))->format('g:i a').' · '.$booking['attendees'].' '.((int)$booking['attendees'] === 1 ? 'person' : 'people')) ?></li>
+<li><?= $e((new DateTimeImmutable($booking['visit_date'], $nairobi))->format('D j M Y').' at '.(new DateTimeImmutable($booking['booked_time'], $nairobi))->format('g:i a').' EAT · '.$booking['attendees'].' '.((int)$booking['attendees'] === 1 ? 'person' : 'people')) ?></li>
 <li>Transport: <?= $booking['transport_requested'] ? 'Requested' : 'Not requested' ?></li>
 <?php if ($booking['overnight']): ?><li>Overnight stay: Requested</li><?php endif; ?>
 <li>Phone <?= $e($booking['phone']) ?><?= $booking['email'] ? ' · Email '.$e($booking['email']) : '' ?></li>

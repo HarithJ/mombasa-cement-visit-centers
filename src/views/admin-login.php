@@ -1,6 +1,6 @@
 <?php
-// Sign-in pages share one layout; $authView picks the panel: login, link-sent, forgot, reset-sent, reset or expired.
-$titles = ['login' => 'Sign in', 'link-sent' => 'Check your email', 'forgot' => 'Reset your password', 'reset-sent' => 'Check your email', 'reset' => 'Set a new password', 'expired' => 'Link expired'];
+// Sign-in pages share one layout; $authView picks the panel: login, link, link-sent, forgot, reset-sent, reset or expired.
+$titles = ['login' => 'Sign in', 'link' => 'Sign in', 'link-sent' => 'Check your email', 'forgot' => 'Reset your password', 'reset-sent' => 'Check your email', 'reset' => 'Set a new password', 'expired' => 'Link expired'];
 $csrfField = '<input type="hidden" name="csrf" value="'.ae($_SESSION['csrf']).'">';
 ?>
 <!doctype html>
@@ -46,6 +46,13 @@ $csrfField = '<input type="hidden" name="csrf" value="'.ae($_SESSION['csrf']).'"
                     <button class="secondary" type="submit" formaction="/admin/login/link">Email me a sign-in link</button>
                 </form>
                 <p class="access-note">For authorised team members.<br>Need access? Ask Harith or Apoorv.</p>
+<?php elseif ($authView === 'link'): ?>
+                <h2 id="login-heading">Sign in.</h2>
+                <form method="post" action="/admin/login/link">
+                    <?=$csrfField?>
+                    <input type="hidden" name="token" value="<?=ae($linkToken)?>">
+                    <button type="submit">Sign in <span aria-hidden="true">↗</span></button>
+                </form>
 <?php elseif ($authView === 'link-sent' || $authView === 'reset-sent'): ?>
                 <h2 id="login-heading">Check your email.</h2>
                 <p class="intro"><?php if ($authView === 'link-sent'): ?>If <?=ae($sentTo)?> has an account, we've sent a sign-in link. It works once and expires in 15 minutes.<?php else: ?>If <?=ae($sentTo)?> has an account, we've sent a reset link. It expires in 1 hour.<?php endif; ?></p>

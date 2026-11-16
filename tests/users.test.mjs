@@ -75,6 +75,7 @@ try {
  await setClock(clock+172800-60);
  const [beaContext,bea]=await fresh();
  await bea.goto(link);
+ await bea.getByRole('button',{name:'Sign in',exact:true}).click();
  assert.equal(await bea.getByRole('heading',{name:'Bookings',exact:true}).count(),1,'The welcome link signs in within 48 hours');
  assert.equal(await bea.getByRole('link',{name:'Users',exact:true}).count(),0,'The new team user has no Users item');
  assert.equal((await (await fresh())[1].goto(link)).status(),410,'The welcome link works once');
