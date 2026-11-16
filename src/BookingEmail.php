@@ -53,6 +53,61 @@ final class BookingEmail {
         return self::payload([$user['email']], 'Please confirm: visit to '.$facts['place'].' on '.$facts['date'].' — '.$booking['reference'], $content);
     }
 
+    // The visitor's email after a decision. A rejection names the decider as the contact and never gives the reason.
+    // $changed: the booking was decided before, so this reverses an earlier decision.
+    public static function decisionVisitorPayload(array $booking, array $decider, string $decision, bool $changed): array {
+        $facts = self::facts($booking);
+        $ref = $booking['reference'];
+        $visit = $facts['place'].' on '.$facts['date'].' at '.$facts['time'];
+        if ($decision === 'confirmed') {
+            $scenarioLines = [
+                'day' => 'Keep your booking reference handy, and get in touch if you have any questions before you arrive.',
+                'day_transport' => 'Your transport is confirmed too. Our team will contact you about pickup details.',
+                'overnight' => "Your overnight stay is confirmed too. Our team will contact you if there's anything to arrange.",
+                'overnight_transport' => 'Your transport and overnight stay are confirmed too. Our team will contact you about pickup details.',
+            ];
+            $details = $facts['details'];
+            if (!empty($booking['transport_requested'])) $details['Transport'] = 'Confirmed';
+            if (!empty($booking['overnight'])) $details['Overnight stay'] = 'Confirmed';
+            $content = [
+                'title' => 'We look forward to welcoming you.', 'eyebrow' => 'Your visit is confirmed', 'preheader' => $facts['preheader'],
+                'paragraphs' => ['Hi '.$booking['full_name'].',', $changed ? "Good news: we've been able to confirm your visit to $visit after all." : "Good news: your visit to $visit is confirmed.", $scenarioLines[$facts['scenario']]],
+                'details' => $details + ['Status' => 'Confirmed'], 'notes' => [],
+                'contacts' => $facts['team']['people'], 'contactHeading' => 'Questions before your visit?',
+                'footer' => 'Please keep your booking reference: '.$ref,
+            ];
+            return self::payload([$booking['email']], 'Your visit to '.$facts['place'].' is confirmed — '.$ref, $content);
+        }
+        $content = [
+            'title' => $changed ? 'We can no longer host your visit on this date.' : "We can't host your visit on this date.", 'eyebrow' => 'Visit not confirmed', 'preheader' => $facts['preheader'],
+            'paragraphs' => ['Hi '.$booking['full_name'].',', $changed ? "Sorry, we're no longer able to host your visit to $visit, which we'd confirmed earlier." : "Sorry, we're unable to confirm your visit to $visit.", 'Please contact '.$decider['name'].' to talk about it or find another date:'],
+            'contacts' => [['name' => $decider['name'], 'phone' => $decider['phone'], 'tel' => preg_replace('/[^+0-9]/', '', $decider['phone']), 'email' => $decider['email']]],
+            'contactsFirst' => true,
+            'details' => ['Booking reference' => $ref, 'Visit date' => $facts['date'], 'Time' => $facts['time'], 'Attendees' => (string)$booking['attendees'], 'Status' => 'Not confirmed'], 'notes' => [],
+            'footer' => 'Please quote your booking reference: '.$ref,
+        ];
+        return self::payload([$booking['email']], ($changed ? 'Change to your visit to ' : 'About your visit request to ').$facts['place'].' — '.$ref, $content);
+    }
+
+    // One other user's "who decided what" email: no buttons, just a link to the booking in the admin panel.
+    public static function decisionTeamPayload(array $booking, array $recipient, array $decider, string $decision, ?string $reason, bool $changed, string $adminUrl): array {
+        $facts = self::facts($booking);
+        $who = $decider['name']; $visitor = $booking['full_name'];
+        $confirmed = $decision === 'confirmed';
+        $visit = $visitor."'s visit to ".$facts['place'].' on '.$facts['date'].' at '.$facts['time'].' ('.$facts['people'].')';
+        $first = $changed ? "$who changed $visit from ".($confirmed ? 'rejected to confirmed' : 'confirmed to rejected').'.' : "$who ".($confirmed ? 'confirmed' : 'rejected')." $visit.";
+        $by = ($changed ? 'Changed' : ($confirmed ? 'Confirmed' : 'Rejected')).' by '.$who;
+        $content = [
+            'title' => $by.'.', 'eyebrow' => $confirmed ? 'Visit confirmed' : 'Visit rejected', 'preheader' => $facts['preheader'],
+            'paragraphs' => [$first.' '.($confirmed ? "$visitor has been told by email and SMS. No action needed." : "The visitor has been asked to contact $who.")],
+            'details' => $facts['details'] + ['Visitor' => $visitor, 'Organization' => ($booking['organization'] ?? '') ?: 'Not provided', 'Phone' => $booking['phone'], 'Email' => $booking['email'] ?: 'Not provided'],
+            'notes' => $confirmed ? [] : ['Reason: '.$reason],
+            'actions' => [['label' => 'View in admin panel', 'url' => $adminUrl, 'secondary' => true]],
+            'footer' => 'Please keep your booking reference: '.$booking['reference'],
+        ];
+        return self::payload([$recipient['email']], $by.': visit on '.$facts['date'].' — '.$booking['reference'], $content);
+    }
+
     private static function facts(array $booking): array {
         $contacts = require __DIR__.'/../config/contacts.php';
         $team = $contacts[$booking['destination']];

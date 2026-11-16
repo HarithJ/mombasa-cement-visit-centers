@@ -2,14 +2,12 @@
 declare(strict_types=1);
 require __DIR__.'/../src/EmailWorker.php';
 require_once __DIR__.'/../src/UserStore.php';
+require_once __DIR__.'/../src/BookingDecisions.php';
 function verify(bool $value, string $message): void { if (!$value) throw new RuntimeException($message); }
-// Feedback invitations are created when a booking is confirmed; this stands in for that decision.
+// Feedback invitations are created when a booking is confirmed, so book and confirm it.
 function bookConfirmed(BookingStore $store, PDO $db, array $input, string $token): array {
     $saved = $store->create($input, $token);
-    if ($saved['status'] === 'pending') {
-        $db->prepare("UPDATE bookings SET status = 'confirmed' WHERE id = ?")->execute([$saved['id']]);
-        Feedback::schedule($db, $saved, 'v1', '/v1');
-    }
+    if ($saved['status'] === 'pending') (new BookingDecisions($db))->decide((int)$saved['id'], (new UserStore($db))->activeUsers()[0], 'confirmed', null, 'first', strtotime('2099-04-01T00:00:00Z'));
     return $saved;
 }
 $directory = sys_get_temp_dir().'/feedback-worker-'.bin2hex(random_bytes(8));
@@ -44,7 +42,7 @@ try {
     putenv('FEEDBACK_EMAIL_ENABLED=0');
     $messages=[];
     $sent = $worker->run(function($payload) use (&$messages) {$messages[]=$payload; return 'immediate';}, 'test@example.com');
-    verify($sent['accepted']===2, 'Pausing feedback must not pause immediate emails');
+    verify($sent['accepted']===3, 'Pausing feedback must not pause immediate emails (request, received, confirmed)');
     putenv('FEEDBACK_EMAIL_ENABLED=1');
     verify($worker->run(fn()=>'feedback-three', 'test@example.com')['accepted']===1, 'Resume pending invitation');
     putenv('FEEDBACK_EMAIL_ENABLED=0');

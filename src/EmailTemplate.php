@@ -9,16 +9,31 @@ final class EmailTemplate {
     }
     public static function text(array $content): string {
         $lines = $content['paragraphs'];
+        if (!empty($content['contactsFirst'])) array_push($lines, ...self::contactLines($content));
         $lines[] = '';
         foreach ($content['details'] as $label => $value) $lines[] = $label.': '.$value;
         foreach ($content['notes'] as $note) { $lines[] = ''; $lines[] = $note; }
         foreach (self::actions($content) as $action) { $lines[] = ''; $lines[] = $action['label'].':'; $lines[] = $action['url']; }
-        if (!empty($content['contacts'])) {
-            $lines[] = ''; $lines[] = $content['contactHeading'];
-            foreach ($content['contacts'] as $person) $lines[] = ($person['name'] !== '' ? $person['name'].' — ' : '').$person['phone'].' · '.$person['email'];
-        }
+        if (empty($content['contactsFirst'])) array_push($lines, ...self::contactLines($content));
         $lines[] = ''; $lines[] = 'Warm regards,'; $lines[] = 'The Nyumba team';
         return implode("\n", $lines);
+    }
+    // Contacts follow the buttons, or the paragraphs when 'contactsFirst' is set; 'contactHeading' is optional.
+    private static function contactLines(array $content): array {
+        if (empty($content['contacts'])) return [];
+        $lines = [''];
+        if (!empty($content['contactHeading'])) $lines[] = $content['contactHeading'];
+        foreach ($content['contacts'] as $person) $lines[] = ($person['name'] !== '' ? $person['name'].' — ' : '').$person['phone'].' · '.$person['email'];
+        return $lines;
+    }
+    private static function contactsHtml(array $content): string {
+        if (empty($content['contacts'])) return '';
+        $e = self::escape(...);
+        $html = empty($content['contactHeading']) ? '' : '<h2 style="margin:30px 0 12px;font-size:18px;color:#173f35;">'.$e($content['contactHeading']).'</h2>';
+        foreach ($content['contacts'] as $person) {
+            $html .= '<p style="margin:0 0 16px;font-size:14px;line-height:1.9;overflow-wrap:anywhere;word-break:break-word;">'.($person['name'] !== '' ? '<strong>'.$e($person['name']).'</strong><br>' : '').'<a href="tel:'.$e($person['tel']).'" style="color:#245e48;">'.$e($person['phone']).'</a><br><a href="mailto:'.$e($person['email']).'" style="color:#245e48;">'.$e($person['email']).'</a></p>';
+        }
+        return $html;
     }
     // Buttons in order: 'actions' is a list of {label, url, secondary?}; a lone 'action' still works.
     // Secondary actions show as a plain link under the buttons.
@@ -29,6 +44,7 @@ final class EmailTemplate {
         $e = self::escape(...);
         $body = '';
         foreach ($content['paragraphs'] as $paragraph) $body .= '<p style="margin:0 0 18px;font-size:16px;line-height:1.7;color:#31483e;overflow-wrap:anywhere;word-break:break-word;">'.$e($paragraph).'</p>';
+        if (!empty($content['contactsFirst'])) $body .= self::contactsHtml($content);
         $body .= '<table width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:26px 0;">';
         foreach ($content['details'] as $label => $value) {
             $body .= '<tr><th scope="row" align="left" valign="top" style="width:36%;padding:13px 10px 13px 0;border-bottom:1px solid #dfe5dc;font-size:13px;line-height:1.6;font-weight:400;color:#526459;">'.$e($label).': </th><td valign="top" style="padding:13px 0;border-bottom:1px solid #dfe5dc;font-size:14px;line-height:1.6;color:#173f35;font-weight:600;word-break:break-word;overflow-wrap:anywhere;">'.$e((string)$value).'</td></tr>';
@@ -44,12 +60,7 @@ final class EmailTemplate {
         foreach (array_filter($actions, fn($action) => !empty($action['secondary'])) as $action) {
             $body .= '<p style="margin:0 0 18px;font-size:15px;line-height:1.7;"><a href="'.$e($action['url']).'" style="color:#245e48;font-weight:bold;">'.$e($action['label']).'</a></p>';
         }
-        if (!empty($content['contacts'])) {
-            $body .= '<h2 style="margin:30px 0 12px;font-size:18px;color:#173f35;">'.$e($content['contactHeading']).'</h2>';
-            foreach ($content['contacts'] as $person) {
-                $body .= '<p style="margin:0 0 16px;font-size:14px;line-height:1.9;overflow-wrap:anywhere;word-break:break-word;">'.($person['name'] !== '' ? '<strong>'.$e($person['name']).'</strong><br>' : '').'<a href="tel:'.$e($person['tel']).'" style="color:#245e48;">'.$e($person['phone']).'</a><br><a href="mailto:'.$e($person['email']).'" style="color:#245e48;">'.$e($person['email']).'</a></p>';
-            }
-        }
+        if (empty($content['contactsFirst'])) $body .= self::contactsHtml($content);
         return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'.$e($content['title']).'</title></head>'
             .'<body style="margin:0;padding:0;background:#f3f2eb;font-family:Arial,Helvetica,sans-serif;">'
             .'<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">'.$e($content['preheader']).'</div>'

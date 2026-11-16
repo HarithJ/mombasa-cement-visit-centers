@@ -3,6 +3,7 @@ declare(strict_types=1);
 if (preg_match('#^/admin(?:/|$)#', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '')) { require __DIR__.'/../src/admin-web.php'; exit; }
 $uiVersion = 'v3';
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/feedback') { require __DIR__.'/../src/feedback-web.php'; exit; }
+if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/decide') { require __DIR__.'/../src/decide-web.php'; exit; }
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/privacy') { require __DIR__.'/../src/privacy-web.php'; exit; }
 require __DIR__.'/../src/web.php';
 function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
