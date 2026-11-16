@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/AdminAuth.php';
+require_once __DIR__.'/SignIn.php';
 require_once __DIR__.'/BookingStore.php';
 require_once __DIR__.'/Schedule.php';
 header('Cache-Control: no-store, private');
@@ -12,7 +13,7 @@ header("Content-Security-Policy: default-src 'none'; img-src 'self'; style-src '
 $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
 $trusted = array_filter(array_map('trim', explode(',', getenv('ADMIN_TRUSTED_PROXIES') ?: '')));
 if (in_array($_SERVER['REMOTE_ADDR'] ?? '', $trusted, true)) $secure = ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
-if (!AdminAuth::configured() || (!$secure && PHP_SAPI !== 'cli-server')) { http_response_code(503); echo 'Administration unavailable.'; return; }
+if (!$secure && PHP_SAPI !== 'cli-server') { http_response_code(503); echo 'Administration unavailable.'; return; }
 ini_set('session.use_strict_mode', '1');
 if ($sessionPath = getenv('BOOKING_SESSION_PATH')) session_save_path($sessionPath);
 session_name('nyumba_admin');
@@ -22,6 +23,9 @@ $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 $now = $adminNow ?? time();
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $error = ''; $rows = []; $page = 1; $filters = []; $booking = null;
+// Set when a sign-in page (login, link sent, forgot, reset, expired) is shown instead of the workspace.
+$authView = null; $sentTo = ''; $resetToken = '';
+$dbPath = getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite';
 $destinations = array_map(fn($destination) => $destination['name'], Schedule::load());
 // Bookings kept from destinations no longer offered stay listed under a generic label.
 function adminPlace(array $destinations, string $key): string { return $destinations[$key] ?? 'Retired destination'; }
@@ -40,8 +44,16 @@ function adminListUrl(array $filters, int $page, string $base = '/admin'): strin
 function ae(mixed $value): string { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function adminRedirect(string $target): never { header('Location: '.$target, true, 303); exit; }
 if (!in_array($_SERVER['REQUEST_METHOD'], ['GET','POST'], true)) { http_response_code(405); header('Allow: GET, POST'); exit; }
-$authenticated = AdminAuth::authenticated($now);
-if ($path !== '/admin/login' && !$authenticated) adminRedirect('/admin/login');
+try {
+    $signIn = SignIn::open($dbPath);
+    $currentUser = AdminAuth::user($now, UserStore::open($dbPath));
+} catch (Throwable $exception) { http_response_code(503); echo 'Administration temporarily unavailable.'; return; }
+$authenticated = $currentUser !== null;
+$signInPath = in_array($path, ['/admin/login', '/admin/login/link', '/admin/forgot', '/admin/reset'], true);
+if (!$signInPath && !$authenticated) adminRedirect('/admin/login');
+$postedEmail = is_string($_POST['email'] ?? null) ? trim(substr($_POST['email'], 0, 254)) : '';
+// An unknown, used or expired link gets one page that never says which.
+function adminExpiredLink(): string { http_response_code(410); return 'expired'; }
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!is_string($_POST['csrf'] ?? null) || !hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
@@ -51,18 +63,50 @@ try {
             setcookie(session_name(), '', ['expires' => 1, 'path' => '/admin', 'httponly' => true, 'secure' => $secure, 'samesite' => 'Lax']);
             adminRedirect('/admin/login');
         } elseif ($path === '/admin/login') {
-            $store = new BookingStore(getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite');
-            $username = is_string($_POST['username'] ?? null) ? $_POST['username'] : '';
             $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
-            if ($store->adminLogin($_SERVER['REMOTE_ADDR'] ?? 'unknown', $username, $password, $now)) { AdminAuth::start($now); adminRedirect('/admin'); }
-            $error = 'Unable to sign in. Check your credentials or try again later.';
+            try {
+                if ($user = $signIn->withPassword($_SERVER['REMOTE_ADDR'] ?? 'unknown', $postedEmail, $password, $now)) { AdminAuth::start($now, $user); adminRedirect('/admin'); }
+                $error = "That email and password don't match.";
+            } catch (TooManyAttempts) { $error = 'Too many attempts. Please wait 15 minutes and try again.'; }
+            $authView = 'login';
+        } elseif ($path === '/admin/login/link') {
+            $signIn->requestLink($postedEmail, $now);
+            [$authView, $sentTo] = ['link-sent', $postedEmail];
+        } elseif ($path === '/admin/forgot') {
+            $signIn->requestReset($postedEmail, $now);
+            [$authView, $sentTo] = ['reset-sent', $postedEmail];
+        } elseif ($path === '/admin/reset') {
+            $resetToken = is_string($_POST['token'] ?? null) ? $_POST['token'] : '';
+            $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
+            $confirm = is_string($_POST['confirm'] ?? null) ? $_POST['confirm'] : '';
+            try {
+                $user = $signIn->resetPassword($resetToken, $password, $confirm, $now);
+                if (!$user) $authView = adminExpiredLink();
+                else {
+                    AdminAuth::start($now, $user);
+                    $_SESSION['notice'] = "Password saved. You're signed in, and any other sessions have been signed out.";
+                    adminRedirect('/admin');
+                }
+            } catch (UserError $invalid) { http_response_code(422); [$authView, $error] = ['reset', $invalid->errors['password']]; }
         } else { http_response_code(405); exit; }
+    } elseif ($path === '/admin/login') {
+        if ($authenticated) adminRedirect('/admin');
+        $authView = 'login';
+    } elseif ($path === '/admin/login/link') {
+        $user = $signIn->withLink(is_string($_GET['token'] ?? null) ? $_GET['token'] : '', $now);
+        if ($user) { AdminAuth::start($now, $user); adminRedirect('/admin'); }
+        $authView = adminExpiredLink();
+    } elseif ($path === '/admin/forgot') {
+        $authView = 'forgot';
+    } elseif ($path === '/admin/reset') {
+        $resetToken = is_string($_GET['token'] ?? null) ? $_GET['token'] : '';
+        $authView = $signIn->resetUser($resetToken, $now) ? 'reset' : adminExpiredLink();
     }
-    if ($path === '/admin/login' && $authenticated) adminRedirect('/admin');
-    if ($path !== '/admin/login') {
+    if (!$authView) {
+        $notice = $_SESSION['notice'] ?? ''; unset($_SESSION['notice']);
         $detail = preg_match('#^/admin/bookings/([1-9][0-9]{0,17})$#D', $path, $match);
         if (!$detail && !in_array($path, ['/admin', '/admin/', '/admin/bookings.csv'], true)) { http_response_code(404); echo 'Page not found.'; return; }
-        $store = new BookingStore(getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite');
+        $store = new BookingStore($dbPath);
         $page = filter_var($_GET['page'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 1000000]]) ?: 1;
         if ($error) http_response_code(400);
         elseif ($path === '/admin/bookings.csv') { adminBookingsCsv($store->adminBookingsExport($filters), $destinations, $now); return; }

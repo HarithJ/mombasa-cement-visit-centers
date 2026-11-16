@@ -20,4 +20,4 @@
 .upcoming.urgent .upcoming-requests{border-color:#efc9a1;font-weight:600}
 .upcoming.urgent:hover{background:#f8e0c6}.upcoming.urgent:hover .upcoming-arrow{transform:translateX(3px)}
 .upcoming.urgent:focus-visible{outline:3px solid #b9753d;outline-offset:3px}
-.csv-link{font-size:13px;margin:0 0 18px}
+.csv-link{font-size:13px;margin:0 0 18px}.notice{padding:15px;background:#e4ecdf;color:#244b33;border-left:3px solid #245540}

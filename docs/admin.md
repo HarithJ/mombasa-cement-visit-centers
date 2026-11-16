@@ -1,26 +1,24 @@
 # Administration
 
-The PHP deployment provides `/admin` with login-only, read-only access to bookings and feedback. All destinations and public designs in a deployment share its configured database. Separate deployments do not aggregate records. GitHub Pages remains a static visitor-design preview and has no admin interface.
+The PHP deployment provides `/admin` with sign-in-only, read-only access to bookings and feedback. All destinations and public designs in a deployment share its configured database. Separate deployments do not aggregate records. GitHub Pages remains a static visitor-design preview and has no admin interface.
 
-## Private configuration
+## Accounts and sign-in
 
-Set `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` in the PHP process environment using the deployment's private secret configuration. There are no default credentials and no registration or password-reset page. Generate a strong unique password in your password manager. Generate its hash on a trusted operator machine with PHP `password_hash(..., PASSWORD_DEFAULT)`; supply the password through a hidden input or stdin, never a shell argument, committed file, or shell history. Only the resulting hash belongs in the server environment.
+Staff sign in with their own account from the `users` table (see `php bin/users.php`). There are no shared credentials and no default accounts; the old `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` settings are no longer read and should be removed from the server environment and PHP-FPM configuration.
 
-One way to generate the hash without placing the password in shell history is:
+Active users can sign in three ways:
 
-```sh
-read -r -s 'admin_password?Admin password: '
-printf '%s' "$admin_password" | php -r 'echo password_hash(stream_get_contents(STDIN), PASSWORD_DEFAULT), PHP_EOL;'
-unset admin_password
-```
+- **Email and password.** Passwords are at least 12 characters and are stored only as hashes.
+- **Email me a sign-in link.** A single-use link, valid for 15 minutes, at most 3 per email address per 15 minutes.
+- **Forgot password?** A single-use reset link, valid for one hour, leads to a set-password page. Saving a password signs the user in and ends their other sessions.
 
-This example uses zsh. Treat the resulting hash as a secret as well. To rotate credentials, replace the configured username/hash and reload the PHP service. Existing admin sessions lose access on their next request. Missing or invalid credentials disable administration rather than permitting access.
+Link requests always show the same message, whether or not the email has an account, and inactive accounts are never sent links. Only a hash of each link token is stored. Deactivating a user, changing their email or resetting their password ends their sessions and stops their unused links. Sign-in and reset emails go through the email queue (`bin/send-booking-emails.php`, once a minute) and are sent whenever the worker runs, independent of `BOOKING_EMAIL_ENABLED`. Links are built from `BOOKING_SITE_URL`, which must be the canonical HTTPS origin (see `docs/feedback.md`); requests never use the incoming Host header.
 
 Use HTTPS in production. If TLS terminates at a reverse proxy, set `ADMIN_TRUSTED_PROXIES` to a comma-separated list of its exact IP addresses. Only those peers may supply `X-Forwarded-Proto: https`. The proxy must overwrite that header. Client address forwarding is deliberately not used: login throttling uses the direct peer address, so visitors behind the same proxy share a throttle bucket. Never configure a broad or untrusted proxy range.
 
 Admin sessions use their own cookie, scoped to `/admin`. Sessions expire after 30 minutes idle or eight hours total. Logout requires a valid form POST. `BOOKING_SESSION_PATH`, when configured, must be private, writable, and persistent across PHP requests. Preserve the existing private `BOOKING_DB` storage configuration.
 
-Five failed logins per direct peer address in a 15-minute window block further attempts until that window expires. Counters persist in private SQLite storage across browser-cookie resets; old counters are removed on subsequent login attempts. Do not remove the database to clear a throttle. Wait for its window to expire. Credential changes do not bypass throttling.
+Five failed password sign-ins per direct peer address in a 15-minute window block further attempts until that window expires. Counters persist in private SQLite storage across browser-cookie resets; old counters are removed on subsequent sign-in attempts. Do not remove the database to clear a throttle. Wait for its window to expire. Password changes do not bypass throttling.
 
 ## What staff can see
 
@@ -30,4 +28,4 @@ Times display in Kenya local time. No booking editing, cancellation, check-in, d
 
 ## Verification
 
-Run `npm run test:admin` using the same Playwright and browser configuration as the existing integration tests. Tests start an isolated PHP server and database, use fictional visitors, and exercise login, filtering, details, feedback, logout, CSRF, rate limiting, session expiry, and rotation. A temporary test router supplies a controlled clock; there is no public clock-control endpoint or production test-mode environment switch. No real emails are sent.
+Run `npm run test:admin` using the same Playwright and browser configuration as the existing integration tests. Tests start an isolated PHP server and database, use fictional visitors, and exercise sign-in with seeded fictional users, filtering, details, feedback, logout, CSRF, rate limiting, session expiry, and deactivation. `npm run test:sign-in` covers sign-in links, password reset and expired links. A temporary test router supplies a controlled clock; there is no public clock-control endpoint or production test-mode environment switch. No real emails are sent.

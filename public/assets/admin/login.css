@@ -51,3 +51,14 @@ button{display:flex;align-items:center;justify-content:space-between;width:100%;
 /* Keep the full house inside the compact tablet banner. */
 @media(max-width:850px){.house-wrap{max-width:330px}}
 @media(max-width:400px){.scene-title h1{font-size:clamp(36px,10vw,44px)}}
+
+/* Sign-in links, password reset and expired-link pages. */
+.forgot-link,.text-link{display:inline-block;margin-top:12px;font-size:13px;color:var(--green)}
+.text-link{margin-top:24px}
+.divider{display:flex;align-items:center;gap:14px;margin:18px 0 0;font-size:12px;color:var(--muted)}
+.divider:before,.divider:after{content:"";flex:1;border-top:1px solid #dcdfd5}
+button.secondary{justify-content:center;margin-top:18px;background:transparent;color:var(--green);border:1px solid #cdd1c5}
+button.secondary:hover{background:#2455400c}
+.hint{margin:8px 0 0;font-size:12px;color:var(--muted)}
+.button-link{display:inline-block;margin-top:8px;padding:15px 20px;border-radius:5px;background:var(--green);color:white;font-size:14px;font-weight:600;text-decoration:none}
+.button-link:hover{background:#183e2d}

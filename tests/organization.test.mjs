@@ -6,8 +6,8 @@ import {spawn, execFileSync} from 'node:child_process';
 const {chromium} = await import(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright');
 const storage = await mkdtemp(join(tmpdir(), 'nyumba-organization-ui-'));
 const origin = 'http://127.0.0.1:8099';
-const hash = execFileSync('php', ['-r', "echo password_hash('test-password', PASSWORD_DEFAULT);"], {encoding:'utf8'}).trim();
-const server = spawn('php', ['-S','127.0.0.1:8099','-t','public'], {env:{...process.env,BOOKING_DB:join(storage,'bookings.sqlite'),BOOKING_SESSION_PATH:storage,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0',ADMIN_USERNAME:'operator',ADMIN_PASSWORD_HASH:hash},stdio:'ignore'});
+execFileSync('php', ['tests/helpers/seed-user.php', join(storage,'bookings.sqlite'), 'Olive Operator', 'operator@example.test', 'admin', 'test-password']);
+const server = spawn('php', ['-S','127.0.0.1:8099','-t','public'], {env:{...process.env,BOOKING_DB:join(storage,'bookings.sqlite'),BOOKING_SESSION_PATH:storage,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0'},stdio:'ignore'});
 let browser;
 async function fillRequired(page, name) {
     await page.locator('#full-name').fill(name);
@@ -62,9 +62,9 @@ try {
     }
     const admin = await browser.newPage();
     await admin.goto(origin+'/admin');
-    await admin.locator('#admin-username').fill('operator');
+    await admin.locator('#admin-email').fill('operator@example.test');
     await admin.locator('#admin-password').fill('test-password');
-    await admin.locator('[type="submit"]').click();
+    await admin.getByRole('button', {name:'Sign in', exact:true}).click();
     await admin.locator('a[href^="/admin/bookings/"]').first().click();
     assert.match(await admin.locator('body').innerText(), /Organization\s+(Mombasa Primary School|Not provided)/);
     console.log('PASS organization displayed in protected admin details');
