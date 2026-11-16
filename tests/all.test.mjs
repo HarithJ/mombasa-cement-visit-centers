@@ -18,6 +18,7 @@ const checks = [
  ['php','tests/feedback-migration.test.php'],
  ['php','tests/galana-only.test.php'],
  ['php','tests/users.test.php'],
+ [process.execPath,'tests/users.test.mjs'],
  ['php','tests/sign-in.test.php'],
  [process.execPath,'tests/sign-in.test.mjs'],
  [process.execPath,'tests/bookings.test.mjs'],

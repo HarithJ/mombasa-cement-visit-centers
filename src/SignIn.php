@@ -62,6 +62,18 @@ final class SignIn {
         } catch (Throwable $error) { $this->db->exec('ROLLBACK'); throw $error; }
         return (new UserStore($this->db))->find($user['id']);
     }
+    // Adds a user and emails them a 48-hour welcome sign-in link naming $adminName, all or nothing.
+    public function addUser(array $input, string $adminName, int $now): array {
+        AuthTokens::site();
+        $this->db->exec('BEGIN IMMEDIATE');
+        try {
+            $user = (new UserStore($this->db))->add($input);
+            $token = AuthTokens::issue($this->db, $user, 'welcome', $now);
+            AccountEmail::queue($this->db, $user, 'welcome', AccountEmail::welcome($user, AuthTokens::link('welcome', $token), $adminName), 'welcome/'.hash('sha256', $token));
+            $this->db->exec('COMMIT');
+            return $user;
+        } catch (Throwable $error) { $this->db->exec('ROLLBACK'); throw $error; }
+    }
     private function sendLink(string $email, string $purpose, int $now): void {
         AuthTokens::site();
         $this->db->exec('BEGIN IMMEDIATE');
