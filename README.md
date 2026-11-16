@@ -13,6 +13,10 @@ php -S 127.0.0.1:8080 -t public
 
 Open http://127.0.0.1:8080. Serve only `public/`, never the repository root. Migrations are repeatable and preserve existing records; they also run on first storage access.
 
+## Staff accounts
+
+Staff accounts live in the `users` table (migration `019-users.sql`). Manage them on the server with `php bin/users.php list|add|edit|deactivate|reactivate`; run it with no arguments for usage. Users are never deleted, only deactivated, and the last active admin can't be deactivated or changed to team. New accounts get a random password that is never shown; `add --no-welcome` creates an account without emailing the person.
+
 ## Private configuration and storage
 
 - Default database: `var/bookings.sqlite`, outside the public document root. `BOOKING_DB` overrides it with a private absolute path.
