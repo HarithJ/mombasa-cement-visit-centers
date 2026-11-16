@@ -5,7 +5,6 @@ import {join} from 'node:path';
 import {spawn,spawnSync} from 'node:child_process';
 const {chromium}=await import(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright');
 const storage=await mkdtemp(join(tmpdir(),'nyumba-admin-'));
-const hash=spawnSync('php',['-r',"echo password_hash('test-password', PASSWORD_DEFAULT);"],{encoding:'utf8'}).stdout;
 const seed=spawnSync('php',['-r', `require 'src/BookingStore.php'; $s=new BookingStore($argv[1]); for($i=0;$i<27;$i++) $s->create(['fullName'=>$i===0?'Special Visitor':'Visitor '.$i,'phone'=>'+254712345678','location'=>$i===0?'galana':'retired-place','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>3,'overnight'=>'','arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null,'email'=>'visitor@example.com'], 'seed-'.$i);`,join(storage,'bookings.sqlite')],{encoding:'utf8',env:{...process.env,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0'}});
 assert.equal(seed.status,0,seed.stderr);
 const fixture=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $db->exec("UPDATE bookings SET reference='NY-AAAAAAAAAAAAAAAAAAAAAAA' || char(64+id)"); $db->exec("UPDATE bookings SET overnight=1, arrival_date='2099-05-01', departure_date='2099-05-03', overnight_guests=2 WHERE id=1"); $db->exec("UPDATE bookings SET email=NULL WHERE id=2"); $q=$db->prepare('INSERT INTO feedback_responses VALUES (?,?,?,?,?,?,?)'); $q->execute([1,'attended',5,'The farm','More signs','<script>alert(1)</script>','2026-09-24T09:00:00Z']); $q->execute([2,'not_attended',null,'','','','2026-09-24T09:00:00Z']);`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
@@ -18,13 +17,18 @@ function domainSnapshot() {
  assert.equal(result.status,0,result.stderr); return JSON.parse(result.stdout);
 }
 const beforeAdmin=domainSnapshot();
+// Fictional staff accounts; the second admin lets the first be deactivated and reactivated.
+for(const [name,email] of [['Olive Operator','operator@example.test'],['Sam Second','second@example.test']]) {
+ const user=spawnSync('php',['tests/helpers/seed-user.php',join(storage,'bookings.sqlite'),name,email,'admin','test-password'],{encoding:'utf8'});
+ assert.equal(user.status,0,user.stderr);
+}
+const users=(...args)=>{const result=spawnSync('php',['bin/users.php',...args],{encoding:'utf8',env:{...process.env,BOOKING_DB:join(storage,'bookings.sqlite')}}); assert.equal(result.status,0,result.stderr);};
 const clockFile=join(storage,'clock');
-const hashFile=join(storage,'hash');
-await writeFile(clockFile,'1800000000'); await writeFile(hashFile,hash);
+await writeFile(clockFile,'1800000000');
 const router=join(storage,'router.php');
-await writeFile(router,`<?php if (str_starts_with(parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH), '/admin')) { $adminNow=(int)file_get_contents(__DIR__.'/clock'); putenv('ADMIN_PASSWORD_HASH='.file_get_contents(__DIR__.'/hash')); require ${JSON.stringify(process.cwd()+'/public/index.php')}; return true; } return false;`);
+await writeFile(router,`<?php if (str_starts_with(parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH), '/admin')) { $adminNow=(int)file_get_contents(__DIR__.'/clock'); require ${JSON.stringify(process.cwd()+'/public/index.php')}; return true; } return false;`);
 const origin='http://127.0.0.1:8097';
-const server=spawn('php',['-S','127.0.0.1:8097','-t','public',router],{env:{...process.env,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0',BOOKING_DB:join(storage,'bookings.sqlite'),BOOKING_SESSION_PATH:storage,ADMIN_USERNAME:'operator',ADMIN_PASSWORD_HASH:hash},stdio:'ignore'});
+const server=spawn('php',['-S','127.0.0.1:8097','-t','public',router],{env:{...process.env,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0',BOOKING_DB:join(storage,'bookings.sqlite'),BOOKING_SESSION_PATH:storage},stdio:'ignore'});
 let browser;
 try {
  for(let i=0;i<50;i++){try{await fetch(origin);break;}catch{}await new Promise(r=>setTimeout(r,100));}
@@ -35,7 +39,7 @@ try {
  await page.goto(origin+'/admin');
  assert.match(page.url(),/\/admin\/login$/);
  const preLoginCookie=(await context.cookies()).find(c=>c.name==='nyumba_admin')?.value;
- await page.getByLabel('Username').fill('operator');
+ await page.getByLabel('Email').fill('operator@example.test');
  await page.getByLabel('Password',{exact:true}).fill('test-password');
  await page.getByRole('button',{name:'Sign in'}).click();
  assert.notEqual((await context.cookies()).find(c=>c.name==='nyumba_admin')?.value,preLoginCookie);
@@ -78,7 +82,7 @@ try {
  console.log('PASS admin login, filters, overnight details, escaped feedback and logout without JavaScript');
  async function login(target=page) {
   await target.goto(origin+'/admin/login');
-  await target.getByLabel('Username').fill('operator');
+  await target.getByLabel('Email').fill('operator@example.test');
   await target.getByLabel('Password',{exact:true}).fill('test-password');
   await target.getByRole('button',{name:'Sign in'}).click();
  }
@@ -117,24 +121,25 @@ try {
  await writeFile(clockFile,String(1800001800+28800));
  await page.goto(origin+'/admin'); assert.match(page.url(),/login$/);
  await login();
- await writeFile(hashFile,spawnSync('php',['-r',"echo password_hash('new-password',PASSWORD_DEFAULT);"],{encoding:'utf8'}).stdout);
+ // Deactivating the signed-in user ends their session at once.
+ users('deactivate','operator@example.test');
  await page.goto(origin+'/admin'); assert.match(page.url(),/login$/);
- await writeFile(hashFile,hash);
+ users('reactivate','operator@example.test');
  // Invalid CSRF never authenticates.
- assert.equal((await context.request.post(origin+'/admin/login',{form:{username:'operator',password:'test-password',csrf:'invalid'}})).status(),403);
+ assert.equal((await context.request.post(origin+'/admin/login',{form:{email:'operator@example.test',password:'test-password',csrf:'invalid'}})).status(),403);
  await page.goto(origin+'/admin/bookings/1'); assert.match(page.url(),/login$/);
  // Cookie resets cannot bypass persistent rate limiting.
  for(let attempt=0;attempt<5;attempt++) {
   await context.clearCookies(); await page.goto(origin+'/admin/login');
-  await page.getByLabel('Username').fill('operator'); await page.getByLabel('Password',{exact:true}).fill('wrong');
-  await page.getByRole('button',{name:'Sign in'}).click(); assert.match(await page.locator('[role=alert]').innerText(),/Unable to sign in/);
+  await page.getByLabel('Email').fill('operator@example.test'); await page.getByLabel('Password',{exact:true}).fill('wrong');
+  await page.getByRole('button',{name:'Sign in'}).click(); assert.equal(await page.locator('[role=alert]').innerText(),"That email and password don't match.");
  }
  await context.clearCookies(); await login(); assert.match(page.url(),/login$/);
+ assert.equal(await page.locator('[role=alert]').innerText(),'Too many attempts. Please wait 15 minutes and try again.');
  await writeFile(clockFile,String(1800001800+28800+901));
  await login(); assert.match(await page.locator('h1').innerText(),/Bookings/);
  const authCookie=(await context.cookies()).find(c=>c.name==='nyumba_admin');
  assert.equal(authCookie.httpOnly,true); assert.equal(authCookie.sameSite,'Lax');
- await writeFile(hashFile,''); assert.equal((await page.goto(origin+'/admin')).status(),503); await writeFile(hashFile,hash);
  const outsider=await browser.newContext();
  const outsidePage=await outsider.newPage();
  await outsidePage.goto(origin+'/admin/bookings/1'); assert.match(outsidePage.url(),/login$/);
@@ -164,7 +169,7 @@ try {
   assert.ok(house.y>=scene.y && house.y+house.height<=scene.y+scene.height,`House fully visible at ${width}px`);
  }
  await jsPage.setViewportSize({width:1440,height:1000});
- await jsPage.getByLabel('Username').focus(); await jsPage.keyboard.press('Tab');
+ await jsPage.getByLabel('Email').focus(); await jsPage.keyboard.press('Tab');
  assert.equal(await jsPage.getByLabel('Password',{exact:true}).evaluate(e=>e===document.activeElement),true);
  await jsPage.keyboard.press('Tab');
  assert.equal(await jsPage.getByRole('button',{name:'Show password',exact:true}).evaluate(e=>e===document.activeElement),true);
@@ -198,5 +203,5 @@ try {
  }
  assert.deepEqual(uiErrors,[],'Admin screens load without browser errors');
  await jsContext.close();
- console.log('PASS pagination, feedback states, validation, CSRF, expiry, rotation, throttling and public booking isolation');
+ console.log('PASS pagination, feedback states, validation, CSRF, expiry, deactivation, throttling and public booking isolation');
 } finally {await browser?.close();server.kill();await rm(storage,{recursive:true,force:true});}
