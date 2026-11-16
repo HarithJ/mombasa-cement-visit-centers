@@ -8,7 +8,7 @@ const storage=await mkdtemp(join(tmpdir(),'nyumba-admin-'));
 const hash=spawnSync('php',['-r',"echo password_hash('test-password', PASSWORD_DEFAULT);"],{encoding:'utf8'}).stdout;
 const seed=spawnSync('php',['-r', `require 'src/BookingStore.php'; $s=new BookingStore($argv[1]); for($i=0;$i<27;$i++) $s->create(['fullName'=>$i===0?'Special Visitor':'Visitor '.$i,'phone'=>'+254712345678','location'=>$i===0?'galana':'retired-place','visitDate'=>'2099-05-01','timeSlot'=>'11:00','attendees'=>3,'overnight'=>'','arrivalDate'=>null,'departureDate'=>null,'overnightGuests'=>null,'email'=>'visitor@example.com'], 'seed-'.$i);`,join(storage,'bookings.sqlite')],{encoding:'utf8',env:{...process.env,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'0'}});
 assert.equal(seed.status,0,seed.stderr);
-const fixture=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $db->exec("UPDATE bookings SET reference='NY-AAAAAAAAAAAAAAAAAAAAAAA' || char(64+id)"); $db->exec("UPDATE bookings SET overnight=1, arrival_date='2099-05-01', departure_date='2099-05-03', overnight_guests=2 WHERE id=1"); $db->exec("UPDATE bookings SET email=NULL WHERE id=2"); $q=$db->prepare('INSERT INTO feedback_responses VALUES (?,?,?,?,?,?,?)'); $q->execute([1,'attended',5,'The farm','More signs','<script>alert(1)</script>','2026-09-24T09:00:00Z']); $q->execute([2,'not_attended',null,'','','','2026-09-24T09:00:00Z']);`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
+const fixture=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $db->exec("UPDATE bookings SET reference='NY-AAAAAAAAAAAAAAAAAAAAAAA' || char(64+id)"); $db->exec("UPDATE bookings SET overnight=1, arrival_date='2099-05-01', departure_date='2099-05-03', overnight_guests=2 WHERE id=1"); $db->exec("UPDATE bookings SET email=NULL, status='confirmed' WHERE id=2"); $db->exec("UPDATE bookings SET status='rejected' WHERE id=3"); $q=$db->prepare('INSERT INTO feedback_responses VALUES (?,?,?,?,?,?,?)'); $q->execute([1,'attended',5,'The farm','More signs','<script>alert(1)</script>','2026-09-24T09:00:00Z']); $q->execute([2,'not_attended',null,'','','','2026-09-24T09:00:00Z']);`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
 assert.equal(fixture.status,0,fixture.stderr);
 // Reproduce a populated pre-admin schema, including private invitation and queue data.
 const legacy=spawnSync('php',['-r', `$db=new PDO('sqlite:'.$argv[1]); $db->exec("INSERT INTO feedback_invitations VALUES (1,'fixture-token-hash','v1')"); $db->exec("INSERT INTO booking_emails (booking_id,payload,idempotency_key) VALUES (1,'{}','fixture-email')"); $db->exec('DROP TABLE admin_login_attempts'); $db->exec("DELETE FROM schema_migrations WHERE version='006-admin-throttle.sql'");`,join(storage,'bookings.sqlite')],{encoding:'utf8'});
@@ -67,11 +67,16 @@ try {
  await page.screenshot({path:join(tmpdir(),'nyumba-admin-mobile.png'),fullPage:true});
  // A stored multi-night booking still shows through the single overnight line.
  assert.match(await page.locator('main').innerText(),/Overnight stay\s+Requested/);
+ assert.match(await page.locator('main').innerText(),/Status\s+Awaiting confirmation/);
  assert.doesNotMatch(await page.locator('main').innerText(),/3 May 2099|Arrival|Departure|Overnight guests/);
  assert.match(await page.locator('main').innerText(),/<script>alert\(1\)<\/script>/);
  assert.equal(await page.locator('main script').count(),0);
  await page.getByRole('link',{name:'Back to bookings'}).click();
  assert.equal(await page.getByLabel('Search reference or name').inputValue(),'Special');
+ for(const [id,label] of [[2,'Confirmed'],[3,'Rejected']]) {
+  await page.goto(origin+'/admin/bookings/'+id);
+  assert.match(await page.locator('main').innerText(),new RegExp('Status\\s+'+label+'\\n'));
+ }
  await page.getByRole('button',{name:'Sign out'}).click();
  await page.goto(origin+'/admin');
  assert.match(page.url(),/\/admin\/login$/);

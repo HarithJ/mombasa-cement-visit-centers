@@ -9,6 +9,8 @@ const database=join(storage,'bookings.sqlite');
 const origin='http://127.0.0.1:8095';
 const env={...process.env,BOOKING_DB:database,BOOKING_SESSION_PATH:storage,BOOKING_EMAIL_ENABLED:'0',FEEDBACK_EMAIL_ENABLED:'1',BOOKING_SITE_URL:'https://visits.example.com'};
 const server=spawn('php',['-S','127.0.0.1:8095','-t','public'],{env,stdio:'ignore'});
+// Only confirmed bookings get a feedback invitation; this confirms the newest pending booking.
+const confirmLatest=()=>execFileSync('php',['tests/helpers/confirm-booking.php',database],{env,encoding:'utf8'});
 const worker=(when,mode='',extra={})=>JSON.parse(execFileSync('php',['tests/helpers/feedback-worker.php',database,String(Date.parse(when)/1000),mode],{env:{...env,...extra},encoding:'utf8'}));
 let browser;
 try {
@@ -24,7 +26,7 @@ try {
  await page.locator('#time-slot').selectOption('11:00');
  await page.locator('#attendees').fill('1');
  await page.locator('[type=submit]').click();
- await page.waitForURL(/confirmation=1/);
+ await page.waitForURL(/confirmation=1/); confirmLatest();
  assert.equal(worker('2099-05-02T05:59:59Z').messages.length,0);
  const sent=worker('2099-05-02T06:00:00Z').messages;
  assert.equal(sent.length,1,'next-morning feedback invitation');
@@ -58,14 +60,14 @@ try {
  await page.locator('#attendees').fill('2');
  await page.locator('#overnight').check();
  await page.locator('[type=submit]').click();
- await page.waitForURL(/confirmation=1/);
+ await page.waitForURL(/confirmation=1/); confirmLatest();
  assert.equal(worker('2100-01-01T06:00:00Z').messages.length,0,'not while the guest is still at the farm');
  assert.equal(worker('2100-01-02T05:59:59Z').messages.length,0);
  const overnight=worker('2100-01-02T06:00:00Z').messages;
  assert.equal(overnight.length,1,'invitation after overnight departure');
  // A one-night stay is shown by its visit date and a short note, never as a stay range.
- assert.match(overnight[0].payload.text,/31 December 2099 · Overnight stay/);
- assert.doesNotMatch(overnight[0].payload.text,/1 January 2100/);
+ assert.match(overnight[0].payload.text,/Thu 31 Dec 2099 · Overnight stay/);
+ assert.doesNotMatch(overnight[0].payload.text,/1 Jan 2100/);
  const overnightUrl=overnight[0].payload.text.match(/https:\/\/visits\.example\.com\/\S+/)[0].replace('https://visits.example.com',origin);
  const native=await browser.newContext({javaScriptEnabled:false});
  const nativePage=await native.newPage();
@@ -84,7 +86,7 @@ try {
   await page.locator('#full-name').fill('Retry Feedback'); await page.locator('#email').fill(email);
   await page.locator('#phone').fill('0712345678'); await page.locator('#visit-date').fill(date);
   await page.locator('#time-slot').selectOption('11:00'); await page.locator('#attendees').fill('1');
-  await page.locator('[type=submit]').click(); await page.waitForURL(/confirmation=1/);
+  await page.locator('[type=submit]').click(); await page.waitForURL(/confirmation=1/); confirmLatest();
  }
  await bookDay('retry@example.com');
  assert.equal(worker('2100-05-02T06:00:00Z','',{FEEDBACK_EMAIL_ENABLED:'0'}).messages.length,0);

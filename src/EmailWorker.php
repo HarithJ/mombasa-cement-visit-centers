@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/BookingStore.php';
+require_once __DIR__.'/Feedback.php';
 final class EmailWorker {
     private Closure $clock;
     public function __construct(private PDO $db, ?Closure $clock = null) { $this->clock = $clock ?? fn() => time(); }

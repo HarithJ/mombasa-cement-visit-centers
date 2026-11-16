@@ -25,11 +25,16 @@ try {
   const payload = await page.locator('form').evaluate(form => Object.fromEntries(new FormData(form)));
   await page.getByRole('button', { name: 'Book my visit', exact: true }).click({ timeout: 3000 });
   await page.locator('#confirmation-view').waitFor({ state: 'visible' });
-  assert.match(await page.locator('#confirmation-view').innerText(), /Visit registered/);
+  const confirmationText = await page.locator('#confirmation-view').innerText();
+  assert.match(confirmationText, /Request received\./);
+  assert.match(confirmationText, /We've sent your request to the Galana team\. They'll confirm by email and SMS, usually within a day\. Please don't travel until your visit is confirmed\./);
+  assert.match(await page.locator('.confirmation-preview').innerText(), /^Status: Awaiting confirmation$/);
+  assert.doesNotMatch(confirmationText, /Visit registered|capacity check/);
   assert.match(await page.locator('.reference-label strong').innerText(), /^NY-[A-F0-9]{24}$/);
+  assert.equal(records()[0].status, 'pending');
   assert.match(await page.locator('#confirmation-details').innerText(), /Galana Farm/);
   assert.match(await page.locator('#confirmation-details').innerText(), /4/);
-  console.log('PASS Galana Farm group day booking is saved and confirmed');
+  console.log('PASS Galana Farm group day booking is saved as a pending request');
   const reference = await page.locator('.reference-label strong').innerText();
   await page.reload();
   assert.equal(await page.locator('.reference-label strong').innerText(), reference);
@@ -89,7 +94,7 @@ try {
     await page.locator('#visit-date').fill('2099-02-15'); await page.locator('#time-slot').selectOption('14:00');
     await page.getByRole('button', { name: 'Book my visit', exact: true }).click();
     await page.locator('#confirmation-view').waitFor({ state: 'visible' });
-    assert.match(await page.locator('#confirmation-view').innerText(), /Visit registered/);
+    assert.match(await page.locator('#confirmation-view').innerText(), /Request received\./);
   }
   assert.equal(records().length, 3);
   console.log('PASS Galana Farm day visits are saved through the preselected form');
@@ -130,7 +135,7 @@ try {
   console.log('PASS failed storage never confirms, retains details, and permits a successful retry');
   for (let i = 0; i < 2; i++) execFileSync('php', ['bin/migrate.php'], { env: { ...process.env, BOOKING_DB: join(storage, 'bookings.sqlite') } });
   assert.equal(records().length, 5);
-  assert.ok(records().every(record => record.status === 'automatically_confirmed' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(record.created_at)));
+  assert.ok(records().every(record => record.status === 'pending' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(record.created_at)));
   const config = join(storage, 'schedule.php');
   await writeFile(config, "<?php return ['galana'=>['name'=>'Galana Farm','slots'=>['14:00']]];");
   await stop(); server = launchServer(join(storage, 'bookings.sqlite'), config); await ready();

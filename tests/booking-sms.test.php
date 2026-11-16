@@ -3,6 +3,7 @@ declare(strict_types=1);
 require __DIR__.'/../src/BookingStore.php';
 require __DIR__.'/../src/DayBooking.php';
 require __DIR__.'/../src/SmsWorker.php';
+require_once __DIR__.'/../src/UserStore.php';
 function check(bool $ok, string $message): void { if (!$ok) throw new RuntimeException($message); }
 function response(string $body, int $status = 201): array { return ['status'=>$status,'body'=>$body]; }
 function successTransport(string $url, array $headers, string $body): array {
@@ -13,9 +14,14 @@ function client(?Closure $transport = null): AfricasTalkingClient {
     return new AfricasTalkingClient('sandbox','fake-key','sandbox','', $transport ?? successTransport(...));
 }
 $path = sys_get_temp_dir().'/nyumba-sms-'.bin2hex(random_bytes(8)).'/bookings.sqlite';
-putenv('BOOKING_EMAIL_ENABLED=0'); putenv('FEEDBACK_EMAIL_ENABLED=0'); putenv('BOOKING_SMS_ENABLED=1');
+putenv('BOOKING_EMAIL_ENABLED=0'); putenv('FEEDBACK_EMAIL_ENABLED=0'); putenv('BOOKING_SMS_ENABLED=1'); putenv('BOOKING_SITE_URL=https://example.com');
 try {
     $store = new BookingStore($path);
+    // Five active admins get the new-booking SMS; team users and deactivated admins don't.
+    $users = UserStore::open($path);
+    foreach (['A','B','C','D','E'] as $i => $letter) $users->add(['name'=>"Admin $letter",'email'=>"admin$letter@example.test",'phone'=>'+25471100000'.($i+1),'role'=>'admin']);
+    $users->add(['name'=>'Team Member','email'=>'team@example.test','phone'=>'+254711000009','role'=>'team']);
+    $users->deactivate($users->add(['name'=>'Gone Admin','email'=>'gone@example.test','phone'=>'+254711000008','role'=>'admin'])['id']);
     $db = new PDO('sqlite:'.$path,null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);
     $schedule = require __DIR__.'/../config/destinations.php';
     $input = ['fullName'=>'Alex','phone'=>'0712345678','email'=>'','location'=>'galana','visitDate'=>'2099-05-01','timeSlot'=>'09:00','attendees'=>'3'];
@@ -36,30 +42,24 @@ try {
     $saved = $store->create($booking,'first');
     $store->create($booking,'first');
     $jobs = $db->query('SELECT * FROM booking_sms')->fetchAll();
-    check(count($jobs)===6, 'Visitor, three Galana managers and two additional managers once');
-    check(array_column($jobs,'recipient') === ['+254712345678','+254706093132','+254790225592','+254728999990','+254792488382','+254115933896'], 'Visitor, destination managers and additional managers');
+    check(count($jobs)===6, 'Visitor and five active admins once');
+    check(array_column($jobs,'recipient') === ['+254712345678','+254711000001','+254711000002','+254711000003','+254711000004','+254711000005'], 'Visitor, then active admins on their account phones');
     $fixture = array_merge($saved,['reference'=>'NY-TEST']);
-    check(BookingSms::visitorMessage($fixture) === 'Hi Alex, thanks for booking a visit to Galana Farm! We look forward to welcoming you on 1 May 2099 at 9:00 am EAT. Your booking reference is NY-TEST.', 'Approved day visitor text');
+    check(BookingSms::visitorMessage($fixture) === "Hi Alex, thanks for your request to visit Galana Farm on 1 May 2099 at 9:00 am EAT. It isn't confirmed yet; we'll let you know shortly. Ref NY-TEST.", 'Approved day visitor text');
     foreach ([0,1] as $overnight) foreach ([0,1] as $transport) {
         $variant = array_merge($fixture,['overnight'=>$overnight,'transport_requested'=>$transport,'arrival_date'=>$overnight?'2099-05-01':null,'departure_date'=>$overnight?'2099-05-03':null,'overnight_guests'=>$overnight?2:null]);
-        $visitor = BookingSms::visitorMessage($variant); $manager = BookingSms::managerMessage($variant);
-        check(str_contains($manager,'a total of 3 people'), 'Every manager scenario includes total attendees');
+        $visitor = BookingSms::visitorMessage($variant); $admin = BookingSms::adminMessage($variant);
+        check(str_contains($admin,', 3 people'), 'Every admin scenario includes total attendees');
         check(!str_contains($visitor,'group') && !str_contains($visitor,'3 people'), 'Visitor is not separated from group');
-        check(str_contains($visitor,'NY-TEST') && str_contains($manager,'+254712345678'), 'Reference and visitor phone');
-        check(str_contains($visitor,'transport') === (bool)$transport, 'Visitor transport text is relevant');
-        check(str_contains($manager,'No company transport was requested.') === !$transport, 'Manager transport choice');
-        foreach ([$visitor,$manager] as $text) {
-            check(str_contains($text,'overnight stay') === (bool)$overnight, 'Overnight stay mentioned only when requested');
-            check(!str_contains($text,'3 May 2099') && !str_contains($text,'2 guests'), 'No overnight dates or staying-guest count');
-        }
-        if ($overnight) check(str_contains($manager,'availability'), 'Manager accommodation is subject to availability');
-        if ($overnight || $transport) check(str_contains($visitor,'confirm') && str_contains($visitor,'availability'), 'Requests not guarantees');
+        check(str_contains($visitor,'Ref NY-TEST.') && str_contains($admin,'Ref NY-TEST.'), 'Reference in both');
+        check(str_contains($visitor,'transport') === (bool)$transport && str_contains($admin,', transport') === (bool)$transport, 'Transport mentioned only when requested');
+        check(str_contains($visitor,'overnight') === (bool)$overnight && str_contains($admin,', overnight') === (bool)$overnight, 'Overnight stay mentioned only when requested');
+        foreach ([$visitor,$admin] as $text) check(!str_contains($text,'3 May 2099') && !str_contains($text,'2 guests'), 'No overnight dates or staying-guest count');
+        check(str_contains($visitor,"It isn't confirmed yet") && str_contains($admin,'Awaiting confirmation; see your email to accept or reject.'), 'Both say the visit is not confirmed yet');
     }
     $solo=array_merge($fixture,['attendees'=>1]);
-    check(str_contains(BookingSms::managerMessage($solo),'a total of 1 person.'), 'Solo wording');
-    $contacts=require __DIR__.'/../config/contacts.php';
-    $contacts['galana']['people'][]=['phone'=>'0706093132'];
-    check(count(BookingSms::messagesFor($fixture,$contacts))===6,'Deduplicate normalized manager phones');
+    check(str_contains(BookingSms::adminMessage($solo),', 1 person.'), 'Solo wording');
+    check(count(BookingSms::messagesFor($fixture,[['phone'=>'+254711000001'],['phone'=>'+254711000001']]))===2,'Deduplicate admin phones');
     $now=1000; $worker=new SmsWorker($db,fn()=>$now);
     // Missing credentials leave every field untouched, not merely attempts.
     $before=$db->query('SELECT * FROM booking_sms')->fetchAll();

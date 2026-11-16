@@ -12,6 +12,7 @@
     "test:email": "php tests/email.test.php",
     "test:sms": "php tests/sms.test.php && php tests/booking-sms.test.php",
     "test:users": "php tests/users.test.php",
+    "test:approval-requests": "php tests/approval-requests.test.php",
     "test": "node tests/all.test.mjs",
     "test:admin": "node tests/admin.test.mjs"
   },

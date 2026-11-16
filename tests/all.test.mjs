@@ -5,7 +5,7 @@ const checks = [
  [process.execPath,'tests/admin.test.mjs'],
  ['php','tests/email.test.php'],
  ['php','tests/email-design.test.php'],
- ['php','tests/manager-notifications.test.php'],
+ ['php','tests/approval-requests.test.php'],
  ['php','tests/transport.test.php'],
  ['php','tests/organization.test.php'],
  [process.execPath,'tests/organization.test.mjs'],

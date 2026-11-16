@@ -21,7 +21,7 @@ try {
         $saved = $store->create($booking, 'org-'.md5(var_export($choice, true)));
         check($saved['organization'] === $expected, 'Organization saved as '.var_export($expected, true));
         check($store->adminBooking((int)$saved['id'])['organization'] === $expected, 'Organization available to admin');
-        $details = BookingEmail::payload($saved)['text'];
+        $details = BookingEmail::requestPayload($saved, ['id' => 1, 'name' => 'Tom Team', 'email' => 'tom@example.test'], 'https://example.com/a', 'https://example.com/r')['text'];
         check(str_contains($details, 'Organization: '.($expected ?? 'Not provided')), 'Team email lists organization');
     }
 
