@@ -39,6 +39,22 @@ final class BookingSms {
         foreach (array_unique(array_column($admins, 'phone')) as $number) $messages[] = ['audience' => 'manager', 'recipient' => (string)$number, 'message' => $message];
         return $messages;
     }
+    // The visitor's SMS after a decision. A rejection gives the decider's contact details, never the reason.
+    // $changed: this reverses an earlier decision.
+    public static function decisionMessage(array $booking, array $decider, string $decision, bool $changed): string {
+        if ($decision === 'confirmed') {
+            $requests = ['day' => '', 'day_transport' => ', including transport', 'overnight' => ', including your overnight stay', 'overnight_transport' => ', including transport and your overnight stay'];
+            return strtr('Hi {name}, your visit to {destination} on {date} at {time} is confirmed{requests}. We look forward to welcoming you! Ref {reference}.', self::values($booking) + ['{requests}' => $requests[self::scenario($booking)]]);
+        }
+        return strtr('Hi {name}, sorry, we {cannot} your visit to {destination} on {date}. Please contact {decider} on {deciderPhone} or {deciderEmail}. Ref {reference}.', self::values($booking) + ['{cannot}' => $changed ? 'can no longer host' : "can't confirm", '{decider}' => $decider['name'], '{deciderPhone}' => $decider['phone'], '{deciderEmail}' => $decider['email']]);
+    }
+    public static function enqueueDecision(PDO $db, array $booking, array $decider, string $decision, bool $changed): void {
+        if (!self::enabled()) return;
+        $recipient = PhoneNumber::normalize($booking['phone']) ?? $booking['phone'];
+        $routable = PhoneNumber::smsRoutable($recipient);
+        $db->prepare("INSERT INTO booking_sms(booking_id,audience,recipient,message,status,last_error) VALUES (?,'decision',?,?,?,?)")
+            ->execute([$booking['id'], $recipient, self::decisionMessage($booking, $decider, $decision, $changed), $routable ? 'pending' : 'review', $routable ? null : 'unroutable_recipient']);
+    }
     public static function enqueue(PDO $db, array $booking): void {
         if (!self::enabled()) return;
         $query = $db->prepare('INSERT INTO booking_sms(booking_id,audience,recipient,message,status,last_error) VALUES (?,?,?,?,?,?)');

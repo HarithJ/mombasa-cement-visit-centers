@@ -20,4 +20,20 @@ final class DecisionLinks {
         }
         return $urls;
     }
+
+    // The link's action, user and booking, or null when the token is malformed, unknown, or its user
+    // has been deactivated or changed email since it was issued.
+    public static function find(PDO $db, string $token): ?array {
+        if (!preg_match('/^[a-f0-9]{64}$/D', $token)) return null;
+        $query = $db->prepare('SELECT l.action, l.user_id, l.booking_id FROM decision_links l JOIN users u ON u.id = l.user_id WHERE l.token_hash = ? AND u.active = 1 AND u.credential_version = l.credential_version');
+        $query->execute([self::hash($token)]);
+        $link = $query->fetch(PDO::FETCH_ASSOC);
+        if (!$link) return null;
+        $user = $db->prepare('SELECT * FROM users WHERE id = ?');
+        $user->execute([$link['user_id']]);
+        $booking = $db->prepare('SELECT * FROM bookings WHERE id = ?');
+        $booking->execute([$link['booking_id']]);
+        $booking = $booking->fetch(PDO::FETCH_ASSOC);
+        return $booking ? ['action' => $link['action'], 'user' => $user->fetch(PDO::FETCH_ASSOC), 'booking' => $booking] : null;
+    }
 }
