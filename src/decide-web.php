@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__.'/BookingDecisions.php';
 require_once __DIR__.'/DecisionLinks.php';
 require_once __DIR__.'/HttpsRequest.php';
+require_once __DIR__.'/EmailDispatch.php';
 header('Cache-Control: no-store, private');
 header('Referrer-Policy: no-referrer');
 header('X-Content-Type-Options: nosniff');
@@ -22,6 +23,8 @@ $token = is_string($_GET['token'] ?? null) ? $_GET['token'] : '';
 $page = 'invalid'; $link = null; $booking = null; $latest = null; $errors = []; $reason = ''; $done = null; $open = false;
 try {
     $path = getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite';
+    // A decision queues the visitor and team emails; send them as soon as this page has gone out.
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') EmailDispatch::afterResponse($path);
     $db = BookingStore::connect($path);
     $decisions = new BookingDecisions($db);
     $link = DecisionLinks::find($db, $token);

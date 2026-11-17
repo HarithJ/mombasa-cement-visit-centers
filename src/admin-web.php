@@ -6,6 +6,7 @@ require_once __DIR__.'/BookingStore.php';
 require_once __DIR__.'/BookingDecisions.php';
 require_once __DIR__.'/Schedule.php';
 require_once __DIR__.'/HttpsRequest.php';
+require_once __DIR__.'/EmailDispatch.php';
 header('Cache-Control: no-store, private');
 header('X-Robots-Tag: noindex, nofollow');
 header('Referrer-Policy: no-referrer');
@@ -28,6 +29,8 @@ $decisionForm = null; $reason = ''; $reasonError = ''; $decisionHistory = [];
 // Set when a sign-in page (login, link, link sent, forgot, reset, expired) is shown instead of the workspace.
 $authView = null; $sentTo = ''; $resetToken = ''; $linkToken = '';
 $dbPath = getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite';
+// Sign-in links, resets, welcomes and decisions queue emails; send them as soon as the page has gone out.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') EmailDispatch::afterResponse($dbPath);
 $destinations = array_map(fn($destination) => $destination['name'], Schedule::load());
 // Bookings kept from destinations no longer offered stay listed under a generic label.
 function adminPlace(array $destinations, string $key): string { return $destinations[$key] ?? 'Retired destination'; }
