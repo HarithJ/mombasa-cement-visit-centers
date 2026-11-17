@@ -6,6 +6,7 @@ if (!in_array(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), ['/', '/index.ph
 require_once __DIR__.'/BookingStore.php';
 require_once __DIR__.'/DayBooking.php';
 require_once __DIR__.'/Schedule.php';
+require_once __DIR__.'/EmailDispatch.php';
 $schedule = Schedule::load();
 ini_set('session.use_strict_mode', '1');
 if ($sessionPath = getenv('BOOKING_SESSION_PATH')) session_save_path($sessionPath);
@@ -17,6 +18,8 @@ header('X-Content-Type-Options: nosniff');
 $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 $errors = []; $input = []; $confirmation = null; $openForm = false;
 $dbPath = getenv('BOOKING_DB') ?: __DIR__.'/../var/bookings.sqlite';
+// A booking queues emails; send them as soon as the confirmation page has gone out.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') EmailDispatch::afterResponse($dbPath);
 $newToken = fn() => bin2hex(random_bytes(32));
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $openForm = true;
