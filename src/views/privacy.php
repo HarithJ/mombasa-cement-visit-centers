@@ -6,9 +6,9 @@ $assets = $assets ?? '/assets/';
 $updated = '4 November 2026';
 ?>
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Privacy notice — Visit Nyumba</title><link rel="icon" href="<?= $e($assets) ?>nyumba-group.svg" type="image/svg+xml"><link rel="stylesheet" href="<?= $e($assets) ?>feedback.css"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Privacy notice — Visit Galana</title><link rel="icon" href="<?= $e($assets) ?>nyumba-group.svg" type="image/svg+xml"><link rel="stylesheet" href="<?= $e($assets) ?>feedback.css"></head>
 <body data-version="<?= $e($uiVersion) ?>">
-<header class="feedback-header"><a href="/"><img src="<?= $e($assets) ?>nyumba-group.svg" alt="Nyumba Group home" width="60" height="82"></a><span>VISIT NYUMBA<br><strong>Privacy notice.</strong></span></header>
+<header class="feedback-header"><a href="/"><img src="<?= $e($assets) ?>nyumba-group.svg" alt="Nyumba Group home" width="60" height="82"></a><span>VISIT GALANA<br><strong>Privacy notice.</strong></span></header>
 <main class="privacy">
 <p class="eyebrow">YOUR DETAILS, YOUR RIGHTS</p>
 <h1>How we use your information.</h1>
@@ -65,5 +65,5 @@ $updated = '4 November 2026';
 <h2>Children</h2>
 <p>Visits should be booked by an adult. If you book for a group that includes children, we only record the number of attendees, not their names.</p>
 
-<p class="privacy-back"><a href="/">Back to Visit Nyumba</a></p>
+<p class="privacy-back"><a href="/">Back to Visit Galana</a></p>
 </main><footer>Nyumba Group · Building better visits, together.</footer></body></html>

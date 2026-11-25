@@ -1,4 +1,4 @@
-# Visit Nyumba
+# Visit Galana
 
 A booking site for visits to Galana Farm, the Nyumba Foundation's agricultural project near Malindi.
 

@@ -1,4 +1,4 @@
-# Visit Nyumba
+# Visit Galana
 
 PHP-rendered visitor booking website for Galana Farm, the only destination it offers (see [ADR 0001](docs/adr/0001-galana-farm-only.md)). The UI uses a bold outdoor-explorer identity: panoramic photography, oversized typography, deep green and tangerine, a featured Galana Farm story and a trip-planning form. Day bookings use real SQLite persistence. Galana visits can include a one-night overnight request made with a single checkbox. Hosting is not selected.
 
@@ -33,7 +33,7 @@ Phone policy: 7–15 digits, optional leading +, spaces, parentheses and hyphens
 
 ## Content and interaction
 
-Supplied photos are optimized copies, with unchanged originals: fifteen Galana Farm images. Photographs cycle every five seconds, with a pause/resume control and progress rings around the gallery buttons. Destination photographs have no numbered badges. Opening a photo launches a gallery with thumbnails, previous/next buttons and arrow-key navigation. Reduced motion disables automatic cycling. Manrope uses the bundled SIL Open Font License across headings and interface text. Final contact details and operational copy remain owner handoff items; official Nyumba links are used rather than invented contact details.
+Supplied photos are optimized copies, with unchanged originals: fifteen Galana Farm images. To change photos, edit `config/photo-manifest.json` (source file in `galana/`, plus a numbered `asset` name) and run `bin/build-photos.py` (needs Pillow); adding or deleting a file in `galana/` alone changes nothing on the site. Photographs cycle every five seconds, with a pause/resume control and progress rings around the gallery buttons. Destination photographs have no numbered badges. Opening a photo launches a gallery with thumbnails, previous/next buttons and arrow-key navigation. Reduced motion disables automatic cycling. Manrope uses the bundled SIL Open Font License across headings and interface text. Final contact details and operational copy remain owner handoff items; official Nyumba links are used rather than invented contact details.
 
 ## Development-only browser tests
 
@@ -76,3 +76,7 @@ Staff recipients come from the active users in the `users` table (see [Staff acc
 - Feedback invitations are scheduled only for confirmed visits; rejecting a visit cancels one still waiting to send.
 
 The existing email/SMS enablement flags still apply.
+
+## Brand film
+
+Every page load opens with the brand film (`public/assets/video/brand-video.mp4`, compressed from `galana/brand-video.mp4` with `ffmpeg -i galana/brand-video.mp4 -c:v libx264 -crf 27 -preset slow -pix_fmt yuv420p -c:a aac -b:a 96k -movflags +faststart`). It plays in a window over the dimmed page and starts muted, because browsers only autoplay muted video on a first visit; an Unmute button turns the sound on. If a browser refuses to autoplay even muted video, the visitor taps "Play the film". It cannot be paused. A first-time visitor cannot close it until it ends; then it waits for them to press Close (or Escape). A visitor who has watched it to the end before, in the same browser, sees it again on every page load but can close it straight away. It closes by itself only if the video fails to load or stalls for 20 seconds. Visitors without JavaScript never see it. `BRAND_INTRO_ENABLED=0` turns it off; the browser tests set this, apart from `tests/brand-intro.test.mjs`.

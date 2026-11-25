@@ -1,3 +1,4 @@
+process.env.BRAND_INTRO_ENABLED='0'; // The brand film is covered by tests/brand-intro.test.mjs.
 import assert from 'node:assert/strict';
 import {mkdtemp,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -68,8 +69,8 @@ try {
  assert.deepEqual((await rows(admin)).map(row=>row[0]),['Ada Admin','Bea Brown','Tom Team']);
  const sent=emails();
  assert.equal(sent.length,1); assert.deepEqual(sent[0].to,['bea@example.test']);
- assert.equal(sent[0].subject,"You've been added to Visit Nyumba admin");
- assert.match(sent[0].text,/^Hi Bea, Ada Admin has given you access to the Visit Nyumba admin panel, where you can see bookings and accept or reject visits to Galana Farm\.\nFrom now on you'll get an email with Accept and Reject buttons whenever someone books a visit\./);
+ assert.equal(sent[0].subject,"You've been added to Visit Galana admin");
+ assert.match(sent[0].text,/^Hi Bea, Ada Admin has given you access to the Visit Galana admin panel, where you can see bookings and accept or reject visits to Galana Farm\.\nFrom now on you'll get an email with Accept and Reject buttons whenever someone books a visit\./);
  assert.match(sent[0].text,/After that, sign in with "Email me a sign-in link", or set a password with "Forgot password\?"\./);
  const link=origin+sent[0].text.match(/Sign in:\nhttps:\/\/visits\.example\.com(\/admin\/login\/link\?token=[a-f0-9]{64})/)[1];
  await setClock(clock+172800-60);

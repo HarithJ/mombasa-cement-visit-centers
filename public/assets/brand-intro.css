@@ -1,0 +1,23 @@
+html.brand-intro-active,html.brand-intro-active body{overflow:hidden}
+/* Dim the page while it loads, before the film element exists. */
+html.brand-intro-active body:before{content:'';position:fixed;inset:0;z-index:2147482999;background:#081410d9}
+.brand-intro{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;background:#081410d9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fffbed;font-family:Manrope,system-ui,sans-serif}
+.brand-intro[hidden]{display:none}
+.brand-intro-player{width:min(960px,100%,(100svh - 120px) * 16 / 9);border-radius:14px;overflow:hidden;background:#000;box-shadow:0 24px 70px #0009}
+.brand-intro-screen{position:relative;display:grid;place-items:center;aspect-ratio:16/9;background:#000}
+.brand-intro-video{width:100%;height:100%;object-fit:contain}
+.brand-intro-controls{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#12372e}
+.brand-intro-bar{flex:1;height:4px;border-radius:4px;background:#ffffff33;overflow:hidden}
+.brand-intro-bar span{display:block;width:0;height:100%;background:#ff9b55;transition:width .25s linear}
+.brand-intro-time{min-width:3.2em;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.brand-intro button{font:inherit;cursor:pointer;border-radius:50px}
+.brand-intro-sound{min-height:36px;padding:6px 16px;border:1px solid #ffffff60;background:transparent;color:#fffbed;font-size:12px;font-weight:700}
+.brand-intro-sound:hover{background:#ffffff14}
+.brand-intro-play{position:absolute;padding:16px 30px;border:0;background:#ff9b55;color:#183d31;font-size:14px;font-weight:800;box-shadow:0 8px 24px #0006}
+.brand-intro-play[hidden]{display:none}
+.brand-intro button:focus-visible{outline:2px solid #fffbed;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.brand-intro-bar span{transition:none}}
+.brand-intro-close{position:absolute;z-index:1;top:12px;right:12px;display:flex;align-items:center;gap:6px;min-height:40px;padding:8px 16px 8px 12px;border:1px solid #ffffff60;background:#12372ee6;color:#fffbed;font-size:13px;font-weight:700;box-shadow:0 6px 18px #0006}
+.brand-intro-close:hover{background:#1b4a3e}
+.brand-intro-close[hidden]{display:none}
+.brand-intro-close .icon{width:16px;height:16px}

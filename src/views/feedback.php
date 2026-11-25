@@ -9,7 +9,7 @@ $done = !empty($invitation['submitted_at']);
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Visit feedback — Nyumba Group</title><link rel="stylesheet" href="<?= $e($assets) ?>feedback.css"><script defer src="<?= $e($assets) ?>feedback.js"></script></head>
 <body data-version="<?= $e($uiVersion) ?>" <?= $preview ? 'data-feedback-preview' : '' ?>>
-<header class="feedback-header"><img src="<?= $e($assets) ?>nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><span>VISIT NYUMBA<br><strong>A moment to reflect.</strong></span></header>
+<header class="feedback-header"><img src="<?= $e($assets) ?>nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><span>VISIT GALANA<br><strong>A moment to reflect.</strong></span></header>
 <main>
 <?php if ($preview): ?><aside class="preview-notice">Design preview · Sample visit only. Nothing is sent or saved. <a href="../">Back to the visit preview</a><a href="<?= $invitation['overnight'] ? './' : 'overnight.html' ?>"><?= $invitation['overnight'] ? 'Try a day visit' : 'Try an overnight stay' ?></a></aside><noscript><p>Enable JavaScript to try this sample feedback form. Nothing can be submitted here.</p></noscript><?php endif; ?>
 <?php if ($unavailable): ?>

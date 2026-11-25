@@ -1,3 +1,4 @@
+process.env.BRAND_INTRO_ENABLED='0'; // The brand film is covered by tests/brand-intro.test.mjs.
 import assert from 'node:assert/strict';
 import {mkdtemp,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -106,7 +107,7 @@ try {
  await page.getByLabel('Email').fill('ada@example.test');
  await page.getByRole('button',{name:'Send reset link'}).click();
  assert.match(await page.locator('main').innerText(),/If ada@example\.test has an account, we've sent a reset link\. It expires in 1 hour\./);
- sent=emails(); assert.equal(sent.length,1); assert.equal(sent[0].subject,'Reset your Visit Nyumba admin password');
+ sent=emails(); assert.equal(sent.length,1); assert.equal(sent[0].subject,'Reset your Visit Galana admin password');
  const reset=linkIn(sent[0],'/admin/reset');
  const [otherContext,otherPage]=await fresh();
  await signIn('ada@example.test','ada password 123',otherPage); assert.equal(await signedIn(otherPage),true);

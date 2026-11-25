@@ -42,7 +42,7 @@ server {
     server_name _;
     server_tokens off;
     default_type text/plain;
-    location / { return 200 'Visit Nyumba server ready. Application deployment pending.\n'; }
+    location / { return 200 'Visit Galana server ready. Application deployment pending.\n'; }
 }
 EOF
 cat > /usr/local/sbin/visit-nyumba-backup <<'EOF'

@@ -337,3 +337,8 @@ if ('IntersectionObserver' in window) { document.body.classList.add('js-ready');
 // Route illustrations are local assets; Google opens only through the directions link.
 const inlineMap = document.querySelector('#inline-map');
 dialog.addEventListener('close', () => { inlineMap.open = false; });
+
+// Keep the logo readable once the hero photograph has scrolled out from behind it.
+const siteHeader = document.querySelector('.header');
+const hero = document.querySelector('.explorer-hero');
+if (siteHeader && hero && 'IntersectionObserver' in window) new IntersectionObserver(([entry]) => siteHeader.classList.toggle('is-scrolled', !entry.isIntersecting), { rootMargin: '-90px 0px 0px 0px' }).observe(hero);

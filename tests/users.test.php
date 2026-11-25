@@ -92,8 +92,8 @@ try {
     [$status, $out, $err] = $cli('add', '--name=Dan Team', '--email=dan@example.test', '--phone=0712000002', '--role=team');
     check($status === 0 && str_contains($out, "Dan Team added. We've sent them a welcome email."), 'add without --no-welcome sends the welcome email: '.$out.$err);
     $welcome = sentEmails($cliPath);
-    check(count($welcome) === 1 && $welcome[0]['to'] === ['dan@example.test'] && $welcome[0]['subject'] === "You've been added to Visit Nyumba admin", 'The welcome email goes to the new user');
-    check(str_contains($welcome[0]['text'], 'Hi Dan, Cleo Admin has given you access to the Visit Nyumba admin panel, where you can see bookings and accept or reject visits to Galana Farm.'), 'The welcome names the admin who added them: '.$welcome[0]['text']);
+    check(count($welcome) === 1 && $welcome[0]['to'] === ['dan@example.test'] && $welcome[0]['subject'] === "You've been added to Visit Galana admin", 'The welcome email goes to the new user');
+    check(str_contains($welcome[0]['text'], 'Hi Dan, Cleo Admin has given you access to the Visit Galana admin panel, where you can see bookings and accept or reject visits to Galana Farm.'), 'The welcome names the admin who added them: '.$welcome[0]['text']);
     check(str_contains($welcome[0]['text'], "From now on you'll get an email with Accept and Reject buttons whenever someone books a visit."), 'The welcome explains booking emails');
     check(str_contains($welcome[0]['text'], 'After that, sign in with "Email me a sign-in link", or set a password with "Forgot password?".'), 'The welcome explains later sign-ins');
     check(str_contains($welcome[0]['html'], '>Sign in &rarr;</a>') && str_contains($welcome[0]['html'], 'Cleo Admin has given you access'), 'The HTML welcome has the Sign in button');

@@ -38,8 +38,10 @@ function icon(string $name, string $class = ''): string {
 $mapLinks = require __DIR__.'/../config/locations.php';
 $routeIllustrations = require __DIR__.'/../config/route-illustrations.php';
 $photoDescriptions = require __DIR__.'/../config/photo-descriptions.php';
+// The brand film plays on every page load before the page can be used; BRAND_INTRO_ENABLED=0 turns it off (tests do).
+$brandIntro = getenv('BRAND_INTRO_ENABLED') !== '0';
 $destinations = [
-    'galana' => ['name' => 'Galana Farm', 'category' => 'NATURE & AGRICULTURE', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
+    'galana' => ['name' => 'Galana Farm', 'category' => 'SOIL HEALTH | WILDLIFE | AGRICULTURE | TOURISM', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
 ];
 foreach ($destinations as $id => &$destination) {
     $files = glob(__DIR__.'/assets/photos/'.$id.'/*.{webp,jpg,jpeg,png}', GLOB_BRACE) ?: [];
@@ -68,16 +70,28 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
     <meta name="description" content="Explore Galana Farm, the Nyumba agricultural project near Malindi. Book your day visit, with an overnight stay on request.">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#173f35">
-    <title>Visit Nyumba — A visit that means more</title>
+    <title>Visit Galana — A visit that means more</title>
     <link rel="icon" href="assets/nyumba-group.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/travel.css">
+<?php if ($brandIntro): ?>
+    <link rel="stylesheet" href="assets/brand-intro.css">
+    <script src="assets/brand-intro.js"></script>
+<?php endif; ?>
     <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
     <script src="assets/app.js" defer></script>
 </head>
 <body>
+<?php if ($brandIntro): ?>
+<div class="brand-intro" id="brand-intro" role="dialog" aria-modal="true" aria-label="Galana brand film" hidden>
+    <div class="brand-intro-player">
+        <div class="brand-intro-screen"><button class="brand-intro-close" type="button" aria-label="Close the film" hidden><?= icon('close') ?> Close</button><video class="brand-intro-video" data-src="assets/video/brand-video.mp4" poster="assets/video/brand-video-poster.webp" muted playsinline preload="none"></video><button class="brand-intro-play" type="button" hidden>Play the film</button></div>
+        <div class="brand-intro-controls"><div class="brand-intro-bar" aria-hidden="true"><span></span></div><span class="brand-intro-time" aria-hidden="true"></span><button class="brand-intro-sound" type="button" aria-pressed="true">Unmute</button></div>
+    </div>
+</div>
+<?php endif; ?>
 <a class="skip-link" href="#destinations">Skip to Galana Farm</a>
 <header class="header">
     <div class="header-inner">
@@ -91,9 +105,9 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
 <main>
     <section class="visit-hero" aria-labelledby="hero-title">
         <div class="explorer-hero">
-            <img class="explorer-landscape" src="assets/photos/galana/02-circular-fields-aerial.webp" srcset="assets/photos/galana/responsive/02-circular-fields-aerial-720.webp 720w, assets/photos/galana/responsive/02-circular-fields-aerial-1024.webp 1024w, assets/photos/galana/02-circular-fields-aerial.webp 1600w" sizes="100vw" alt="Aerial view of a large green irrigated field under a cloudy sky at Galana Farm" width="1600" height="900" fetchpriority="high">
+            <img class="explorer-landscape" src="assets/photos/galana/01-farm.webp" srcset="assets/photos/galana/responsive/01-farm-720.webp 720w, assets/photos/galana/responsive/01-farm-1024.webp 1024w, assets/photos/galana/01-farm.webp 1600w" sizes="100vw" alt="Long rows of young crops stretching to the horizon under a soft evening sky at Galana Farm" width="1600" height="900" fetchpriority="high">
             <div class="explorer-shade"></div>
-            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Nyumba<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><p>A little adventure.<br>A whole new perspective.</p><a class="explorer-button" href="#destinations">Explore Galana Farm <?= icon('diagonal') ?></a></div></div>
+            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Galana<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><ul class="explorer-pillars" aria-label="What Galana Farm is about"><li>Soil health</li><li>Wildlife</li><li>Agriculture</li><li>Tourism</li></ul><a class="explorer-button" href="#destinations">Explore Galana Farm <?= icon('diagonal') ?></a></div></div>
         </div>
         <div class="discovery-heading wrap"><p class="eyebrow">YOUR NEXT EXPERIENCE</p><h2>Good days start<br>with <span>curiosity.</span></h2></div>
         <div class="destinations wrap" id="destinations" aria-label="Galana Farm">
@@ -127,13 +141,13 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
     <section class="final-cta reveal" aria-labelledby="cta-title"><div class="wrap final-cta-inner"><div><p class="eyebrow">MAKE ROOM FOR SOMETHING DIFFERENT</p><h2 id="cta-title">See you<br>out there<span aria-hidden="true">↗</span></h2></div><a class="button dark-button" href="#destinations">Explore Galana Farm <?= icon('diagonal') ?></a></div></section>
 </main>
 <footer class="footer wrap">
-    <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Nyumba</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Galana Farm</a><a href="/privacy">Privacy notice</a></div></div>
-    <div class="footer-bottom"><span>© <?= date('Y') ?> Nyumba Group</span><span>Visit Nyumba · Day bookings</span></div>
+    <div class="footer-top"><div class="footer-brand"><img src="assets/nyumba-group.svg" alt="Nyumba Group" width="60" height="82"><div><strong>Visit Galana</strong><span>Places. People. Purpose.</span></div></div><div class="footer-links"><a href="#destinations">Galana Farm</a><a href="/privacy">Privacy notice</a></div></div>
+    <div class="footer-bottom"><span>© <?= date('Y') ?> Nyumba Group</span><span>Visit Galana · Day bookings</span></div>
 </footer>
 <dialog id="booking-dialog" aria-labelledby="<?= $confirmation ? 'confirmation-title' : 'booking-title' ?>" <?= $openForm || $confirmation ? 'open' : '' ?>>
-    <div class="dialog-toolbar"><span class="itinerary-label">YOUR NEXT ADVENTURE <span>/ VISIT NYUMBA</span></span><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
+    <div class="dialog-toolbar"><span class="itinerary-label">YOUR NEXT ADVENTURE <span>/ VISIT GALANA</span></span><a role="button" href="/" class="close-button" aria-label="Close booking form"><?= icon('close') ?></a></div>
     <div class="dialog-shell">
-        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">THE DESTINATION</p><h2 id="aside-destination"><?= e($destinations[$formLocation]['name']) ?></h2><p>Something different<br>to look forward to.</p><span><?= icon('leaf') ?> Visit Nyumba</span></div></aside>
+        <aside class="booking-aside"><img id="booking-image" src="assets/galana-placeholder.svg" alt="" width="500" height="800"><div class="aside-overlay"><p class="eyebrow">THE DESTINATION</p><h2 id="aside-destination"><?= e($destinations[$formLocation]['name']) ?></h2><p>Something different<br>to look forward to.</p><span><?= icon('leaf') ?> Visit Galana</span></div></aside>
         <div class="booking-main">
             <div id="form-view" <?= $confirmation ? 'hidden' : '' ?>>
                 <p class="eyebrow dialog-eyebrow">LET’S PLAN YOUR VISIT</p><h2 id="booking-title">Make it a date.</h2><p class="dialog-subtitle">Your people. Your place. Your next day out.</p>

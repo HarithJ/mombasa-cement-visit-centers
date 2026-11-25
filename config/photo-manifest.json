@@ -14,13 +14,6 @@
     "asset": "01-farm.webp"
   },
   {
-    "original": "galana/DJI_0107.jpg",
-    "source": "galana/galana-circular-fields-aerial.jpg",
-    "destination": "galana",
-    "description": "circular-fields-aerial",
-    "asset": "02-circular-fields-aerial.webp"
-  },
-  {
     "original": "galana/DJI_0112.jpg",
     "source": "galana/galana-cultivated-fields.jpg",
     "destination": "galana",
@@ -54,20 +47,6 @@
     "destination": "galana",
     "description": "irrigation-at-dusk",
     "asset": "10-irrigation-at-dusk.webp"
-  },
-  {
-    "original": "galana/Galana-93.jpg",
-    "source": "galana/galana-irrigation-at-sunset.jpg",
-    "destination": "galana",
-    "description": "irrigation-at-sunset",
-    "asset": "11-irrigation-at-sunset.webp"
-  },
-  {
-    "original": "galana/Onion flower 1.jpg",
-    "source": "galana/galana-onion-flower.jpg",
-    "destination": "galana",
-    "description": "onion-flower",
-    "asset": "13-onion-flower.webp"
   },
   {
     "original": "galana/Screenshot 2026-09-23 122718.png",
@@ -110,5 +89,19 @@
     "destination": "galana",
     "description": "sunset",
     "asset": "16-sunset.webp"
+  },
+  {
+    "original": "galana/WhatsApp Image 2026-11-25 at 09.32.52.jpeg",
+    "source": "galana/galana-tractor-shed.jpg",
+    "destination": "galana",
+    "description": "tractor-shed",
+    "asset": "02-tractor-shed.webp"
+  },
+  {
+    "original": "galana/WhatsApp Image 2026-11-25 at 09.54.43.jpeg",
+    "source": "galana/galana-irrigation-pumps.jpg",
+    "destination": "galana",
+    "description": "irrigation-pumps",
+    "asset": "11-irrigation-pumps.webp"
   }
 ]

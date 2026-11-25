@@ -44,7 +44,7 @@ try {
     $signIn->requestLink('Ada@Example.test', $now);
     $sent = $deliver($now);
     check(count($sent) === 1 && $sent[0]['to'] === ['ada@example.test'], 'An active user is emailed a sign-in link');
-    check($sent[0]['subject'] === 'Your sign-in link for Visit Nyumba admin', 'The sign-in email has the approved subject');
+    check($sent[0]['subject'] === 'Your sign-in link for Visit Galana admin', 'The sign-in email has the approved subject');
     check(str_contains($sent[0]['text'], "Hi Ada, here's your link to sign in. It works once and expires in 15 minutes."), 'The sign-in email greets by first name');
     check(str_contains($sent[0]['text'], "Sign in:\n") && str_contains($sent[0]['html'], EmailTemplate::escape("If you didn't ask for this, you can ignore this email.")), 'The sign-in email has its button and footer');
     $token = $tokenFrom($sent[0], '/admin/login/link');
@@ -77,7 +77,7 @@ try {
     $now += 5000;
     $signIn->requestReset('ADA@new.example.test', $now);
     $sent = $deliver($now);
-    check(count($sent) === 1 && $sent[0]['to'] === ['ada@new.example.test'] && $sent[0]['subject'] === 'Reset your Visit Nyumba admin password', 'An active user is emailed a reset link');
+    check(count($sent) === 1 && $sent[0]['to'] === ['ada@new.example.test'] && $sent[0]['subject'] === 'Reset your Visit Galana admin password', 'An active user is emailed a reset link');
     check(str_contains($sent[0]['text'], 'Hi Ada, use this link to set a new password. It works once and expires in 1 hour.') && str_contains($sent[0]['text'], "Set a new password:\n"), 'The reset email has the approved wording');
     check(str_contains($sent[0]['html'], EmailTemplate::escape("If you didn't ask for this, you can ignore this email. Your password won't change.")), 'The reset email has the approved footer');
     $reset = $tokenFrom($sent[0], '/admin/reset');

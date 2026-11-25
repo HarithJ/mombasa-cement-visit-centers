@@ -1,3 +1,4 @@
+process.env.BRAND_INTRO_ENABLED='0'; // The brand film is covered by tests/brand-intro.test.mjs.
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdtemp, mkdir, rm} from 'node:fs/promises';

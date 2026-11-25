@@ -2,6 +2,7 @@ import {spawnSync} from 'node:child_process';
 import {existsSync} from 'node:fs';
 const checks = [
  [process.execPath,'tests/photos.test.mjs'],
+ [process.execPath,'tests/brand-intro.test.mjs'],
  [process.execPath,'tests/admin.test.mjs'],
  [process.execPath,'tests/admin-decisions.test.mjs'],
  ['php','tests/email.test.php'],
