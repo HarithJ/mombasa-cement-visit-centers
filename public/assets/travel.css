@@ -52,7 +52,7 @@ html{scroll-padding-top:80px}
 .header.is-scrolled .header-inner{padding-block:8px;min-height:0;align-items:center}
 .header.is-scrolled .group-logo{filter:none;width:30px;height:41px}
 
-/* Hero pillars: Soil health | Wildlife | Agriculture | Tourism */
+/* Hero pillars: Soil health | Wildlife | Agriculture | Agro-tourism */
 /* Every item has a leading bar; the list is shifted left and clipped so a bar never starts a wrapped line. */
 .explorer-pillars{--bar:1.6em;display:flex;flex-wrap:wrap;gap:6px 0;max-width:calc(30em + var(--bar));margin:0 0 0 calc(-1 * var(--bar));padding:0;list-style:none;clip-path:inset(0 0 0 var(--bar));font-size:clamp(14px,1.35vw,19px);font-weight:750;letter-spacing:1.6px;line-height:1.5;text-transform:uppercase}
 .explorer-pillars li{white-space:nowrap}

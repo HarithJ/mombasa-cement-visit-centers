@@ -48,9 +48,9 @@ $brandIntro = getenv('BRAND_INTRO_ENABLED') !== '0';
 // Link previews (WhatsApp, social apps) need absolute URLs, so they use the canonical site URL when it is configured.
 require_once __DIR__.'/../src/SiteUrl.php';
 try { $siteUrl = SiteUrl::canonical(); } catch (RuntimeException) { $siteUrl = null; }
-$shareDescription = 'Discover soil health, wildlife, agriculture and tourism at Galana Farm, near Malindi. Book a day visit, with an overnight stay on request.';
+$shareDescription = 'Discover soil health, wildlife, agriculture and agro-tourism at Galana Farm, near Malindi. Book a day visit, with an overnight stay on request.';
 $destinations = [
-    'galana' => ['name' => 'Galana Farm', 'category' => 'SOIL HEALTH | WILDLIFE | AGRICULTURE | TOURISM', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
+    'galana' => ['name' => 'Galana Farm', 'category' => 'SOIL HEALTH | WILDLIFE | AGRICULTURE | AGRO-TOURISM', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
 ];
 foreach ($destinations as $id => &$destination) {
     $files = glob(__DIR__.'/assets/photos/'.$id.'/*.{webp,jpg,jpeg,png}', GLOB_BRACE) ?: [];
@@ -79,7 +79,7 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
     <meta name="description" content="<?= e($shareDescription) ?>">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Visit Galana">
-    <meta property="og:title" content="Visit Galana — Soil health, wildlife, agriculture and tourism">
+    <meta property="og:title" content="Visit Galana — Soil health, wildlife, agriculture and agro-tourism">
     <meta property="og:description" content="<?= e($shareDescription) ?>">
 <?php if ($siteUrl): ?>
     <meta property="og:url" content="<?= e($siteUrl) ?>/">
@@ -87,7 +87,7 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Visit Galana: rows of crops at Galana Farm, with the words Soil health, Wildlife, Agriculture, Tourism">
+    <meta property="og:image:alt" content="Visit Galana: rows of crops at Galana Farm, with the words Soil health, Wildlife, Agriculture, Agro-tourism">
 <?php endif; ?>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="robots" content="noindex, nofollow">
@@ -128,7 +128,7 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
         <div class="explorer-hero">
             <img class="explorer-landscape" src="assets/photos/galana/01-farm.webp" srcset="assets/photos/galana/responsive/01-farm-720.webp 720w, assets/photos/galana/responsive/01-farm-1024.webp 1024w, assets/photos/galana/01-farm.webp 1600w" sizes="100vw" alt="Long rows of young crops stretching to the horizon under a soft evening sky at Galana Farm" width="1600" height="900" fetchpriority="high">
             <div class="explorer-shade"></div>
-            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Galana<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><ul class="explorer-pillars" aria-label="What Galana Farm is about"><li>Soil health</li><li>Wildlife</li><li>Agriculture</li><li>Tourism</li></ul><a class="explorer-button" href="#destinations">Explore Galana Farm <?= icon('diagonal') ?></a></div></div>
+            <div class="explorer-intro wrap"><h1 id="hero-title">Visit<br>Galana<span class="hero-spark" aria-hidden="true">✳</span></h1><div class="explorer-promise"><ul class="explorer-pillars" aria-label="What Galana Farm is about"><li>Soil health</li><li>Wildlife</li><li>Agriculture</li><li>Agro-tourism</li></ul><a class="explorer-button" href="#destinations">Explore Galana Farm <?= icon('diagonal') ?></a></div></div>
         </div>
         <div class="discovery-heading wrap"><p class="eyebrow">YOUR NEXT EXPERIENCE</p><h2>Good days start<br>with <span>curiosity.</span></h2></div>
         <div class="destinations wrap" id="destinations" aria-label="Galana Farm">
