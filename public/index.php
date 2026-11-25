@@ -6,6 +6,9 @@ if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/feedback') { require 
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/decide') { require __DIR__.'/../src/decide-web.php'; exit; }
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/privacy') { require __DIR__.'/../src/privacy-web.php'; exit; }
 require __DIR__.'/../src/web.php';
+// Stylesheets and scripts carry a hash of their contents, so browsers fetch a fresh copy after each deploy
+// instead of reusing a cached old one (the server sends no Cache-Control for static files).
+function asset(string $file): string { return 'assets/'.$file.'?v='.substr(md5_file(__DIR__.'/assets/'.$file) ?: '', 0, 8); }
 function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function photoVariants(string $path): array {
     $variants = [];
@@ -40,6 +43,10 @@ $routeIllustrations = require __DIR__.'/../config/route-illustrations.php';
 $photoDescriptions = require __DIR__.'/../config/photo-descriptions.php';
 // The brand film plays on every page load before the page can be used; BRAND_INTRO_ENABLED=0 turns it off (tests do).
 $brandIntro = getenv('BRAND_INTRO_ENABLED') !== '0';
+// Link previews (WhatsApp, social apps) need absolute URLs, so they use the canonical site URL when it is configured.
+require_once __DIR__.'/../src/SiteUrl.php';
+try { $siteUrl = SiteUrl::canonical(); } catch (RuntimeException) { $siteUrl = null; }
+$shareDescription = 'Discover soil health, wildlife, agriculture and tourism at Galana Farm, near Malindi. Book a day visit, with an overnight stay on request.';
 $destinations = [
     'galana' => ['name' => 'Galana Farm', 'category' => 'SOIL HEALTH | WILDLIFE | AGRICULTURE | TOURISM', 'description' => 'Trade the everyday for open fields. Discover agriculture at Galana Farm, with the option to request an overnight stay.'],
 ];
@@ -67,21 +74,34 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Explore Galana Farm, the Nyumba agricultural project near Malindi. Book your day visit, with an overnight stay on request.">
+    <meta name="description" content="<?= e($shareDescription) ?>">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Visit Galana">
+    <meta property="og:title" content="Visit Galana — Soil health, wildlife, agriculture and tourism">
+    <meta property="og:description" content="<?= e($shareDescription) ?>">
+<?php if ($siteUrl): ?>
+    <meta property="og:url" content="<?= e($siteUrl) ?>/">
+    <meta property="og:image" content="<?= e($siteUrl) ?>/assets/share-card.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Visit Galana: rows of crops at Galana Farm, with the words Soil health, Wildlife, Agriculture, Tourism">
+<?php endif; ?>
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#173f35">
     <title>Visit Galana — A visit that means more</title>
     <link rel="icon" href="assets/nyumba-group.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="stylesheet" href="assets/travel.css">
+    <link rel="stylesheet" href="<?= asset('style.css') ?>">
+    <link rel="stylesheet" href="<?= asset('travel.css') ?>">
 <?php if ($brandIntro): ?>
-    <link rel="stylesheet" href="assets/brand-intro.css">
-    <script src="assets/brand-intro.js"></script>
+    <link rel="stylesheet" href="<?= asset('brand-intro.css') ?>">
+    <script src="<?= asset('brand-intro.js') ?>"></script>
 <?php endif; ?>
     <noscript><style>.destination-photo > .photo-secondary { display: none; }</style></noscript>
     <script id="booking-state" type="application/json"><?= json_encode($webState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
     <script id="destination-config" type="application/json"><?= json_encode($schedule, JSON_HEX_TAG | JSON_THROW_ON_ERROR) ?></script>
-    <script src="assets/app.js" defer></script>
+    <script src="<?= asset('app.js') ?>" defer></script>
 </head>
 <body>
 <?php if ($brandIntro): ?>
