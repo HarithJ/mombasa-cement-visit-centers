@@ -1,5 +1,5 @@
 'use strict';
-// Shows the brand film, with sound, on every page load before the page can be used.
+// Shows the brand film on every page load before the page can be used.
 // Every visitor watches it to the end (a reload starts it again); it then fades into the page.
 // It only lets the visitor in early if the film fails to play.
 // Loaded synchronously in <head> so the page never flashes before the film covers it.
@@ -11,6 +11,7 @@
     if (!intro) { root.classList.remove('brand-intro-active'); return; }
     const video = intro.querySelector('video');
     const play = intro.querySelector('.brand-intro-play');
+    const sound = intro.querySelector('.brand-intro-sound');
     const bar = intro.querySelector('.brand-intro-bar span');
     const behind = [...document.body.children].filter(element => element !== intro);
     let finished = false;
@@ -26,7 +27,17 @@
       intro.classList.add('is-leaving');
       setTimeout(remove, matchMedia('(prefers-reduced-motion: reduce)').matches ? 250 : 1100);
     };
-    const start = () => video.play().then(() => { play.hidden = true; }, () => { play.hidden = false; play.focus(); });
+    const showSound = () => {
+      sound.classList.toggle('is-muted', video.muted);
+      sound.setAttribute('aria-label', video.muted ? 'Unmute the film' : 'Mute the film');
+    };
+    // Play with sound. Browsers often refuse sound before the visitor has interacted with the site;
+    // then the film autoplays muted, with the speaker button to turn the sound on. If a browser refuses
+    // even muted autoplay (for example iPhone Low Power Mode), the film waits for a tap on "Play the film".
+    const start = () => video.play().then(() => { play.hidden = true; }, () => {
+      if (!video.muted) { video.muted = true; showSound(); return start(); }
+      play.hidden = false; play.focus();
+    });
     behind.forEach(element => { element.inert = true; });
     intro.hidden = false;
     // Download straight away, so the film is ready (or fails fast) even while waiting for a tap to play.
@@ -41,9 +52,9 @@
     // The film cannot be paused: resume whenever the browser pauses it (for example after switching tabs).
     video.addEventListener('pause', () => { if (!finished && !video.ended && play.hidden && document.visibilityState === 'visible') start(); });
     document.addEventListener('visibilitychange', () => { if (!finished && play.hidden && document.visibilityState === 'visible' && video.paused) start(); });
-    // The film plays with sound. Browsers often refuse to start video with sound before the visitor
-    // has interacted with the site; then the film waits for a tap on "Play the film", which plays it with sound.
-    play.addEventListener('click', start);
+    sound.addEventListener('click', () => { video.muted = !video.muted; showSound(); });
+    // A tap is a user gesture, so the film can play with sound from here.
+    play.addEventListener('click', () => { video.muted = false; showSound(); start(); });
     // If playback makes no progress for 20 seconds (a stalled download), let the visitor in.
     let last = -1, stalled = 0;
     const watchdog = setInterval(() => {

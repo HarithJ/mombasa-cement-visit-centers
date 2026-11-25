@@ -13,13 +13,23 @@ try {
  const context=await browser.newContext({viewport:{width:390,height:844}});
  const page=await context.newPage();page.setDefaultTimeout(6000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ // Like a browser that allows sound on this site (for example after earlier visits).
+ await page.addInitScript(()=>{const play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){play.call(this).catch(()=>{});return Promise.resolve();};});
  await holdFilm(page);
  await page.goto(url);
  const intro=page.locator('#brand-intro');
  await intro.waitFor({state:'visible'});
  assert.equal(await page.locator('#brand-intro video').getAttribute('controls'),null,'the film has no controls to skip with');
  assert.ok(await page.locator('#brand-intro video').evaluate(v=>!v.muted&&v.src.endsWith('/assets/video/brand-video.mp4')),'the film plays with sound');
- assert.equal(await page.locator('#brand-intro button:not(.brand-intro-play)').count(),0,'there is no close or mute button');
+ assert.equal(await page.locator('#brand-intro button:not(.brand-intro-play):not(.brand-intro-sound)').count(),0,'there is no close button');
+ const sound=page.locator('.brand-intro-sound');
+ assert.equal(await sound.getAttribute('aria-label'),'Mute the film');
+ assert.equal((await sound.innerText()).trim(),'','the sound button is an icon only');
+ await sound.click();
+ assert.ok(await page.locator('#brand-intro video').evaluate(v=>v.muted),'the visitor can mute the film');
+ assert.equal(await sound.getAttribute('aria-label'),'Unmute the film');
+ await sound.click();
+ assert.equal(await page.locator('#brand-intro video').evaluate(v=>v.muted),false,'the visitor can unmute the film');
  assert.ok(await page.locator('.brand-intro-player').evaluate(p=>p.getBoundingClientRect().width<innerWidth),'the film plays in a window, not full screen');
  assert.ok(await page.locator('main').evaluate(m=>m.inert),'the page behind the film cannot be used');
  await page.keyboard.press('Escape');
@@ -46,16 +56,30 @@ try {
  console.log('PASS a new browser sees the film too');
  await fresh.close();
 
- // If the browser refuses to autoplay at all, the film waits for a tap.
+ // Like a real browser: refuse sound until the visitor has interacted with the page.
+ const soundPolicy=()=>{const play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){if(!this.muted&&!navigator.userActivation.isActive)return Promise.reject(new DOMException('blocked','NotAllowedError'));play.call(this).catch(()=>{});return Promise.resolve();};};
+ const muted=await browser.newContext();const mutedPage=await muted.newPage();mutedPage.setDefaultTimeout(6000);
+ await mutedPage.addInitScript(soundPolicy);await holdFilm(mutedPage);await mutedPage.goto(url);
+ await mutedPage.locator('.brand-intro-sound.is-muted').waitFor({state:'visible'});
+ assert.ok(await mutedPage.locator('#brand-intro video').evaluate(v=>v.muted),'when sound is refused, the film autoplays muted');
+ assert.equal(await mutedPage.locator('.brand-intro-play').isVisible(),false,'a muted film plays without waiting for a tap');
+ assert.equal(await mutedPage.locator('.brand-intro-sound').getAttribute('aria-label'),'Unmute the film');
+ await mutedPage.locator('.brand-intro-sound').click();
+ assert.equal(await mutedPage.locator('#brand-intro video').evaluate(v=>v.muted),false,'one tap turns the sound on');
+ console.log('PASS when sound is refused, the film autoplays muted and the speaker button turns the sound on');
+ await muted.close();
+
+ // If the browser refuses to autoplay at all, the film waits for a tap, then plays with sound.
  const refused=await browser.newContext();const refusedPage=await refused.newPage();refusedPage.setDefaultTimeout(6000);
- await refusedPage.addInitScript(()=>{const play=HTMLMediaElement.prototype.play;let first=true;HTMLMediaElement.prototype.play=function(){if(first){first=false;return Promise.reject(new DOMException('blocked','NotAllowedError'));}play.call(this).catch(()=>{});return Promise.resolve();};});
+ await refusedPage.addInitScript(()=>{const play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){if(!navigator.userActivation.isActive)return Promise.reject(new DOMException('blocked','NotAllowedError'));play.call(this).catch(()=>{});return Promise.resolve();};});
  await holdFilm(refusedPage);await refusedPage.goto(url);
  const playButton=refusedPage.locator('.brand-intro-play');
  await playButton.waitFor({state:'visible'});
  await playButton.click();
  await playButton.waitFor({state:'hidden'});
  assert.ok(await refusedPage.locator('#brand-intro').isVisible());
- console.log('PASS when autoplay is refused, a tap plays the film');
+ assert.equal(await refusedPage.locator('#brand-intro video').evaluate(v=>v.muted),false,'the tap plays the film with sound');
+ console.log('PASS when autoplay is refused, a tap plays the film with sound');
  await refused.close();
 
  const broken=await browser.newContext();const brokenPage=await broken.newPage();brokenPage.setDefaultTimeout(6000);

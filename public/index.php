@@ -35,6 +35,8 @@ function icon(string $name, string $class = ''): string {
         'photo' => '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1"/><path d="m3 16 5-5 5 5 3-3 5 5"/>',
         'moon' => '<path d="M20 15A9 9 0 0 1 9 4a9 9 0 1 0 11 11Z"/>',
         'clock' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+        'sound-on' => '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+        'sound-off' => '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/>',
     ];
     return '<svg class="icon '.e($class).'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$paths[$name].'</svg>';
 }
@@ -107,7 +109,7 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
 <?php if ($brandIntro): ?>
 <div class="brand-intro" id="brand-intro" role="dialog" aria-modal="true" aria-label="Galana brand film" hidden>
     <div class="brand-intro-player">
-        <div class="brand-intro-screen"><video class="brand-intro-video" data-src="assets/video/brand-video.mp4" poster="assets/video/brand-video-poster.webp" playsinline preload="none"></video><div class="brand-intro-bar" aria-hidden="true"><span></span></div><button class="brand-intro-play" type="button" hidden>Play the film</button></div>
+        <div class="brand-intro-screen"><video class="brand-intro-video" data-src="assets/video/brand-video.mp4" poster="assets/video/brand-video-poster.webp" playsinline preload="none"></video><div class="brand-intro-bar" aria-hidden="true"><span></span></div><button class="brand-intro-sound" type="button" aria-label="Mute the film"><?= icon('sound-on', 'brand-intro-sound-on') ?><?= icon('sound-off', 'brand-intro-sound-off') ?></button><button class="brand-intro-play" type="button" hidden>Play the film</button></div>
     </div>
 </div>
 <?php endif; ?>

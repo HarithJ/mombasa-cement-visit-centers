@@ -17,3 +17,13 @@ html.brand-intro-active body:before{content:'';position:fixed;inset:0;z-index:21
 .brand-intro-play[hidden]{display:none}
 .brand-intro button:focus-visible{outline:2px solid #fffbed;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.brand-intro,.brand-intro-player{transition-duration:.2s}.brand-intro-bar span{transition:none}.brand-intro.is-leaving .brand-intro-player{transform:none}}
+/* Speaker button: icon only, in the film's corner. While muted it pulses gently so visitors notice they can turn the sound on. */
+.brand-intro-sound{position:absolute;z-index:1;right:14px;bottom:16px;display:grid;place-items:center;width:46px;height:46px;padding:0;border:0;background:#081410a6;color:#fffbed;box-shadow:0 4px 16px #0006;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.brand-intro-sound:hover{background:#081410d9}
+.brand-intro-sound .icon{width:24px;height:24px;stroke-width:1.8}
+.brand-intro-sound .brand-intro-sound-off,.brand-intro-sound.is-muted .brand-intro-sound-on{display:none}
+.brand-intro-sound.is-muted .brand-intro-sound-off{display:block}
+.brand-intro-sound.is-muted{background:#ff9b55;color:#183d31;animation:brand-intro-pulse 2s ease-out infinite}
+@keyframes brand-intro-pulse{0%{box-shadow:0 0 0 0 #ff9b55b3}70%{box-shadow:0 0 0 14px #ff9b5500}100%{box-shadow:0 0 0 0 #ff9b5500}}
+@media(prefers-reduced-motion:reduce){.brand-intro-sound.is-muted{animation:none}}
+@media(max-width:600px){.brand-intro-sound{right:10px;bottom:12px;width:40px;height:40px}.brand-intro-sound .icon{width:20px;height:20px}}
