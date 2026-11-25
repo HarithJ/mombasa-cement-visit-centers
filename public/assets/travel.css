@@ -54,8 +54,11 @@ html{scroll-padding-top:80px}
 
 /* Hero pillars: Soil health | Wildlife | Agriculture | Agro-tourism */
 /* Every item has a leading bar; the list is shifted left and clipped so a bar never starts a wrapped line. */
-.explorer-pillars{--bar:1.6em;display:flex;flex-wrap:wrap;gap:6px 0;max-width:calc(30em + var(--bar));margin:0 0 0 calc(-1 * var(--bar));padding:0;list-style:none;clip-path:inset(0 0 0 var(--bar));font-size:clamp(14px,1.35vw,19px);font-weight:750;letter-spacing:1.6px;line-height:1.5;text-transform:uppercase}
+.explorer-pillars{--bar:1.5em;display:flex;flex-wrap:nowrap;margin:0 0 0 calc(-1 * var(--bar));padding:0;list-style:none;clip-path:inset(0 0 0 var(--bar));font-size:clamp(10px,1.05vw,15px);font-weight:750;letter-spacing:.09em;line-height:1.5;text-transform:uppercase}
 .explorer-pillars li{white-space:nowrap}
 .explorer-pillars li:before{content:'|';display:inline-block;width:var(--bar);text-align:center;color:var(--orange);font-weight:500}
-@media(max-width:700px){.explorer-pillars{--bar:1.2em;font-size:14px;letter-spacing:1.2px}}
+/* The pillars stay on one line, so the type scales down with the screen; the button fits its label instead of stretching under them. */
+.explorer-button{display:inline-flex;min-width:250px}
+@media(max-width:800px){.explorer-promise{display:block}.explorer-pillars{font-size:min(15px,calc((100vw - 64px) / 34.5))}.explorer-button{margin-top:23px}}
+@media(max-width:700px){.explorer-pillars{--bar:1.2em;font-size:min(14px,calc((100vw - 40px) / 34.5))}.explorer-button{min-width:0}}
 @media(prefers-reduced-motion:reduce){.header,.header .header-inner,.header .group-logo{transition:none}}
