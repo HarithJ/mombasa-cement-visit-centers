@@ -18,49 +18,33 @@ try {
  const intro=page.locator('#brand-intro');
  await intro.waitFor({state:'visible'});
  assert.equal(await page.locator('#brand-intro video').getAttribute('controls'),null,'the film has no controls to skip with');
- assert.ok(await page.locator('#brand-intro video').evaluate(v=>v.muted&&v.src.endsWith('/assets/video/brand-video.mp4')),'the film starts muted so it can autoplay');
+ assert.ok(await page.locator('#brand-intro video').evaluate(v=>!v.muted&&v.src.endsWith('/assets/video/brand-video.mp4')),'the film plays with sound');
+ assert.equal(await page.locator('#brand-intro button:not(.brand-intro-play)').count(),0,'there is no close or mute button');
  assert.ok(await page.locator('.brand-intro-player').evaluate(p=>p.getBoundingClientRect().width<innerWidth),'the film plays in a window, not full screen');
  assert.ok(await page.locator('main').evaluate(m=>m.inert),'the page behind the film cannot be used');
  await page.keyboard.press('Escape');
  await page.mouse.click(10,10);
  assert.ok(await intro.isVisible(),'Escape and clicks do not skip the film');
- assert.equal(await page.locator('.brand-intro-close').isVisible(),false,'a first-time visitor cannot close the film before it ends');
- await page.locator('.brand-intro-sound').click();
- assert.equal(await page.locator('#brand-intro video').evaluate(v=>v.muted),false,'the visitor can unmute the film');
- assert.equal(await page.locator('.brand-intro-sound').getAttribute('aria-pressed'),'false');
  await page.locator('#brand-intro video').evaluate(v=>v.dispatchEvent(new Event('ended')));
- await page.locator('.brand-intro-close').waitFor({state:'visible'});
- await page.waitForTimeout(300);
- assert.ok(await intro.isVisible(),'the film stays open after it ends until the visitor closes it');
- await page.locator('.brand-intro-close').click();
+ assert.equal(await page.locator('main').evaluate(m=>m.inert),false,'the page is usable as soon as the film ends');
+ assert.ok(await intro.evaluate(i=>i.classList.contains('is-leaving')),'the film fades into the page');
  await intro.waitFor({state:'detached'});
- assert.equal(await page.locator('main').evaluate(m=>m.inert),false);
  assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('brand-intro-active')),false);
- console.log('PASS the film covers a new visit, cannot be skipped, and can be closed once it ends');
+ console.log('PASS the film covers a new visit with sound, cannot be skipped, and fades into the page when it ends');
 
  await page.reload();
  await intro.waitFor({state:'visible'});
- await page.locator('.brand-intro-close').waitFor({state:'visible'});
- console.log('PASS the film shows again on reload, and having watched it, the visitor can close it straight away');
+ await page.keyboard.press('Escape');
+ await page.waitForTimeout(300);
+ assert.ok(await intro.isVisible()&&await page.locator('main').evaluate(m=>m.inert),'having watched it, the visitor still cannot skip it after a reload');
+ console.log('PASS the film shows again on reload and must be watched again');
  await context.close();
 
  const fresh=await browser.newContext();const freshPage=await fresh.newPage();freshPage.setDefaultTimeout(6000);
  await holdFilm(freshPage);await freshPage.goto(url);
  await freshPage.locator('#brand-intro').waitFor({state:'visible'});
- assert.equal(await freshPage.locator('.brand-intro-close').isVisible(),false);
- console.log('PASS a new session sees the film again');
+ console.log('PASS a new browser sees the film too');
  await fresh.close();
-
- // A visitor who has watched the film before (in this browser) sees it again but can close it straight away.
- const returning=await browser.newContext({storageState:{cookies:[],origins:[{origin:url.slice(0,-1),localStorage:[{name:'nyumba-brand-intro-watched',value:'1'}]}]}});
- const returningPage=await returning.newPage();returningPage.setDefaultTimeout(6000);
- await holdFilm(returningPage);await returningPage.goto(url);
- await returningPage.locator('.brand-intro-close').waitFor({state:'visible'});
- await returningPage.keyboard.press('Escape');
- await returningPage.locator('#brand-intro').waitFor({state:'detached'});
- assert.equal(await returningPage.locator('main').evaluate(m=>m.inert),false);
- console.log('PASS a returning visitor can close the film straight away');
- await returning.close();
 
  // If the browser refuses to autoplay at all, the film waits for a tap.
  const refused=await browser.newContext();const refusedPage=await refused.newPage();refusedPage.setDefaultTimeout(6000);
@@ -70,7 +54,7 @@ try {
  await playButton.waitFor({state:'visible'});
  await playButton.click();
  await playButton.waitFor({state:'hidden'});
-  assert.ok(await refusedPage.locator('#brand-intro').isVisible());
+ assert.ok(await refusedPage.locator('#brand-intro').isVisible());
  console.log('PASS when autoplay is refused, a tap plays the film');
  await refused.close();
 

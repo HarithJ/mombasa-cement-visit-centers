@@ -107,8 +107,7 @@ $formLocation = isset($destinations[$confirmation['destination'] ?? $input['loca
 <?php if ($brandIntro): ?>
 <div class="brand-intro" id="brand-intro" role="dialog" aria-modal="true" aria-label="Galana brand film" hidden>
     <div class="brand-intro-player">
-        <div class="brand-intro-screen"><button class="brand-intro-close" type="button" aria-label="Close the film" hidden><?= icon('close') ?> Close</button><video class="brand-intro-video" data-src="assets/video/brand-video.mp4" poster="assets/video/brand-video-poster.webp" muted playsinline preload="none"></video><button class="brand-intro-play" type="button" hidden>Play the film</button></div>
-        <div class="brand-intro-controls"><div class="brand-intro-bar" aria-hidden="true"><span></span></div><span class="brand-intro-time" aria-hidden="true"></span><button class="brand-intro-sound" type="button" aria-pressed="true">Unmute</button></div>
+        <div class="brand-intro-screen"><video class="brand-intro-video" data-src="assets/video/brand-video.mp4" poster="assets/video/brand-video-poster.webp" playsinline preload="none"></video><div class="brand-intro-bar" aria-hidden="true"><span></span></div><button class="brand-intro-play" type="button" hidden>Play the film</button></div>
     </div>
 </div>
 <?php endif; ?>
